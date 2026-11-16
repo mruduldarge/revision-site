@@ -629,6 +629,23 @@ html.lite #bgfx{display:none}
 
 #splash .sp-pts{--h1:var(--bio);--h2:var(--chem);--h3:var(--phy)}
 #splash .bk{--bo:.7}
+
+/* quiz clock + time report */
+.qclock{font-variant-numeric:tabular-nums;font-weight:800;color:var(--acc)}
+.qclock.paused{opacity:.6}
+.treport{text-align:left;margin:16px 0 12px;padding:14px;border-radius:var(--r2);background:var(--card2);border:1px solid var(--line)}
+.treport h3{margin:0 0 8px}
+.tstats{display:flex;gap:10px;margin-bottom:12px}
+.tstats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.tstats b{display:block;font-family:var(--head);font-size:1.3rem;line-height:1.1}
+.tstats span{font-size:.78rem;color:var(--ink3);font-weight:700}
+.tb{display:grid;grid-template-columns:minmax(90px,30%) 1fr auto;align-items:center;gap:8px;margin:6px 0;font-size:.85rem;font-weight:700}
+.tbt{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.tbt i{display:block;height:100%;border-radius:6px;transform-origin:left;animation:grow 1s .2s cubic-bezier(.2,.8,.2,1) backwards}
+.tbt i.y{background:var(--acc)}.tbt i.t{background:var(--ok)}.tbt i.n{background:var(--ink3)}
+.tb b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tv{margin:10px 0 6px}
+.tv:not(.ok):not(.bad){background:var(--yel2)}
 </style></head>
 <body>
 <header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">MD</span><span class="t" id="ttl">Class 11 Revision</span></div><button class="subjbtn hidden" id="subjBtn" aria-label="Switch subject"></button><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
@@ -671,7 +688,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 /* Version rule (set by Mrudul): 1.0 = first release (Ch 5, 6). Each new chapter adds 1 to the middle number
    and resets the bug-fix count; each bug fix adds 1 to the last number. e.g. 1.1 → 1.1.1 … 1.1.5 → (new chapter) 1.2
    History: 1.0 – Ch 5 & 6 · 1.1 – Ch 1 The Living World */
-const APP_VERSION='1.3.10'; /* rule: 1.<chapters>.<changes since last chapter>. 3 chapters (Ch1,5,6). 1.3.9 MD logo; 1.3.10 premium background (colour glows, line art, glow particles). New chapter -> 1.4 (last number resets), each later fix/change -> 1.4.1 ... */
+const APP_VERSION='1.3.14'; /* rule: 1.<chapters>.<changes since last chapter>. 3 chapters (Ch1,5,6). 1.3.11 dark default; 1.3.12 Wrong Tab per subject; 1.3.13 Progress tab only on main screen; 1.3.14 quiz timer + NEET pace report. New chapter -> 1.4 (last number resets), each later fix/change -> 1.4.1 ... */
 const LESSONS={1:[],5:[],6:[]};
 const allLessons=()=>Object.values(LESSONS).flat();
 const DIAGRAMS={};
@@ -722,8 +739,13 @@ function confirmBox(title,msg,okText='Yes'){return new Promise(res=>{const m=$('
 function addScore(n){S.score=(S.score||0)+n;save();}
 
 /* ---------- wrong tab ---------- */
-function wrongCount(){return Object.keys(S.wrong||{}).length;}
-function addWrong(item){if(!item||!item.key)return;const isNew=!S.wrong[item.key];S.wrong[item.key]=Object.assign({},item,{t:Date.now()});save();updateBadge(isNew);}
+function wrongSubj(it){if(it.subj)return it.subj;let ch=null;
+  if(it.type==='mcq'&&typeof MCQ!=='undefined'){const q=MCQ.find(x=>x.id===it.id);if(q)ch=q.ch;}
+  if(it.type==='exam'&&typeof EXAM!=='undefined'){const e=EXAM.find(x=>x.id===it.id);if(e)ch=e.ch;}
+  const s=ch!=null&&subjOf(ch);return s?s.id:'bio';}
+function wrongItems(all){const v=Object.values(S.wrong||{});return (all||!App.subj)?v:v.filter(i=>wrongSubj(i)===App.subj);}
+function wrongCount(all){return wrongItems(all).length;}
+function addWrong(item){if(!item||!item.key)return;const isNew=!S.wrong[item.key];if(!item.subj)item.subj=(item.ch&&subjOf(item.ch)?subjOf(item.ch).id:null)||(wrongSubj(item)!=='bio'?wrongSubj(item):(App.subj||'bio'));S.wrong[item.key]=Object.assign({},item,{t:Date.now()});save();updateBadge(isNew);}
 function removeWrong(key){if(S.wrong[key]){delete S.wrong[key];save();updateBadge();}}
 function updateBadge(pop){const b=$('#wrongBadge');const n=wrongCount();b.textContent=n;b.classList.toggle('hidden',n===0);if(pop){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}}
 
@@ -741,7 +763,7 @@ const IC={swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',home:'<pa
 const icon=(n,cls='ic')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 
 /* ---------- theme ---------- */
-function applyTheme(){const t=S.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b){b.innerHTML=icon(t==='dark'?'sun':'moon');b.setAttribute('aria-label',t==='dark'?'Switch to light mode':'Switch to dark mode');}}
+function applyTheme(){const t=S.theme||'dark';document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b){b.innerHTML=icon(t==='dark'?'sun':'moon');b.setAttribute('aria-label',t==='dark'?'Switch to light mode':'Switch to dark mode');}}
 
 /* ---------- subjects & chapters ---------- */
 const SUBJECTS=[
@@ -793,7 +815,7 @@ const App={tab:'home',stack:[],subj:null,learnCh:5,
     const main=$('#main');const top=this.stack[this.stack.length-1];
     main.innerHTML='';const scr=document.createElement('div');scr.className='screen'+(isBack?' back':'');if(quiet)scr.style.animation='none';main.appendChild(scr);
     let subj=this.subj;if(top&&top.opts.ch){const s=subjOf(top.opts.ch);if(s)subj=s.id;}
-    document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
+    document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);{const pt=$('#tabs [data-tab=progress]');if(pt)pt.classList.toggle('hidden',!!this.subj);}updateBadge();if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
     $('#backBtn').classList.toggle('show',!!top);
     const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'MD';
     if(top){$('#ttl').textContent=top.title;top.fn(scr);animateScreen(scr);}
@@ -831,7 +853,7 @@ function chapterFn(key){const c=chapOf(key),s=subjOf(key);
     $('#cQuiz',scr).onclick=()=>startQuiz('c'+key,10);
     $('#cExam',scr).onclick=()=>openExam(key);
   };}
-function openChapter(key){App.subj=subjOf(key).id;App.learnCh=key;App.push(chapterFn(key),'Chapter '+chapOf(key).num,{ch:key});}
+function openChapter(key){if(App.tab!=='learn'){App.tab='learn';App.stack=[];$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab==='learn'));try{history.replaceState(null,'','#learn');}catch(e){}}App.subj=subjOf(key).id;App.learnCh=key;App.push(chapterFn(key),'Chapter '+chapOf(key).num,{ch:key});}
 
 /* ---------- lessons ---------- */
 function openLesson(id){
@@ -1196,18 +1218,24 @@ function startQuiz(mode,n){
   const qs=shuffle(pool).slice(0,n||pool.length);
   const title=mode==='mix'?'Biology quiz':'Chapter '+mode.slice(1)+' quiz';
   App.push(async scr=>{
-    let score=0;
+    let score=0,spent=0;const times=[];const fmt=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+    let qStart=0,running=false;const tick=setInterval(()=>{if(!scr.isConnected){clearInterval(tick);return;}const el=$('.qclock b',scr);if(el)el.textContent=fmt(spent+(running?performance.now()-qStart:0));},250);
     for(let i=0;i<qs.length;i++){
       if(!scr.isConnected)return;
-      const head=`<div class="qhead"><span>Question ${i+1} of ${qs.length}</span><span>⭐ ${score}</span></div><div class="progressbar"><i style="width:${i/qs.length*100}%"></i></div>`;
+      const head=`<div class="qhead"><span>Question ${i+1} of ${qs.length}</span><span class="qclock">⏱ <b>${fmt(spent)}</b></span><span>⭐ ${score}</span></div><div class="progressbar"><i style="width:${i/qs.length*100}%"></i></div>`;
       const box=h('<div class="card"></div>');scr.innerHTML='';scr.appendChild(box);
-      if(await askMCQ(box,qs[i],{head,src:title}))score++;
+      qStart=performance.now();running=true;
+      const ok=await askMCQ(box,qs[i],{head,src:title});
+      const t=performance.now()-qStart;running=false;spent+=t;times.push(t);if(ok)score++;
+      const ck=$('.qclock',box);if(ck){ck.classList.add('paused');$('b',ck).textContent=fmt(spent);}
       await nextBtn(box,i===qs.length-1?'See my score 🏁':'Next ▶');
     }
+    clearInterval(tick);
     const pct=Math.round(score/qs.length*100);const k=mode;const best=S.quizBest[k]||0;const nb=pct>best;if(nb){S.quizBest[k]=pct;save();}
     scr.innerHTML=`<div class="card center"><div class="ring" style="margin:10px auto">${ringSVG(pct/100,130,13)}<div class="v">${pct}%<small>${score}/${qs.length}</small></div></div>
     <h2>${pct>=90?'Outstanding! 🏆':pct>=70?'Great work! 🌟':pct>=50?'Good effort! 🌱':'Keep practising! 💪'}</h2>${nb?'<p class="pill">New best score!</p>':''}
     <p class="muted">${qs.length-score} question${qs.length-score===1?'':'s'} added to your Wrong Tab.</p>
+    ${timeReport(times,subjOf(mode==='mix'?qs[0].ch:+mode.slice(1)).id,score)}
     <div class="row" style="justify-content:center"><button class="btn ghost" id="again">Try again</button>${qs.length-score?'<button class="btn bad" id="toWrong">Fix mistakes ❌</button>':''}</div></div>`;
     if(pct>=70)confetti(60);
     $('#again',scr).onclick=()=>{App.stack.pop();startQuiz(mode,n);};
@@ -1215,21 +1243,43 @@ function startQuiz(mode,n){
   },title,{ch:mode==='mix'?5:+mode.slice(1)});
 }
 
+/* ---------- quiz timing vs NEET pace ----------
+   NEET UG: 180 questions in 180 minutes = 1 minute per question on average.
+   Coaching guidance for the target pace: Biology under ~45 s per question,
+   Chemistry about 1 min, Physics a little over 1 min (about 55 min for 45). */
+const PACE={bio:{target:45,name:'Biology',why:'Coaching institutes suggest finishing Biology at under about 45 seconds a question, so you save time for Physics.'},
+  chem:{target:60,name:'Chemistry',why:'Coaching institutes suggest about 1 minute a question for Chemistry.'},
+  phy:{target:73,name:'Physics',why:'Coaching institutes suggest about 55 minutes for the 45 Physics questions – a little over 1 minute each.'}};
+function timeReport(times,subj,correct){
+  const n=times.length;if(!n)return '';const P=PACE[subj]||PACE.bio;
+  const you=times.reduce((a,b)=>a+b,0)/1000,avg=you/n,tgt=P.target*n,neet=60*n;
+  const f=s=>{s=Math.round(s);const m=Math.floor(s/60),r=s%60;return m?`${m} min ${r?r+' s':''}`.trim():`${r} s`;};
+  const slow=times.indexOf(Math.max(...times));const mx=Math.max(you,tgt,neet);
+  const acc=correct==null?1:correct/n;
+  const verdict=(avg<=P.target&&acc<.6)?['bad','Fast, but rushing','Your speed is good, but under 60% were right. In NEET each wrong answer costs a mark, so slow down a little and read every option.']:avg<=P.target?['ok','Exam-ready pace','You were at or under the target pace. Keep accuracy high at this speed.']:avg<=60?['mid','Within NEET time','You are inside the 1-minute NEET average but slower than the '+P.name+' target. Aim to answer the easy recall questions faster.']:['bad','Too slow for NEET','You took more than the 1-minute NEET average. Revise the notes, then retry to build speed.'];
+  const bar=(lbl,v,cls)=>`<div class="tb"><span>${lbl}</span><div class="tbt"><i class="${cls}" style="width:${(v/mx*100).toFixed(1)}%"></i></div><b>${f(v)}</b></div>`;
+  return `<div class="treport"><h3>Your time</h3>
+    <div class="tstats"><div><b>${f(you)}</b><span>total for ${n} questions</span></div><div><b>${f(avg)}</b><span>per question</span></div></div>
+    ${bar('You',you,'y')}${bar(P.name+' target',tgt,'t')}${bar('NEET average',neet,'n')}
+    <div class="fb ${verdict[0]==='ok'?'ok':verdict[0]==='bad'?'bad':''} tv"><b>${verdict[1]}</b>${verdict[2]}</div>
+    <p class="small muted">Slowest: question ${slow+1} (${f(times[slow]/1000)}). The clock counts only thinking time – it pauses while you read the explanation.<br>NEET gives 180 minutes for 180 questions – 1 minute each. ${P.why}</p></div>`;
+}
+
 /* ---------- Wrong tab ---------- */
 function renderWrong(el){
-  const items=Object.values(S.wrong).sort((a,b)=>b.t-a.t);
-  const PH=`<div class="ph"><h1>Wrong Tab</h1><p>Every question you miss – in quizzes, games and diagram quizzes – waits here until you get it right.</p></div>`;
+  const items=wrongItems().sort((a,b)=>b.t-a.t);const sj=SUBJECTS.find(x=>x.id===App.subj);
+  const PH=`<div class="ph"><h1>Wrong Tab${sj?' · '+sj.name:''}</h1><p>${sj?`Only ${sj.name} questions are shown here. Switch subject on the main screen to see every subject.`:'Every question you miss – in quizzes, games and diagram quizzes – from all subjects. It waits here until you get it right.'}</p></div>`;
   if(!items.length){el.innerHTML=PH+`<div class="empty"><h3>Nothing to fix</h3><p>Questions you get wrong will appear here.</p><button class="btn" id="goQ">Take a quiz</button></div>`;$('#goQ',el).onclick=()=>App.go('practice');return;}
   const cnt={mcq:0,dpart:0,exam:0};items.forEach(i=>cnt[i.type]=(cnt[i.type]||0)+1);
-  el.innerHTML=PH+`<div class="card"><div class="row"><div><h2 style="margin:0">${items.length} to fix</h2><div class="small muted">${cnt.mcq} MCQs · ${cnt.dpart} diagram parts · ${cnt.exam} exam answers</div></div><div class="spacer"></div><button class="btn ghost sm" id="wClear">Clear all</button></div>
+  el.innerHTML=PH+`<div class="card"><div class="row"><div><h2 style="margin:0">${items.length} to fix</h2><div class="small muted">${cnt.mcq} MCQs · ${cnt.dpart} diagram parts · ${cnt.exam} exam answers</div></div><div class="spacer"></div><button class="btn ghost sm" id="wClear">Clear ${sj?sj.name:'all'}</button></div>
   <button class="btn bad w100 mt" id="wRetry">Retry these questions</button></div>
   <div class="wlist">${items.map(i=>`<div class="card flat" style="padding:12px"><div class="row"><span class="pill">${i.type==='mcq'?'MCQ':i.type==='dpart'?'Diagram':'Exam'}</span><span class="small muted">${esc(i.src||'')}</span></div><div style="margin-top:6px;font-weight:700">${i.type==='mcq'?i.q:i.type==='dpart'?'Identify a part on: '+esc(DIAGRAMS[i.d]?DIAGRAMS[i.d].title:i.d):(EXAM_BY_ID()[i.id]||{}).q||''}</div></div>`).join('')}</div>`;
-  $('#wClear',el).onclick=async()=>{if(await confirmBox('Clear the Wrong Tab?','This removes all '+items.length+' saved questions. This cannot be undone.','Clear all')){S.wrong={};save();updateBadge();App.render(false,true);toast('Wrong Tab cleared');}};
+  $('#wClear',el).onclick=async()=>{if(await confirmBox(sj?'Clear '+sj.name+' from the Wrong Tab?':'Clear the Wrong Tab?','This removes '+items.length+' saved questions. This cannot be undone.',sj?'Clear '+sj.name:'Clear all')){items.forEach(i=>delete S.wrong[i.key]);save();updateBadge();App.render(false,true);toast('Wrong Tab cleared');}};
   $('#wRetry',el).onclick=()=>retryWrong();
 }
 function EXAM_BY_ID(){const m={};(typeof EXAM!=='undefined'?EXAM:[]).forEach(e=>m[e.id]=e);return m;}
 function retryWrong(){
-  const items=shuffle(Object.values(S.wrong));
+  const items=shuffle(wrongItems());
   App.push(async scr=>{
     let fixed=0;
     for(let i=0;i<items.length;i++){
