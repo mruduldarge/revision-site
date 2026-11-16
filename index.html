@@ -39,7 +39,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.55;overflow-x:hidden}
 body{min-height:100vh;transition:background .3s,color .3s;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;background-attachment:fixed}
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px}
 button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:none;background:none}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:10px}
 h1,h2,h3,h4{font-family:var(--head);font-weight:700;line-height:1.15;margin:0 0 .4em;letter-spacing:-.015em}
@@ -49,7 +49,7 @@ b,strong{font-weight:700}
 .muted{color:var(--ink2)} .small{font-size:.86rem}
 svg.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* shell */
-#top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+#top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--line)}
 #top .logo{font-family:var(--head);font-weight:700;font-size:1.08rem;display:flex;align-items:center;gap:10px;flex:1;min-width:0;letter-spacing:-.01em}
 #top .logo .mk{width:30px;height:30px;border-radius:8px;border:2px solid var(--acc);color:var(--acc);display:grid;place-items:center;font-size:.8rem;font-weight:800;flex:none;background:var(--card)}
 #top .logo span.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -191,7 +191,13 @@ svg.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;str
 .lnav .btn{flex:1}
 /* progress */
 .psub{margin-bottom:16px}
-.psub .hd{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.psub .hd{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:0}
+.psub .chev{display:grid;transition:transform .3s}
+.psub.open .chev{transform:rotate(90deg)}
+.psub .pbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.psub.open .pbody{grid-template-rows:1fr}
+.psub .pbody>div{overflow:hidden;min-height:0}
+.psub.open .pbody>div{padding-top:12px}
 .psub .hd .ct{width:46px;height:50px;border-radius:10px;border:2px solid var(--acc);display:grid;place-items:center;font-family:var(--head);font-weight:800;font-size:1.2rem;flex:none}
 .psub .hd h3{margin:0}
 .psub .hd .pc{margin-left:auto;font-family:var(--head);font-weight:800;font-size:1.3rem;color:var(--acc)}
@@ -378,8 +384,8 @@ table.cmp th{font-family:var(--head);font-weight:600;color:var(--acc)}
 /* focus mode depth */
 #focus .wrap{perspective:1400px}
 #focus .stage{transform-style:preserve-3d;cursor:grab;touch-action:none;perspective:1000px}
-#focus .stage svg{animation:sway 8s ease-in-out infinite;transform-origin:50% 50%}
-@keyframes sway{0%,100%{transform:rotateY(-7deg) rotateX(4deg)}50%{transform:rotateY(7deg) rotateX(-3deg)}}
+#focus .stage svg{animation:settle 1.4s cubic-bezier(.2,.8,.2,1);transform-origin:50% 50%}
+@keyframes settle{0%{transform:rotateY(-16deg) rotateX(10deg)}60%{transform:rotateY(3deg) rotateX(-2deg)}100%{transform:none}}
 #focus .stage::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 80% at 25% 15%,rgba(255,255,255,.35),transparent 55%)}
 [data-theme="dark"] #focus .stage::after{background:radial-gradient(120% 80% at 25% 15%,rgba(255,255,255,.08),transparent 55%)}
 /* 3D exploded view */
@@ -405,9 +411,227 @@ table.cmp th{font-family:var(--head);font-weight:600;color:var(--acc)}
 #x3d .x3-chips .chip{white-space:nowrap}
 #x3d .x3-info{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:64px;font-size:.95rem}
 #x3d .x3-info b{color:var(--acc)}
+
+/* performance: keep heavy diagrams on their own layer so scrolling never repaints them */
+.dg{transform:translateZ(0)}
+.lbody .card svg{will-change:transform}
+
+.foot{margin:34px 0 4px;text-align:center;font-size:.8rem;color:var(--ink3);line-height:1.6}
+
+/* flashcard deck */
+.fdeck{position:relative;height:300px;margin:16px 0 22px;perspective:1400px}
+.fcard3{position:absolute;inset:0;transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .42s;touch-action:pan-y;user-select:none;-webkit-user-select:none;border-radius:24px;will-change:transform}
+.fcard3.d1{transform:translateY(16px) scale(.95);opacity:.9}
+.fcard3.d2{transform:translateY(32px) scale(.9);opacity:.55}
+.fcard3:not(.d0){pointer-events:none}
+.fcard3.d0{cursor:grab}
+.fcard3 .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.9,.25,1)}
+.fcard3.flipped .in{transform:rotateY(180deg)}
+.fcard3 .face{position:absolute;inset:0;border-radius:24px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
+.fcard3 .front{background:linear-gradient(150deg,var(--acc),color-mix(in srgb,var(--acc) 70%,#0b3d26));color:#fff}
+.fcard3 .front h2{color:#fff;font-size:1.75rem;margin:4px 0}
+.fcard3 .back{background:var(--card);transform:rotateY(180deg)}
+.stamp{position:absolute;top:18px;padding:4px 12px;border:3px solid;border-radius:10px;font-family:var(--head);font-weight:800;font-size:1.15rem;opacity:0;z-index:3;pointer-events:none;background:var(--card);transition:opacity .15s}
+.stamp.yes{left:18px;color:var(--ok);border-color:var(--ok);transform:rotate(-12deg)}
+.stamp.no{right:18px;color:var(--bad);border-color:var(--bad);transform:rotate(12deg)}
+
+/* motion system – transform/opacity only so it stays smooth */
+.ai{animation:rise .5s var(--d,0ms) cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.98)}}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.rv.seen{opacity:1;transform:none}
+.bar i{transform-origin:left center;animation:grow 1s .15s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes ringIn{from{stroke-dashoffset:var(--c)}}
+#tabs button.on .ic{animation:tabpop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tabpop{0%{transform:scale(.7)}60%{transform:scale(1.18) translateY(-2px)}100%{transform:translateY(-1px)}}
+.tile:active{transform:perspective(600px) rotateX(8deg) scale(.97)}
+.cont:active,.chr:active,.qa:active{transform:scale(.985)}
+.cont .go{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.cont:active .go{transform:translateX(4px)}
+.fpts{position:fixed;z-index:160;font-family:var(--head);font-weight:800;color:var(--ok);pointer-events:none;font-size:1.25rem;text-shadow:0 1px 0 var(--card)}
+.opt.right .k{animation:pop .5s}
+/* lite effects for slower devices */
+html.lite svg.d3 [data-part],html.lite .lbody svg *,html.lite svg.d3w *{filter:none!important}
+html.lite #focus .veil,html.lite #x3d .veil,html.lite #modal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html.lite #focus .veil{background:color-mix(in srgb,var(--bg) 88%,transparent)}
+html.lite #x3d .veil{background:var(--bg)}
+
+.arp{transform-box:fill-box;transform-origin:center;animation:arpop .45s cubic-bezier(.3,1.5,.5,1) backwards}
+@keyframes arpop{from{opacity:0;transform:scale(0)}}
+
+/* ===== subject themes ===== */
+:root{--neu:#34444E;--neu-soft:#E4EAED}
+[data-theme="dark"]{--neu:#C8D5DB;--neu-soft:#1F2B30}
+.s-none{--acc:var(--neu);--acc3:var(--neu-soft)}
+body{transition:background-color .5s,color .3s}
+body.s-none{--bg:#F2F4F5}
+[data-theme="dark"] body.s-none{--bg:#11171A}
+body.s-bio{--bg:#EDF4EF;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22180%22%20height%3D%22180%22%20fill%3D%22none%22%20stroke%3D%22%231E7B4F%22%20stroke-opacity%3D%22.09%22%20stroke-width%3D%221.6%22%3E%3Ccircle%20cx%3D%2234%22%20cy%3D%2238%22%20r%3D%2216%22/%3E%3Ccircle%20cx%3D%2234%22%20cy%3D%2238%22%20r%3D%225%22%20fill%3D%22%231E7B4F%22%20fill-opacity%3D%22.09%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22122%22%20r%3D%2212%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22122%22%20r%3D%224%22%20fill%3D%22%231E7B4F%22%20fill-opacity%3D%22.09%22/%3E%3Cpath%20d%3D%22M110%2030c14%204%2024%2016%2026%2032-16-2-28-12-26-32z%20M110%2030l26%2032%22/%3E%3Cpath%20d%3D%22M30%20120c10%2018%2026%2026%2044%2024-6-18-24-28-44-24z%20M30%20120l44%2024%22/%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2288%22%20r%3D%222.5%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,26px 26px,26px 26px}
+[data-theme="dark"] body.s-bio{--bg:#0B1914;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22180%22%20height%3D%22180%22%20fill%3D%22none%22%20stroke%3D%22%234CC98A%22%20stroke-opacity%3D%22.08%22%20stroke-width%3D%221.6%22%3E%3Ccircle%20cx%3D%2234%22%20cy%3D%2238%22%20r%3D%2216%22/%3E%3Ccircle%20cx%3D%2234%22%20cy%3D%2238%22%20r%3D%225%22%20fill%3D%22%234CC98A%22%20fill-opacity%3D%22.08%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22122%22%20r%3D%2212%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22122%22%20r%3D%224%22%20fill%3D%22%234CC98A%22%20fill-opacity%3D%22.08%22/%3E%3Cpath%20d%3D%22M110%2030c14%204%2024%2016%2026%2032-16-2-28-12-26-32z%20M110%2030l26%2032%22/%3E%3Cpath%20d%3D%22M30%20120c10%2018%2026%2026%2044%2024-6-18-24-28-44-24z%20M30%20120l44%2024%22/%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2240%22%20r%3D%223%22/%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2288%22%20r%3D%222.5%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+body.s-chem{--bg:#F3F0F9;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22104%22%20height%3D%22180%22%20fill%3D%22none%22%20stroke%3D%22%237B3FC6%22%20stroke-opacity%3D%22.09%22%20stroke-width%3D%221.6%22%3E%3Cpolygon%20points%3D%2278.0%2C60.0%2052.0%2C75.0%2026.0%2C60.0%2026.0%2C30.0%2052.0%2C15.0%2078.0%2C30.0%22/%3E%3Cpolygon%20points%3D%2226.0%2C150.0%200.0%2C165.0%20-26.0%2C150.0%20-26.0%2C120.0%20-0.0%2C105.0%2026.0%2C120.0%22/%3E%3Cpolygon%20points%3D%22130.0%2C150.0%20104.0%2C165.0%2078.0%2C150.0%2078.0%2C120.0%20104.0%2C105.0%20130.0%2C120.0%22/%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%2245%22%20r%3D%2213%22/%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%22140%22%20r%3D%223%22%20fill%3D%22%237B3FC6%22%20fill-opacity%3D%22.09%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,26px 26px,26px 26px}
+[data-theme="dark"] body.s-chem{--bg:#13111F;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22104%22%20height%3D%22180%22%20fill%3D%22none%22%20stroke%3D%22%23B48CF2%22%20stroke-opacity%3D%22.08%22%20stroke-width%3D%221.6%22%3E%3Cpolygon%20points%3D%2278.0%2C60.0%2052.0%2C75.0%2026.0%2C60.0%2026.0%2C30.0%2052.0%2C15.0%2078.0%2C30.0%22/%3E%3Cpolygon%20points%3D%2226.0%2C150.0%200.0%2C165.0%20-26.0%2C150.0%20-26.0%2C120.0%20-0.0%2C105.0%2026.0%2C120.0%22/%3E%3Cpolygon%20points%3D%22130.0%2C150.0%20104.0%2C165.0%2078.0%2C150.0%2078.0%2C120.0%20104.0%2C105.0%20130.0%2C120.0%22/%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%2245%22%20r%3D%2213%22/%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%22140%22%20r%3D%223%22%20fill%3D%22%23B48CF2%22%20fill-opacity%3D%22.08%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+body.s-phy{--bg:#EEF2FA;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22none%22%20stroke%3D%22%232156C4%22%20stroke-opacity%3D%22.09%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M14%20150%20Q74%2020%20134%20150%22%20stroke-dasharray%3D%225%206%22/%3E%3Ccircle%20cx%3D%2274%22%20cy%3D%2285%22%20r%3D%224%22%20fill%3D%22%232156C4%22%20fill-opacity%3D%22.09%22/%3E%3Cpath%20d%3D%22M150%2040h36%20M180%2034l6%206-6%206%22/%3E%3Cpath%20d%3D%22M20%2030%20v26%20M14%2050l6%206%206-6%22/%3E%3Cpath%20d%3D%22M150%20170%20q8-10%2016%200%20t16%200%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,26px 26px,26px 26px}
+[data-theme="dark"] body.s-phy{--bg:#0B1322;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22none%22%20stroke%3D%22%237EA8FF%22%20stroke-opacity%3D%22.08%22%20stroke-width%3D%221.5%22%3E%3Cpath%20d%3D%22M14%20150%20Q74%2020%20134%20150%22%20stroke-dasharray%3D%225%206%22/%3E%3Ccircle%20cx%3D%2274%22%20cy%3D%2285%22%20r%3D%224%22%20fill%3D%22%237EA8FF%22%20fill-opacity%3D%22.08%22/%3E%3Cpath%20d%3D%22M150%2040h36%20M180%2034l6%206-6%206%22/%3E%3Cpath%20d%3D%22M20%2030%20v26%20M14%2050l6%206%206-6%22/%3E%3Cpath%20d%3D%22M150%20170%20q8-10%2016%200%20t16%200%22/%3E%3C/svg%3E"),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+
+/* personality per subject: shapes and type weight */
+body.s-bio{--r:20px}
+body.s-chem{--r:12px}
+body.s-chem .card,body.s-chem .cont,body.s-chem .chr,body.s-chem .lcard{border-radius:10px}
+body.s-phy{--r:8px}
+body.s-phy .card,body.s-phy .cont,body.s-phy .chr,body.s-phy .lcard,body.s-phy .qa{border-radius:6px}
+body.s-phy .btn{border-radius:8px}
+body.s-bio .btn{border-radius:999px}
+#top{transition:background-color .5s}
+#tabs button.on{color:var(--acc)}
+.subjbtn{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 12px;border-radius:12px;border:1.5px solid var(--acc);background:var(--acc3);color:var(--acc);font-family:var(--head);font-weight:800}
+.subjbtn .ic{width:18px;height:18px}
+
+/* motifs */
+.mo{width:100%;height:100%;overflow:visible}
+.mo.live .leaf{transform-origin:0 50px;animation:sway 3.2s ease-in-out infinite}
+.mo.live .cellA{animation:bob 2.6s ease-in-out infinite}
+.mo.live .cellB{animation:bob 2.2s .6s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.mo.live .orb{animation:spin 2.4s linear infinite}
+.mo.live .orb.o1{animation-duration:3.1s;animation-direction:reverse}
+.mo.live .orb.o2{animation-duration:2.7s}
+.mo.live .nuc{animation:pulse 2s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.mo.live .bx{animation:bx 1.8s linear infinite}
+.mo.live .by{animation:by 1.8s infinite}
+@keyframes bx{0%{transform:translateX(0)}100%{transform:translateX(96px)}}
+@keyframes by{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.6,.4,1)}50%{transform:translateY(-61px);animation-timing-function:cubic-bezier(.6,0,.8,.4)}100%{transform:translateY(0)}}
+
+/* splash */
+body.splashing{overflow:hidden}
+#splash{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:var(--bg);color:var(--ink);overflow:hidden}
+.sp-in{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 24px 120px}
+.sp-pts{position:absolute;inset:0;pointer-events:none}
+.pt{position:absolute;bottom:-30px;width:22px;height:22px;transform:scale(var(--s));animation:floatUp var(--t) var(--dl) linear infinite}
+@keyframes floatUp{from{transform:translateY(0) rotate(0) scale(var(--s))}to{transform:translateY(-115vh) rotate(300deg) scale(var(--s))}}
+.sp-orbit{position:relative;width:min(50vw,220px);aspect-ratio:1;margin:calc(min(50vw,220px)*.12) 0 calc(min(50vw,220px)*.2)}
+.sp-o{position:absolute;left:50%;top:50%;width:34%;aspect-ratio:1;margin:-17% 0 0 -17%;
+  animation:spIn .8s calc(var(--i)*.14s) cubic-bezier(.2,.9,.3,1.25) backwards,spRing 7s linear infinite}
+.sp-o > .mo{transform:rotate(calc(var(--i)*-120deg));animation:spCounter 7s linear infinite}
+@keyframes spRing{from{transform:rotate(calc(var(--i)*120deg)) translateY(-118%)}to{transform:rotate(calc(var(--i)*120deg + 360deg)) translateY(-118%)}}
+@keyframes spCounter{from{transform:rotate(calc(var(--i)*-120deg))}to{transform:rotate(calc(var(--i)*-120deg - 360deg))}}
+@keyframes spIn{from{opacity:0;scale:.2}}
+.sp-core{position:absolute;inset:34%;border-radius:22%;display:grid;place-items:center;border:3px solid var(--ink);font-family:var(--head);font-weight:800;font-size:clamp(1.4rem,6vw,2rem);background:var(--card);
+  animation:coreIn .7s .35s cubic-bezier(.3,1.6,.5,1) backwards,coreBeat 2.4s 1.2s ease-in-out infinite}
+@keyframes coreIn{from{opacity:0;transform:scale(.3) rotate(-30deg)}}
+@keyframes coreBeat{0%,100%{transform:scale(1) rotate(0)}12%{transform:scale(1.1) rotate(-6deg)}24%{transform:scale(1) rotate(0)}}
+.sp-h{font-size:clamp(2.6rem,11vw,4.4rem);letter-spacing:-.03em;margin:0;line-height:1}
+.sp-h span{display:inline-block;animation:letter .6s calc(.55s + var(--k)*.05s) cubic-bezier(.2,.9,.3,1.3) backwards,wave 2.6s calc(1.6s + var(--k)*.09s) ease-in-out infinite}
+@keyframes letter{from{opacity:0;transform:translateY(40%) rotate(8deg)}}
+@keyframes wave{0%,60%,100%{transform:none}30%{transform:translateY(-14%)}}
+.sp-p{font-family:var(--head);font-size:clamp(1.2rem,4.6vw,1.6rem);color:var(--ink2);margin:6px 0 14px;animation:rise .6s 1.05s cubic-bezier(.2,.8,.2,1) backwards}
+.sp-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:22px}
+.sp-chips span{padding:5px 12px;border-radius:999px;font-weight:800;font-size:.85rem;color:var(--acc);background:var(--acc3);border:1.5px solid var(--acc);animation:chipIn .5s calc(1.25s + var(--k)*.12s) cubic-bezier(.3,1.6,.5,1) backwards}
+@keyframes chipIn{from{opacity:0;transform:translateY(12px) scale(.6)}}
+.sp-go{display:inline-flex;align-items:center;gap:10px;padding:16px 26px;border-radius:999px;background:var(--ink);color:var(--bg);font-family:var(--head);font-weight:800;font-size:1.15rem;
+  box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 55%,#000),0 14px 30px -10px rgba(0,0,0,.4);
+  animation:goIn .7s 1.7s cubic-bezier(.3,1.6,.5,1) backwards,goPulse 2s 2.6s ease-in-out infinite}
+.sp-go .ic{width:20px;height:20px}
+.sp-go:active{transform:translateY(4px);box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 55%,#000)}
+@keyframes goIn{from{opacity:0;transform:translateY(30px) scale(.5)}}
+@keyframes goPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.sp-lane{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom));height:78px;border-top:2px dashed var(--line);z-index:1}
+.mc{position:absolute;left:0;bottom:6px;width:56px;height:62px;animation:walk 9s calc(var(--i)*-3s) linear infinite}
+.mc-b{width:56px;height:56px;animation:hop .45s calc(var(--i)*.15s) ease-in-out infinite alternate}
+.mc.s-phy .mc-b{animation:roll 1.1s linear infinite}
+.mc.s-chem .mc-b{animation:hop .6s ease-in-out infinite alternate}
+.mc-sh{position:absolute;left:12px;right:12px;bottom:0;height:6px;border-radius:50%;background:rgba(0,0,0,.15);animation:shadow .45s ease-in-out infinite alternate}
+@keyframes walk{from{transform:translateX(-70px)}to{transform:translateX(calc(100vw + 20px))}}
+@keyframes hop{from{transform:translateY(0) scaleY(.94)}to{transform:translateY(-14px) scaleY(1.04)}}
+@keyframes roll{to{transform:rotate(360deg)}}
+@keyframes shadow{from{transform:scaleX(1)}to{transform:scaleX(.7);opacity:.6}}
+.mc .eyes{animation:blink 3.4s infinite;transform-origin:0 -4px}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion:reduce){.pt,.mc,.mc-b,.sp-h span,.sp-go{animation:none!important}}
+/* colour wipe when a subject is chosen */
+.wipe{position:fixed;inset:0;z-index:250;pointer-events:none;overflow:hidden}
+.wipe > i{position:absolute;border-radius:50%;background:var(--acc3);transform:scale(0);will-change:transform}
+.wipe .wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:0;color:var(--acc)}
+.wipe .wc .mo{width:min(34vw,150px);height:auto}
+.wipe .wc b{font-family:var(--head);font-weight:800;font-size:clamp(2rem,9vw,3.4rem);letter-spacing:-.03em}
+
+/* subject chooser */
+.pick3{display:grid;gap:12px}
+@media (min-width:700px){.pick3{grid-template-columns:repeat(3,1fr)}.pk{flex-direction:column;align-items:flex-start;min-height:230px}.pk .pk-art{width:100%;height:120px}.pk-go{position:absolute;right:14px;bottom:14px}}
+.pk{position:relative;display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px;border-radius:20px;background:var(--card);border:2px solid color-mix(in srgb,var(--acc) 45%,var(--line));box-shadow:var(--shadow);overflow:hidden;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.pk::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--acc3),transparent 70%);opacity:.9}
+.pk > *{position:relative}
+.pk:active{transform:scale(.97)}
+.pk-art{width:86px;height:86px;flex:none}
+.pk-n{font-family:var(--head);font-weight:800;font-size:1.45rem;letter-spacing:-.02em;color:var(--acc)}
+.pk-m{font-size:.85rem;color:var(--ink2);font-weight:700}
+.pk-go{margin-left:auto;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;flex:none}
+[data-theme="dark"] .pk-go{color:#0D191B}
+.neutral-stats{display:flex;gap:10px;margin-top:16px}
+.neutral-stats .stat span{font-size:.78rem;color:var(--ink3);font-weight:700}
+
+/* themed hero */
+.hero{position:relative;display:flex;align-items:center;gap:10px;padding:18px 18px 18px 20px;margin-bottom:16px;border-radius:calc(var(--r) + 6px);background:linear-gradient(135deg,var(--acc3),var(--card) 80%);border:1.5px solid color-mix(in srgb,var(--acc) 35%,var(--line));overflow:hidden;box-shadow:var(--shadow)}
+.hero-tx{flex:1;min-width:0}
+.hero-k{font-weight:700;color:var(--ink2);font-size:.9rem}
+.hero h1{font-size:clamp(2rem,8vw,2.9rem);color:var(--acc);margin:.05em 0 .12em;letter-spacing:-.035em}
+.hero p{margin:0 0 12px;color:var(--ink2);max-width:34ch}
+.hero-p{display:flex;align-items:center;gap:10px}
+.hero-p b{font-family:var(--head);font-size:1.2rem;display:block;line-height:1}
+.hero-p span{font-size:.8rem;color:var(--ink3);font-weight:700}
+.hero-art{width:clamp(96px,30vw,170px);aspect-ratio:1;flex:none}
+
+/* game intro */
+.gi{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:4vh}
+.gi-card{width:100%;max-width:520px;border-radius:26px;padding:28px 22px 26px;text-align:center;color:#fff;background:var(--gbg);box-shadow:0 18px 40px -18px rgba(0,0,0,.45);animation:giIn .55s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes giIn{from{opacity:0;transform:translateY(30px) scale(.92) rotateX(18deg)}}
+.gi-code{display:inline-grid;place-items:center;min-width:68px;height:68px;padding:0 10px;border-radius:18px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.55);font-family:var(--head);font-weight:800;font-size:1.3rem;margin-bottom:12px}
+.gi-card h2{font-size:clamp(1.5rem,6vw,2rem);margin:0 0 4px;color:#fff}
+.gi-card p{margin:0;opacity:.9}
+.gi-n{height:120px;display:grid;place-items:center;font-family:var(--head);font-weight:800;font-size:96px;line-height:1;margin-top:10px;text-shadow:0 6px 0 rgba(0,0,0,.15)}
+.gi-n.go{font-size:72px}
+.gi-hint{font-weight:700;opacity:.85;min-height:1.5em}
+
+/* moving background – Full effects only, transform/opacity only, no filters */
+#bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict;--h1:var(--acc);--h2:var(--teal);--h3:var(--yel)}
+body.s-bio #bgfx{--h2:#0F8F8C;--h3:#F3B52B}
+body.s-chem #bgfx{--h2:#D2457C;--h3:#2156C4}
+body.s-phy #bgfx{--h2:#0F8F8C;--h3:#7B3FC6}
+body.s-none #bgfx{--h1:var(--bio);--h2:var(--chem);--h3:var(--phy)}
+#main,#top{position:relative;z-index:1}
+#top{position:sticky;z-index:30}
+.au{position:absolute;width:75vmax;height:75vmax;border-radius:50%;will-change:transform;opacity:var(--ao,.32)}
+[data-theme="dark"] .au{--ao:.22}
+.au.a1{left:-30vmax;top:-30vmax;background:radial-gradient(circle,color-mix(in srgb,var(--h1) 55%,transparent) 0,transparent 62%);animation:auA 38s ease-in-out infinite alternate}
+.au.a2{right:-34vmax;top:18vh;background:radial-gradient(circle,color-mix(in srgb,var(--h2) 45%,transparent) 0,transparent 62%);animation:auB 46s ease-in-out infinite alternate}
+.au.a3{left:-10vmax;bottom:-42vmax;background:radial-gradient(circle,color-mix(in srgb,var(--h3) 40%,transparent) 0,transparent 62%);animation:auC 52s ease-in-out infinite alternate}
+@keyframes auA{to{transform:translate(22vmax,14vmax) scale(1.15)}}
+@keyframes auB{to{transform:translate(-18vmax,-12vmax) scale(.9)}}
+@keyframes auC{to{transform:translate(16vmax,-14vmax) scale(1.2)}}
+.bart{position:absolute;right:-18vmin;bottom:calc(var(--tabh) - 14vmin);width:min(78vmin,620px);aspect-ratio:1;color:var(--acc);opacity:.11;display:none;will-change:transform;animation:bartSpin 140s linear infinite}
+.bart svg{width:100%;height:100%;overflow:visible}
+[data-theme="dark"] .bart{opacity:.14}
+@media (min-width:900px){.bart{bottom:-12vmin}}
+body.s-bio .bart-bio,body.s-chem .bart-chem,body.s-phy .bart-phy{display:block}
+body.s-bio .bart-bio{animation:bartBreathe 9s ease-in-out infinite alternate}
+@keyframes bartSpin{to{transform:rotate(360deg)}}
+@keyframes bartBreathe{from{transform:rotate(-4deg) scale(.97)}to{transform:rotate(4deg) scale(1.03)}}
+.bk{position:absolute;top:102%;width:var(--sz);height:var(--sz);border-radius:50%;opacity:0;will-change:transform;
+  background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--h1) 75%,#fff),color-mix(in srgb,var(--h1) 30%,transparent) 70%);animation:bkUp var(--t) var(--dl) linear infinite}
+.bk:nth-of-type(3n+1){background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--h2) 75%,#fff),color-mix(in srgb,var(--h2) 30%,transparent) 70%)}
+@keyframes bkUp{0%{transform:translate(0,0);opacity:0}12%{opacity:var(--bo,.55)}50%{transform:translate(var(--sw),-55vh)}88%{opacity:var(--bo,.55)}100%{transform:translate(0,-112vh);opacity:0}}
+[data-theme="dark"] .bk{--bo:.45}
+html.lite #bgfx{display:none}
+@media (prefers-reduced-motion:reduce){#bgfx{display:none}}
+
+#splash .sp-pts{--h1:var(--bio);--h2:var(--chem);--h3:var(--phy)}
+#splash .bk{--bo:.7}
 </style></head>
 <body>
-<header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">11</span><span class="t" id="ttl">Class 11 Revision</span></div><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
+<header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">MD</span><span class="t" id="ttl">Class 11 Revision</span></div><button class="subjbtn hidden" id="subjBtn" aria-label="Switch subject"></button><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <filter id="dz" x="-8%" y="-8%" width="120%" height="126%" color-interpolation-filters="sRGB">
 <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="b"/>
@@ -444,8 +668,12 @@ const SVGNS='http://www.w3.org/2000/svg';
 function lerp(a,b,t){return a+(b-a)*t}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
-const APP_VERSION='1.4 · 16 Nov';
-const LESSONS={5:[],6:[]};
+/* Version rule (set by Mrudul): 1.0 = first release (Ch 5, 6). Each new chapter adds 1 to the middle number
+   and resets the bug-fix count; each bug fix adds 1 to the last number. e.g. 1.1 → 1.1.1 … 1.1.5 → (new chapter) 1.2
+   History: 1.0 – Ch 5 & 6 · 1.1 – Ch 1 The Living World */
+const APP_VERSION='1.3.10'; /* rule: 1.<chapters>.<changes since last chapter>. 3 chapters (Ch1,5,6). 1.3.9 MD logo; 1.3.10 premium background (colour glows, line art, glow particles). New chapter -> 1.4 (last number resets), each later fix/change -> 1.4.1 ... */
+const LESSONS={1:[],5:[],6:[]};
+const allLessons=()=>Object.values(LESSONS).flat();
 const DIAGRAMS={};
 function reg(def){DIAGRAMS[def.id]=def;return def;}
 
@@ -482,7 +710,7 @@ function save(){Store.save();}
 /* ---------- feedback ---------- */
 let toastT;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1900);}
-function confetti(n=40,x,y){
+function confetti(n=40,x,y){if(document.documentElement.classList.contains('lite'))n=Math.ceil(n/3);
   const cols=['#2e9d5a','#f3b52b','#e5588a','#2a74d4','#14b3a8','#8b5cf6'];
   x=x??innerWidth/2;y=y??innerHeight/2.4;
   for(let i=0;i<n;i++){const d=document.createElement('i');d.className='confetti';d.style.background=cols[i%cols.length];document.body.appendChild(d);
@@ -500,7 +728,7 @@ function removeWrong(key){if(S.wrong[key]){delete S.wrong[key];save();updateBadg
 function updateBadge(pop){const b=$('#wrongBadge');const n=wrongCount();b.textContent=n;b.classList.toggle('hidden',n===0);if(pop){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}}
 
 /* ---------- icons ---------- */
-const IC={home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+const IC={swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
  learn:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6"/>',
  practice:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/>',
  games:'<rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r=".9"/><circle cx="17.8" cy="13.8" r=".9"/>',
@@ -517,26 +745,43 @@ function applyTheme(){const t=S.theme||(matchMedia('(prefers-color-scheme: dark)
 
 /* ---------- subjects & chapters ---------- */
 const SUBJECTS=[
- {id:'bio',name:'Biology',sym:'Bio',chapters:[{key:5,num:5,code:'Mo',title:'Morphology of Flowering Plants'},{key:6,num:6,code:'An',title:'Anatomy of Flowering Plants'}]},
+ {id:'bio',name:'Biology',sym:'Bio',chapters:[{key:1,num:1,code:'Lw',title:'The Living World'},{key:5,num:5,code:'Mo',title:'Morphology of Flowering Plants'},{key:6,num:6,code:'An',title:'Anatomy of Flowering Plants'}]},
  {id:'chem',name:'Chemistry',sym:'Chem',chapters:[],next:'Chemical Bonding'},
  {id:'phy',name:'Physics',sym:'Phy',chapters:[],next:'Projectile motion'}];
 const subjOf=key=>SUBJECTS.find(s=>s.chapters.some(c=>c.key===key));
 const chapOf=key=>{for(const s of SUBJECTS)for(const c of s.chapters)if(c.key===key)return c;return null;};
-function lessonMark(l){const m=l.title.match(/^(\d+(?:\.\d+)*)\s/);if(m)return m[1];if(/^Intro/i.test(l.title))return 'Intro';if(/summary/i.test(l.title))return 'Sum';if(/T\.S\./.test(l.title))return 'T.S.';if(/Compare/i.test(l.title))return 'vs';return l.title.slice(0,2);}
+function lessonMark(l){if(l.mark)return l.mark;const m=l.title.match(/^(\d+(?:\.\d+)*)\s/);if(m)return m[1];if(/^Intro/i.test(l.title))return 'Intro';if(/summary/i.test(l.title))return 'Sum';if(/T\.S\./.test(l.title))return 'T.S.';if(/Compare/i.test(l.title))return 'vs';return l.title.slice(0,2);}
 function lessonName(l){return l.title.replace(/^\d+(?:\.\d+)*\s/,'');}
+
+/* ---------- visual effects: full or lite ---------- */
+const FX={auto:true,lite:false,
+  init(){const pref=S.fx||'auto';if(pref!=='auto'){this.set(pref==='lite');return;}
+    const weak=(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)||(navigator.deviceMemory&&navigator.deviceMemory<=3)||matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.set(!!weak);
+    if(!weak){let n=0,last=performance.now(),slow=0;const f=t=>{const d=t-last;last=t;if(n>3&&d>34)slow++;if(++n<40)requestAnimationFrame(f);else if(slow>12)this.set(true);};requestAnimationFrame(f);}},
+  set(l){this.lite=l;document.documentElement.classList.toggle('lite',l);}};
+function floatPts(anchor,txt){if(!anchor)return;const r=anchor.getBoundingClientRect();const d=document.createElement('div');d.className='fpts';d.textContent=txt;d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top+4)+'px';document.body.appendChild(d);
+  d.animate([{transform:'translate(-50%,0) scale(.7)',opacity:0},{transform:'translate(-50%,-24px) scale(1.15)',opacity:1,offset:.3},{transform:'translate(-50%,-64px) scale(1)',opacity:0}],{duration:1000,easing:'ease-out'}).onfinish=()=>d.remove();}
+function animateScreen(scr){
+  $$('.tile,.cont,.qa,.chr,.lcard,.psub,.exq,.stat,.ph,.sech,.empty',scr).forEach((e,k)=>{e.style.setProperty('--d',Math.min(k,14)*38+'ms');e.classList.add('ai');});
+  $$('.stat b',scr).forEach(b=>{const tn=b.firstChild;if(!tn||tn.nodeType!==3)return;const v=parseInt(tn.textContent);if(!(v>0))return;const t0=performance.now();tn.textContent='0';const f=n=>{const k=Math.min(1,(n-t0)/850);tn.textContent=Math.round(v*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);});
+}
+function revealOnScroll(root){if(!('IntersectionObserver' in window))return;const els=$$('.lbody > .card, .lbody > .seg, .lbody > .sec, .notes, .terms, .qcw > .card, .lbody > div > .card',root);
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('seen');io.unobserve(e.target);}}),{rootMargin:'0px 0px -6% 0px'});
+  els.forEach(e=>{e.classList.add('rv');io.observe(e);});}
 
 /* ---------- shell / router ---------- */
 const TABS=[['home','Home'],['learn','Learn'],['practice','Practice'],['games','Games'],['wrong','Wrong Tab'],['progress','Progress']];
-const App={tab:'home',stack:[],subj:'bio',learnCh:5,
+const App={tab:'home',stack:[],subj:null,learnCh:5,
   init(){
     const tabs=$('#tabs');
     tabs.innerHTML=TABS.map(([id,l])=>`<button data-tab="${id}" aria-label="${l}">${icon(id)}<span class="lb">${l}</span>${id==='wrong'?'<span class="badge hidden" id="wrongBadge">0</span>':''}</button>`).join('');
     tabs.onclick=e=>{const b=e.target.closest('[data-tab]');if(b)this.go(b.dataset.tab);};
     $('#themeBtn').onclick=()=>{S.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme();save();};
-    $('#backBtn').onclick=()=>this.back();
+    $('#backBtn').onclick=()=>this.back();$('#subjBtn').onclick=clearSubject;
     window.addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(TABS.some(x=>x[0]===t)&&t!==this.tab)this.go(t,true);});
-    applyTheme();updateBadge();
-    const t=location.hash.slice(1);this.go(TABS.some(x=>x[0]===t)?t:'home',true);
+    applyTheme();updateBadge();FX.init();BgFx.init();
+    const t=location.hash.slice(1);this.go(TABS.some(x=>x[0]===t)?t:'home',true);Splash.show();
   },
   go(tab,noHash){this.tab=tab;this.stack=[];if(!noHash){try{history.replaceState(null,'','#'+tab);}catch(e){}}
     $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));this.render();},
@@ -548,12 +793,13 @@ const App={tab:'home',stack:[],subj:'bio',learnCh:5,
     const main=$('#main');const top=this.stack[this.stack.length-1];
     main.innerHTML='';const scr=document.createElement('div');scr.className='screen'+(isBack?' back':'');if(quiet)scr.style.animation='none';main.appendChild(scr);
     let subj=this.subj;if(top&&top.opts.ch){const s=subjOf(top.opts.ch);if(s)subj=s.id;}
-    document.body.className='s-'+subj;
+    document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
     $('#backBtn').classList.toggle('show',!!top);
-    const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'11';
-    if(top){$('#ttl').textContent=top.title;top.fn(scr);}
+    const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'MD';
+    if(top){$('#ttl').textContent=top.title;top.fn(scr);animateScreen(scr);}
     else{$('#ttl').textContent={home:'Class 11 Revision',learn:'Learn',practice:'Practice',games:'Games',wrong:'Wrong Tab',progress:'Progress'}[this.tab];
-      ({home:renderHome,learn:renderLearn,practice:renderPractice,games:renderGames,wrong:renderWrong,progress:renderProgress})[this.tab](scr);}
+      ({home:renderHome,learn:renderLearn,practice:renderPractice,games:renderGames,wrong:renderWrong,progress:renderProgress})[this.tab](scr);
+      animateScreen(scr);scr.insertAdjacentHTML('beforeend',`<footer class="foot">Version ${APP_VERSION}<br>© ${new Date().getFullYear()} Mrudul. All rights reserved.</footer>`);}
     if(!quiet)window.scrollTo({top:0,behavior:'instant'});
   }
 };
@@ -565,7 +811,7 @@ function subjProgress(s){if(!s.chapters.length)return 0;return s.chapters.reduce
 function overallProgress(){const act=SUBJECTS.filter(s=>s.chapters.length);if(!act.length)return 0;
   const fcTotal=(typeof FLASH!=='undefined'&&FLASH.length?FLASH.length:1);const fc=Object.values(S.flash||{}).filter(v=>v==='got').length/fcTotal;
   return clamp(act.reduce((a,s)=>a+subjProgress(s),0)/act.length*.85+fc*.15,0,1);}
-function ringSVG(p,size=110,stroke=10,col='var(--acc)'){const r=(size-stroke)/2,c=2*Math.PI*r;return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--card2)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}" style="transition:stroke-dashoffset 1s"/></svg>`;}
+function ringSVG(p,size=110,stroke=10,col='var(--acc)'){const r=(size-stroke)/2,c=2*Math.PI*r;return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--card2)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}" style="--c:${c};animation:ringIn 1.3s cubic-bezier(.2,.8,.2,1) backwards"/></svg>`;}
 const pct=p=>Math.round(p*100)+'%';
 
 /* element tile */
@@ -589,7 +835,7 @@ function openChapter(key){App.subj=subjOf(key).id;App.learnCh=key;App.push(chapt
 
 /* ---------- lessons ---------- */
 function openLesson(id){
-  const l=[...LESSONS[5],...LESSONS[6]].find(x=>x.id===id);if(!l)return;
+  const l=allLessons().find(x=>x.id===id);if(!l)return;
   if(App.tab!=='learn'){App.tab='learn';$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab==='learn'));try{history.replaceState(null,'','#learn');}catch(e){}}
   App.subj=subjOf(l.ch).id;App.learnCh=l.ch;S.last={lesson:id};save();
   const list=LESSONS[l.ch];const idx=list.indexOf(l);const c=chapOf(l.ch);
@@ -603,43 +849,22 @@ function openLesson(id){
     <div class="qcw"></div>
     <div class="card flat center"><button class="btn ${S.lessons[id]?'ok':''} w100" id="doneBtn">${S.lessons[id]?'✓ Lesson completed':'Mark lesson as done'}</button></div>
     <div class="lnav">${idx>0?`<button class="btn ghost" id="prevL">‹ ${lessonName(list[idx-1])}</button>`:''}${idx<list.length-1?`<button class="btn ghost" id="nextL">${lessonName(list[idx+1])} ›</button>`:''}</div>`;
-    l.render($('.lbody',scr));
+    l.render($('.lbody',scr));revealOnScroll(scr);
     if(N.terms)$$('.terms button',scr).forEach((b,i)=>b.onclick=()=>{b.classList.toggle('on');$('span',b).textContent=b.classList.contains('on')?N.terms[i][1]:'Tap to reveal';});
     if(N.qk){const re=new RegExp(N.qk,'i');const qs=shuffle(MCQ.filter(q=>q.ch===l.ch&&re.test(q.q+' '+q.o[q.a]))).slice(0,3);
       if(qs.length){const w=$('.qcw',scr);w.innerHTML=`<h2 class="sech">Quick check <small>${qs.length} questions</small></h2>`;
         qs.forEach((q,i)=>{const b=h('<div class="card"></div>');w.appendChild(b);askMCQ(b,q,{head:`<div class="qhead"><span>Question ${i+1} of ${qs.length}</span></div>`,src:l.title});});}}
-    $('#doneBtn',scr).onclick=e=>{if(!S.lessons[id]){S.lessons[id]=true;addScore(20);confetti(36);toast('Lesson done · +20 points');}e.target.className='btn ok w100';e.target.textContent='✓ Lesson completed';};
+    $('#doneBtn',scr).onclick=e=>{if(!S.lessons[id]){S.lessons[id]=true;addScore(20);confetti(36);floatPts(e.target,'+20');toast('Lesson done · +20 points');}e.target.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.3,1.6,.5,1)'});e.target.className='btn ok w100';e.target.textContent='✓ Lesson completed';};
     $('#prevL',scr)&&($('#prevL',scr).onclick=()=>openLesson(list[idx-1].id));
     $('#nextL',scr)&&($('#nextL',scr).onclick=()=>openLesson(list[idx+1].id));
   },lessonName(l),{ch:l.ch});
 }
 
-/* ---------- home ---------- */
-function renderHome(el){
-  const n=wrongCount();const hr=new Date().getHours();
-  const last=S.last&&S.last.lesson&&[...LESSONS[5],...LESSONS[6]].find(x=>x.id===S.last.lesson);
-  const first=SUBJECTS.find(x=>x.chapters.length);const L=last||LESSONS[first.chapters[0].key][0];const Lc=chapOf(L.ch);
-  el.innerHTML=`
-  <div class="ph"><h1>${hr<12?'Good morning':hr<17?'Good afternoon':'Good evening'}</h1><p>${last?'Pick up where you left off.':'New here? Begin with the first lesson.'}</p></div>
-  <button class="cont" id="contBtn"><div class="ct"><b>${lessonMark(L)}</b><span>${Lc.code}</span></div><div style="min-width:0"><div class="small muted">${last?'Continue where you left off':'Let\'s get started'} · ${subjOf(L.ch).name}, Chapter ${Lc.num}</div><div class="tt">${lessonName(L)}</div></div><span class="go">${icon('next')}</span></button>
-  <h2 class="sech">Subjects <small>${pct(overallProgress())} overall</small></h2>
-  <div class="tiles">${SUBJECTS.map(s=>subjTile(s)).join('')}</div>
-  <h2 class="sech">Quick practice</h2>
-  <div class="quick"><button class="qa" id="hQuiz">${icon('quiz')}<b>Quick quiz</b><span>10 mixed questions</span></button><button class="qa" id="hGame">${icon('bolt')}<b>Speed round</b><span>Best: ${S.games.speed||0}</span></button><button class="qa" id="hWrong">${icon('wrong')}<b>${n?n+' to fix':'Nothing to fix'}</b><span>Wrong Tab</span></button></div>
-  <div class="row mt small muted"><span>${S.score||0} points earned</span><span class="spacer"></span><span>${Object.keys(S.lessons).length} lessons done</span></div>
-  <p class="small muted center" style="margin-top:18px;opacity:.7">Version ${APP_VERSION}</p>`;
-  $$('.tile',el).forEach(b=>b.onclick=()=>{App.subj=b.dataset.s;App.go('learn');});
-  $('#hWrong',el).onclick=()=>App.go('wrong');
-  $('#contBtn',el).onclick=()=>openLesson(L.id);
-  $('#hQuiz',el).onclick=()=>{App.go('practice');startQuiz('mix',10);};
-  $('#hGame',el).onclick=()=>{App.go('games');openGame('speed');};
-}
-
 /* ---------- learn ---------- */
-function subjPicker(cb){const d=h(`<div class="tiles mini">${SUBJECTS.map(s=>subjTile(s,{sel:s.id===App.subj})).join('')}</div>`);$$('.tile',d).forEach(b=>b.onclick=()=>{App.subj=b.dataset.s;cb();});return d;}
+function subjPicker(cb){const d=h(`<div class="tiles mini">${SUBJECTS.map(s=>subjTile(s,{sel:s.id===App.subj})).join('')}</div>`);$$('.tile',d).forEach(b=>b.onclick=e=>setSubject(b.dataset.s,e,cb));return d;}
 function emptySubject(s){return `<div class="empty s-${s.id}"><h3>${s.name} chapters will appear here</h3><p>First up: <b>${s.next}</b>. Lessons, diagrams, quizzes and games will be added for it the same way as Biology.</p></div>`;}
 function renderLearn(el){
-  const s=SUBJECTS.find(x=>x.id===App.subj);document.body.className='s-'+s.id;
+  const s=SUBJECTS.find(x=>x.id===App.subj);if(!s)return needSubject(el,'Learn','Pick a subject and the whole site switches to its look.');
   el.innerHTML=`<div class="ph"><h1>Learn</h1><p>Choose a subject, then a chapter.</p></div>`;
   el.appendChild(subjPicker(()=>App.render(false,true)));
   const w=h(`<div class="mt"></div>`);el.appendChild(w);
@@ -936,7 +1161,7 @@ function askMCQ(el,item,{head='',onWrongSave=true,src='Quiz'}={}){
     $$('.opt',el).forEach(b=>b.onclick=()=>{
       const i=+b.dataset.i,ok=i===item.a;
       $$('.opt',el).forEach(x=>{x.disabled=true;const xi=+x.dataset.i;if(xi===item.a)x.classList.add('right');else if(x===b)x.classList.add('wrong');else x.classList.add('dim');});
-      if(ok){addScore(10);const r=b.getBoundingClientRect();confetti(14,r.left+r.width/2,r.top);}
+      if(ok){addScore(10);const r=b.getBoundingClientRect();confetti(14,r.left+r.width/2,r.top);floatPts(b,'+10');}
       else if(onWrongSave)addWrong({key:'q:'+item.id,type:'mcq',id:item.id,q:item.q,o:item.o,a:item.a,e:item.e||'',src});
       $('.fbx',el).innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?pick(['Correct! 🎉','Nailed it! 🌟','Spot on! ✅','Yes! 🌱'],1)[0]:'Not quite 💭'+(onWrongSave?' · saved to Wrong Tab':'')}</b>${item.e||''}</div>`;
       res(ok);
@@ -946,7 +1171,7 @@ function askMCQ(el,item,{head='',onWrongSave=true,src='Quiz'}={}){
 function nextBtn(el,label='Next ▶'){return new Promise(r=>{const b=h(`<button class="btn w100 mt">${label}</button>`);el.appendChild(b);b.scrollIntoView({behavior:'smooth',block:'nearest'});b.onclick=()=>r();});}
 
 function renderPractice(el){
-  const s=SUBJECTS.find(x=>x.id===App.subj);document.body.className='s-'+s.id;
+  const s=SUBJECTS.find(x=>x.id===App.subj);if(!s)return needSubject(el,'Practice','Pick a subject to see its quizzes and exam questions.');
   el.innerHTML=`<div class="ph"><h1>Practice</h1><p>Questions come from your chapters. Anything you get wrong is saved to the Wrong Tab.</p></div>`;
   el.appendChild(subjPicker(()=>App.render(false,true)));
   const w=h('<div class="mt"></div>');el.appendChild(w);
@@ -967,7 +1192,7 @@ function renderPractice(el){
   $('#pFlash',w).onclick=()=>openFlash();
 }
 function startQuiz(mode,n){
-  const pool=MCQ.filter(q=>mode==='mix'||q.ch===(mode==='c5'?5:6));
+  const pool=MCQ.filter(q=>mode==='mix'||q.ch===+mode.slice(1));
   const qs=shuffle(pool).slice(0,n||pool.length);
   const title=mode==='mix'?'Biology quiz':'Chapter '+mode.slice(1)+' quiz';
   App.push(async scr=>{
@@ -987,7 +1212,7 @@ function startQuiz(mode,n){
     if(pct>=70)confetti(60);
     $('#again',scr).onclick=()=>{App.stack.pop();startQuiz(mode,n);};
     $('#toWrong',scr)&&($('#toWrong',scr).onclick=()=>App.go('wrong'));
-  },title,{ch:mode==='c6'?6:5});
+  },title,{ch:mode==='mix'?5:+mode.slice(1)});
 }
 
 /* ---------- Wrong tab ---------- */
@@ -1049,11 +1274,14 @@ function renderProgress(el){
   const ex=typeof EXAM!=='undefined'?EXAM.length:0;const exK=Object.values(S.exam).filter(v=>v==='knew').length;
   el.innerHTML=`<div class="ph"><h1>Progress</h1><p>Saved on this device${Store.ref?' and synced to your Claude account':''}.</p></div>
   <div class="card"><div class="row" style="gap:18px"><div class="ring">${ringSVG(p)}<div class="v">${pct(p)}<small>overall</small></div></div><div class="row" style="flex:1;min-width:220px"><div class="stat"><b>${S.score||0}</b><span>points</span></div><div class="stat"><b style="color:var(--bad)">${wrongCount()}</b><span>to fix</span></div><div class="stat"><b>${fcG}<small class="muted" style="font-size:.8rem">/${fcT}</small></b><span>flashcards mastered</span></div></div></div></div>
-  ${SUBJECTS.map(s=>`<div class="card psub s-${s.id}"><div class="hd"><div class="ct" style="font-size:${s.sym.length>3?'.85rem':'1rem'}">${s.sym}</div><h3>${s.name}</h3><span class="pc">${s.chapters.length?pct(subjProgress(s)):''}</span></div>
-    ${s.chapters.length?s.chapters.map(c=>{const {done,total}=chLessons(c.key);return `<button class="pch" data-k="${c.key}"><div class="r1"><b>Chapter ${c.num}: ${c.title}</b><span>${pct(chProgress(c.key))}</span></div><div class="bar"><i style="width:${chProgress(c.key)*100}%"></i></div><div class="small muted" style="margin-top:6px">${done} of ${total} lessons · quiz best ${S.quizBest['c'+c.key]||0}%</div></button>`;}).join(''):`<p class="muted" style="margin:0">No chapters yet. ${s.next} is coming next.</p>`}</div>`).join('')}
+  ${SUBJECTS.map(s=>`<div class="card psub s-${s.id} ${App.progOpen&&App.progOpen[s.id]?'open':''}" data-s="${s.id}"><button class="hd" aria-expanded="${!!(App.progOpen&&App.progOpen[s.id])}"><div class="ct" style="font-size:${s.sym.length>3?'.85rem':'1rem'}">${s.sym}</div><div style="flex:1;min-width:0"><h3>${s.name}</h3><div class="small muted">${s.chapters.length?s.chapters.length+' chapter'+(s.chapters.length>1?'s':''):'Coming soon'}</div></div><span class="pc">${s.chapters.length?pct(subjProgress(s)):''}</span><span class="chev muted">${icon('next')}</span></button>
+    <div class="pbody"><div>${s.chapters.length?s.chapters.map(c=>{const {done,total}=chLessons(c.key);return `<button class="pch" data-k="${c.key}"><div class="r1"><b>Chapter ${c.num}: ${c.title}</b><span>${pct(chProgress(c.key))}</span></div><div class="bar"><i style="width:${chProgress(c.key)*100}%"></i></div><div class="small muted" style="margin-top:6px">${done} of ${total} lessons · quiz best ${S.quizBest['c'+c.key]||0}%</div></button>`;}).join(''):`<p class="muted" style="margin:12px 0 0">No chapters yet. ${s.next} is coming next.</p>`}</div></div></div>`).join('')}
   <div class="card"><h3>Best scores</h3><div class="kv"><b>All-chapters quiz</b><span>${S.quizBest.mix||0}%</span><b>Exam answers known</b><span>${exK} of ${ex}</span>${Object.entries(GAME_NAMES).map(([k,n])=>`<b>${n}</b><span>${S.games[k]||0}</span>`).join('')}</div></div>
+  <div class="card"><h3>Visual effects</h3><p class="small muted">Full adds the moving background and 3D lighting. Lite turns those off so older or slower devices stay smooth. Auto checks how fast this device is and picks for you${FX.lite?' – this device is using Lite':''}.</p><div class="fxseg"></div></div>
   <div class="card"><h3>Reset</h3><p class="small muted">Clears lessons, scores, flashcards and the Wrong Tab on this device.</p><button class="btn bad" id="reset">Reset all progress</button></div>`;
   $$('.pch',el).forEach(b=>b.onclick=()=>openChapter(+b.dataset.k));
+  $('.fxseg',el).appendChild(seg([['auto','Auto'],['full','Full'],['lite','Lite']],S.fx||'auto',v=>{S.fx=v;save();FX.init();toast(v==='auto'?(FX.lite?'Auto: using Lite':'Auto: using Full'):v==='lite'?'Lite effects on':'Full effects on');}));
+  $$('.psub .hd',el).forEach(b=>b.onclick=()=>{const c=b.closest('.psub');const o=!c.classList.contains('open');c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);App.progOpen=App.progOpen||{};App.progOpen[c.dataset.s]=o;});
   $('#reset',el).onclick=async()=>{if(await confirmBox('Reset all progress?','Lessons, scores, flashcards and the Wrong Tab will all be cleared.','Reset')){const th=S.theme;S=DEFAULT_STATE();S.theme=th;S.ts=Date.now();Store.saveLocal();Store.push();updateBadge();App.render(false,true);toast('Progress reset');}};
 }
 
@@ -1522,7 +1750,7 @@ function rtipSVG(){
   // cap
   s+=`<g data-part="cap"><path d="M${X0+4} 540 L${X1-4} 540 C${X1+6} 570 ${X1-6} 610 250 622 C${X0+6} 610 ${X0-6} 570 ${X0+4} 540 Z" class="ink" style="fill:#e9c98f"/>${[0,1,2].map(i=>`<path d="M${X0+12+i*4} ${550+i*16} Q250 ${562+i*18} ${X1-12-i*4} ${550+i*16}" stroke="#b58a4c" stroke-width="1" fill="none"/>`).join('')}</g>`;
   return s;}
-const D_RTIP=reg({id:'roottip',title:'The regions of the root-tip',vb:'-30 0 590 640',fs:20,parts:RTIP_PARTS,svg:rtipSVG,labels:[['mat',290,170,340,200,null,'Region of maturation'],['hair',178,100,150,40,'end','Root hairs'],['elo',290,400,340,400,null,'Region of elongation'],['mer',290,505,340,505,null,'Meristematic region'],['cap',280,585,340,600,null,'Root cap']]});
+const D_RTIP=reg({id:'roottip',flat:true,title:'The regions of the root-tip',vb:'-30 0 590 640',fs:20,parts:RTIP_PARTS,svg:rtipSVG,labels:[['mat',290,170,340,200,null,'Region of maturation'],['hair',178,100,150,40,'end','Root hairs'],['elo',290,400,340,400,null,'Region of elongation'],['mer',290,505,340,505,null,'Meristematic region'],['cap',280,585,340,600,null,'Root cap']]});
 LESSONS[5].push({id:'c5-roottip',n:3,ch:5,em:'🔍',title:'5.1.1 Regions of the root',sub:'Root cap, meristem, elongation, maturation',render(el){
   el.appendChild(h(`<style>.anim-on .mer-cell .plate{animation:plate 3s infinite;animation-delay:inherit}.mer-cell .plate{opacity:0}.anim-on .mer-cell{animation:divide 3s infinite}@keyframes plate{0%,40%{opacity:0}55%,85%{opacity:1}100%{opacity:0}}@keyframes divide{0%,40%,100%{filter:none}60%{filter:brightness(1.15)}}
   .anim-on .elo-cell{animation:stretch 3s ease-in-out infinite}@keyframes stretch{0%,100%{transform:scaleY(.55)}60%{transform:scaleY(1)}}</style>`));
@@ -2456,7 +2684,7 @@ function openExam(key){
   App.push(scr=>{
     let ch=key||5;
     const draw=()=>{const list=EXAM.filter(e=>e.ch===ch);const kn=list.filter(e=>S.exam[e.id]==='knew').length;
-      scr.innerHTML=`<div class="seg"><button data-c="5" class="${ch===5?'on':''}">Chapter 5</button><button data-c="6" class="${ch===6?'on':''}">Chapter 6</button></div><p class="small muted mt">All end-of-chapter exercises. Try answering aloud, then reveal the model answer and mark yourself. <b>${kn}/${list.length}</b> known.</p><div class="exl"></div>`;
+      const SB=subjOf(ch);scr.innerHTML=`<div class="seg">${SB.chapters.map(c=>`<button data-c="${c.key}" class="${ch===c.key?'on':''}">Chapter ${c.num}</button>`).join('')}</div><p class="small muted mt">All end-of-chapter exercises. Try answering aloud, then reveal the model answer and mark yourself. <b>${kn}/${list.length}</b> known.</p><div class="exl"></div>`;
       $$('.seg button',scr).forEach(b=>b.onclick=()=>{ch=+b.dataset.c;draw();});
       const L=$('.exl',scr);
       list.forEach((e,i)=>{const c=h(`<div class="card exq"><div class="row"><span class="pill">Q${e.id.split('-')[1].toUpperCase()}</span>${S.exam[e.id]==='knew'?'<span class="pill" style="background:var(--okbg);color:var(--ok)">✅ known</span>':S.exam[e.id]==='rev'?'<span class="pill" style="background:var(--badbg);color:var(--bad)">🔁 revise</span>':''}</div><div class="qtext" style="font-size:1.02rem">${e.q}</div><button class="btn ghost w100 sa">👀 Show answer</button><div class="ans">${e.a}${e.dg?`<button class="btn sm ghost mt dgo">🔬 Open the lesson & diagram</button>`:''}</div><div class="row mt hidden mk"><button class="btn ok sm" style="flex:1">I knew it ✅</button><button class="btn bad sm" style="flex:1">Need revision 🔁</button></div></div>`);
@@ -2472,24 +2700,57 @@ function openExam(key){
 
 /* ===== Flashcards ===== */
 let FLASH=[];
-function buildFlash(){const seen=new Set();FLASH=[];Object.entries(NOTES).forEach(([id,n])=>{(n.terms||[]).forEach(([t,d])=>{const k=t.toLowerCase();if(seen.has(k))return;seen.add(k);FLASH.push({id:'f-'+hashStr(t),ch:id.startsWith('c6')?6:5,t,d});});});}
+function buildFlash(){const seen=new Set();FLASH=[];Object.entries(NOTES).forEach(([id,n])=>{(n.terms||[]).forEach(([t,d])=>{const k=t.toLowerCase();if(seen.has(k))return;seen.add(k);FLASH.push({id:'f-'+hashStr(t),ch:parseInt(id.slice(1)),t,d});});});}
 function openFlash(){
   App.push(scr=>{
-    let filt='all',deck=[],i=0;
-    const mk=()=>{deck=shuffle(FLASH.filter(f=>filt==='all'||(filt==='todo'?S.flash[f.id]!=='got':f.ch===+filt)));i=0;draw();};
-    const draw=()=>{const got=FLASH.filter(f=>S.flash[f.id]==='got').length;
-      scr.innerHTML=`<div class="tabs2 ff">${[['all','All'],['5','Ch 5'],['6','Ch 6'],['todo','Not mastered']].map(([v,l])=>`<button class="chip ${v===filt?'on':''}" data-v="${v}">${l}</button>`).join('')}</div>
-      <div class="row small"><b>${got}/${FLASH.length} mastered</b><div class="spacer"></div><button class="btn ghost sm shf">🔀 Shuffle</button></div>
-      ${deck.length&&i<deck.length?`<div class="qhead mt"><span>Card ${i+1} of ${deck.length}</span><span>${deck[i].ch===5?'🌿 Ch 5':'🔬 Ch 6'}</span></div><div class="progressbar"><i style="width:${i/deck.length*100}%"></i></div>
-      <div class="flash"><div class="in"><div class="face front"><div class="small" style="opacity:.85">What is…</div><h2>${deck[i].t}</h2><div class="small" style="opacity:.85">tap to flip</div></div><div class="face back"><b class="term" style="font-size:1.2rem">${deck[i].t}</b><p style="font-size:1.08rem">${deck[i].d}</p></div></div></div>
-      <div class="row"><button class="btn bad" style="flex:1" id="fAgain">🔁 Again</button><button class="btn ok" style="flex:1" id="fGot">✅ Got it</button></div>`:`<div class="card center mt"><div class="big-emoji">🎉</div><h2>${deck.length?'Deck complete!':'Nothing here!'}</h2><p class="muted">${deck.length?'Cards marked “Again” come back next time.':'All cards in this deck are mastered.'}</p><button class="btn" id="fRe">Go again</button></div>`}`;
-      $$('.ff .chip',scr).forEach(b=>b.onclick=()=>{filt=b.dataset.v;mk();});
-      $('.shf',scr).onclick=mk;
-      const fl=$('.flash',scr);if(fl)fl.onclick=()=>fl.classList.toggle('flip');
-      $('#fRe',scr)&&($('#fRe',scr).onclick=mk);
-      $('#fGot',scr)&&($('#fGot',scr).onclick=()=>{if(S.flash[deck[i].id]!=='got'){addScore(2);}S.flash[deck[i].id]='got';save();fl.classList.add('glow');setTimeout(()=>{i++;draw();},250);});
-      $('#fAgain',scr)&&($('#fAgain',scr).onclick=()=>{S.flash[deck[i].id]='again';save();deck.push(deck[i]);fl.classList.add('shake');setTimeout(()=>{i++;draw();},350);});
-    };mk();
+    let filt='all',deck=[],i=0,busy=false;
+    const chips=()=>[['all','All'],...SUBJECTS[0].chapters.map(c=>[String(c.key),'Ch '+c.num]),['todo','Not mastered']];
+    scr.innerHTML=`<div class="tabs2 ff">${chips().map(([v,l])=>`<button class="chip ${v===filt?'on':''}" data-v="${v}">${l}</button>`).join('')}</div>
+      <div class="row small"><b class="fmast"></b><div class="spacer"></div><button class="btn ghost sm shf">Shuffle</button></div><div class="fbody"></div>`;
+    const body=$('.fbody',scr);
+    const face=c=>`<div class="in"><div class="face front"><div class="small" style="opacity:.85">What is…</div><h2>${c.t}</h2><div class="small" style="opacity:.8">Tap to flip</div></div><div class="face back"><b class="term" style="font-size:1.2rem">${c.t}</b><p style="font-size:1.08rem">${c.d}</p><div class="small muted">Chapter ${c.ch}</div></div></div><div class="stamp yes">Got it</div><div class="stamp no">Again</div>`;
+    const mast=()=>{$('.fmast',scr).textContent=`${FLASH.filter(f=>S.flash[f.id]==='got').length} of ${FLASH.length} mastered`;};
+    const head=()=>{const h1=$('.fhead',body);if(h1)h1.innerHTML=`<span>Card ${Math.min(i+1,deck.length)} of ${deck.length}</span><span>Chapter ${deck[i]?deck[i].ch:''}</span>`;const pb=$('.fpb i',body);if(pb)pb.style.width=(i/deck.length*100)+'%';mast();};
+    const mk=()=>{deck=shuffle(FLASH.filter(f=>filt==='all'||(filt==='todo'?S.flash[f.id]!=='got':f.ch===+filt)));i=0;busy=false;render();};
+    const done=()=>{body.innerHTML=`<div class="card center mt fdone"><h2>${deck.length?'Deck complete':'Nothing here'}</h2><p class="muted">${deck.length?'Cards you marked “Again” came back round until you got them.':'Every card in this deck is mastered.'}</p><button class="btn" id="fRe">Go again</button></div>`;
+      $('.fdone',body).animate([{transform:'scale(.9) rotateX(20deg)',opacity:0},{transform:'none',opacity:1}],{duration:500,easing:'cubic-bezier(.2,.9,.3,1.2)'});$('#fRe',body).onclick=mk;if(deck.length)confetti(40);mast();};
+    const render=()=>{if(i>=deck.length)return done();
+      body.innerHTML=`<div class="qhead mt fhead"></div><div class="progressbar fpb"><i></i></div><div class="fdeck"></div>
+       <div class="row"><button class="btn bad" style="flex:1" id="fAgain">‹ Again</button><button class="btn ok" style="flex:1" id="fGot">Got it ›</button></div>
+       <p class="small muted center" style="margin-top:10px">Tap the card to flip · swipe right for <b>Got it</b> · swipe left for <b>Again</b></p>`;
+      const dk=$('.fdeck',body);for(let k=2;k>=0;k--){if(deck[i+k])dk.insertAdjacentHTML('beforeend',`<div class="fcard3 d${k}">${face(deck[i+k])}</div>`);}
+      head();bindTop(true);
+      $('#fGot',body).onclick=()=>commit(1);$('#fAgain',body).onclick=()=>commit(-1);};
+    const top=()=>$('.fdeck .fcard3.d0',body);
+    const flip=()=>{const t=top();if(!t||busy)return;t.classList.toggle('flipped');t.animate([{transform:'scale(1)'},{transform:'scale(1.045)',offset:.45},{transform:'scale(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});};
+    const bindTop=(first)=>{const t=top();if(!t)return;
+      if(!first){$('.in',t).animate([{transform:'rotateY(-100deg) scale(.96)',opacity:.4},{transform:'rotateY(12deg) scale(1.02)',offset:.65},{transform:'none',opacity:1}],{duration:620,easing:'cubic-bezier(.2,.8,.2,1)'});}
+      let sx=null,sy=0,dx=0,t0=0,moved=0;
+      t.addEventListener('pointerdown',e=>{if(busy)return;sx=e.clientX;sy=e.clientY;dx=0;moved=0;t0=performance.now();t.style.transition='none';try{t.setPointerCapture(e.pointerId);}catch(_){}});
+      t.addEventListener('pointermove',e=>{if(sx===null)return;dx=e.clientX-sx;const dy=e.clientY-sy;moved=Math.max(moved,Math.abs(dx),Math.abs(dy));if(Math.abs(dx)<4)return;
+        t.style.transform=`translateX(${dx}px) rotate(${dx*.06}deg)`;const k=Math.min(1,Math.abs(dx)/110);$('.stamp.yes',t).style.opacity=dx>0?k:0;$('.stamp.no',t).style.opacity=dx<0?k:0;
+        t.style.boxShadow=`0 0 0 ${3*k}px ${dx>0?'var(--ok)':'var(--bad)'}`;});
+      const up=e=>{if(sx===null)return;sx=null;const v=Math.abs(dx)/Math.max(1,performance.now()-t0);
+        if(Math.abs(dx)>95||(Math.abs(dx)>40&&v>.55)){commit(dx>0?1:-1,true);return;}
+        t.style.transition='transform .45s cubic-bezier(.3,1.5,.5,1),box-shadow .3s';t.style.transform='';t.style.boxShadow='';$$('.stamp',t).forEach(s=>s.style.opacity=0);
+        if(moved<8&&e.type==='pointerup')flip();};
+      t.addEventListener('pointerup',up);t.addEventListener('pointercancel',up);
+    };
+    const commit=(dir,dragged)=>{const t=top();if(!t||busy)return;busy=true;const c=deck[i];
+      if(dir>0){if(S.flash[c.id]!=='got')addScore(2);S.flash[c.id]='got';}else{S.flash[c.id]='again';deck.push(c);}save();
+      $(`.stamp.${dir>0?'yes':'no'}`,t).style.opacity=1;
+      const from=getComputedStyle(t).transform;t.style.transition='none';
+      const fly=t.animate([{transform:from==='none'?'none':from},{transform:`translateX(${dir*130}vw) translateY(-30px) rotate(${dir*28}deg)`}],{duration:dragged?300:420,easing:'cubic-bezier(.5,0,.8,.6)',fill:'forwards'});
+      fly.onfinish=()=>{t.remove();i++;
+        if(i>=deck.length){busy=false;return done();}
+        const rest=$$('.fdeck .fcard3',body);rest.forEach(r=>{const d=+r.className.match(/\bd(\d)\b/)[1];r.classList.remove('d'+d);r.classList.add('d'+(d-1));});
+        if(deck[i+2]){const dk=$('.fdeck',body);dk.insertAdjacentHTML('afterbegin',`<div class="fcard3 d2" style="opacity:0">${face(deck[i+2])}</div>`);requestAnimationFrame(()=>{const n=dk.firstElementChild;n.style.opacity='';});}
+        head();bindTop(false);busy=false;};
+    };
+    const kh=e=>{if(!scr.isConnected){document.removeEventListener('keydown',kh);return;}if(e.key==='ArrowRight')commit(1);else if(e.key==='ArrowLeft')commit(-1);else if(e.key===' '){e.preventDefault();flip();}};
+    document.addEventListener('keydown',kh);
+    $$('.ff .chip',scr).forEach(b=>b.onclick=()=>{filt=b.dataset.v;$$('.ff .chip',scr).forEach(x=>x.classList.toggle('on',x===b));mk();});
+    $('.shf',scr).onclick=mk;mk();
   },'Flashcards',{});
 }
 
@@ -2503,15 +2764,16 @@ const GAMES=[
  ['speed','⚡','60-Second Speed Round','Rapid true / false','linear-gradient(135deg,#1d2a22,#2e9d5a)']];
 const GCODE={label:'Lb',dm:'D/M',build:'Fl',identify:'T.S.',decoder:'K(5)',speed:'60s'};
 function renderGames(el){
-  const s=SUBJECTS.find(x=>x.id===App.subj);document.body.className='s-'+s.id;
+  const s=SUBJECTS.find(x=>x.id===App.subj);if(!s)return needSubject(el,'Games','Pick a subject to see its games.');
   el.innerHTML=`<div class="ph"><h1>Games</h1><p>Short rounds to test yourself. Wrong answers go to the Wrong Tab.</p></div>`;
   el.appendChild(subjPicker(()=>App.render(false,true)));
   const w=h('<div class="mt"></div>');el.appendChild(w);
   if(s.id!=='bio'){w.innerHTML=emptySubject(s).replace('chapters will appear here','games will appear here');return;}
-  w.innerHTML=`<h2 class="sech">Biology <small>chapters 5 and 6</small></h2><div class="lgrid">${GAMES.map(([id,em,n,d])=>`<button class="lcard" data-g="${id}"><div class="em">${GCODE[id]}</div><div style="min-width:0"><div class="tt">${n}</div><div class="ss">${d}</div></div><span class="small muted" style="margin-left:auto;white-space:nowrap">Best ${S.games[id]||0}</span></button>`).join('')}</div>`;
+  w.innerHTML=`<h2 class="sech">Biology <small>chapters 1, 5 and 6</small></h2><div class="lgrid">${GAMES.map(([id,em,n,d])=>`<button class="lcard" data-g="${id}"><div class="em">${GCODE[id]}</div><div style="min-width:0"><div class="tt">${n}</div><div class="ss">${d}</div></div><span class="small muted" style="margin-left:auto;white-space:nowrap">Best ${S.games[id]||0}</span></button>`).join('')}</div>`;
   $$('[data-g]',w).forEach(b=>b.onclick=()=>openGame(b.dataset.g));
 }
-function openGame(id){const g=GAMES.find(x=>x[0]===id);App.push(scr=>({label:gLabel,dm:gDM,build:gBuild,identify:gIdentify,decoder:gDecoder,speed:gSpeed})[id](scr),g[2],{ch:5});}
+const GAME_FNS={label:s=>gLabel(s),dm:s=>gDM(s),build:s=>gBuild(s),identify:s=>gIdentify(s),decoder:s=>gDecoder(s),speed:s=>gSpeed(s)};
+function openGame(id){const g=GAMES.find(x=>x[0]===id);App.push(scr=>gameIntro(scr,g,()=>{GAME_FNS[id](scr);animateScreen(scr);}),g[2],{ch:g[5]||5});}
 function best(id,v){const nb=v>(S.games[id]||0);if(nb){S.games[id]=v;save();}return nb;}
 function endCard(scr,id,score,extra,again){scr.innerHTML=`<div class="card center"><div class="big-emoji">${score>0?'🏆':'🌱'}</div><h2>Score: ${score}</h2>${extra||''}<p class="pill">${best(id,score)?'🎉 New best!':'Best: '+(S.games[id]||0)}</p><div class="row mt" style="justify-content:center"><button class="btn" id="ga">Play again</button><button class="btn ghost" id="gb">All games</button></div></div>`;if(score>0)confetti(50);$('#ga',scr).onclick=again;$('#gb',scr).onclick=()=>App.go('games');}
 function hud(items){return `<div class="hud">${items.map(([k,v])=>`<span class="pill" data-h="${k}">${v}</span>`).join('')}</div>`;}
@@ -2640,6 +2902,514 @@ function gSpeed(scr){
   $('#sT',scr).onclick=()=>ans(true);$('#sF',scr).onclick=()=>ans(false);
 }
 
-[5,6].forEach(c=>LESSONS[c].sort((a,b)=>a.n-b.n));buildFlash();Store.loadLocal();App.init();Store.initRemote();
+/* ===== Biology Chapter 1 · The Living World ===== */
+
+/* ---------- notes ---------- */
+n5('c1-intro',{notes:`
+<h4>Unit 1 · Diversity in the living world</h4><ul>
+<li><b>Biology</b> is the science of <b>life forms and living processes</b>. The living world has an amazing <b>diversity</b> of living organisms.</li>
+<li>Early man could easily tell <b>inanimate matter</b> from <b>living organisms</b>; he <b>deified</b> some inanimate matter (wind, sea, fire) and some animals and plants – all of which evoked <b>awe or fear</b>.</li>
+<li>Description of living organisms, including human beings, began much later. Societies with an <b>anthropocentric view</b> of biology made limited progress.</li>
+<li>Systematic description of life forms brought, out of necessity, detailed systems of <b>identification, nomenclature and classification</b>.</li>
+<li>The biggest spin-off: recognising that living organisms <b>share similarities</b> both horizontally and vertically – all present-day organisms are <b>related</b> to each other and to all organisms that ever lived. This humbled man and led to movements for <b>conservation of biodiversity</b>.</li></ul>
+<h4>Chapter 1 · What is life?</h4><ul>
+<li>Living organisms are found in extraordinary <b>habitats</b> – cold mountains, deciduous forests, oceans, fresh water lakes, deserts, hot springs.</li>
+<li>The question <b>“what indeed is life?”</b> has two parts: a <b>technical</b> one – what living is, as opposed to non-living – and a <b>philosophical</b> one – what the purpose of life is.</li>
+<li>As scientists, we <b>do not attempt the second</b> question; we reflect on <b>what is living</b>.</li></ul>
+<h4>Meet Ernst Mayr (1904 – 2004)</h4><ul>
+<li>Born 5 July 1904 in Kempten, Germany; Harvard evolutionary biologist called <b>‘The Darwin of the 20th century’</b>.</li>
+<li>Research spanned ornithology, taxonomy, zoogeography, evolution, systematics and the history and philosophy of biology.</li>
+<li>Made the <b>origin of species diversity</b> the central question of evolutionary biology; pioneered the currently accepted definition of a <b>biological species</b>.</li>
+<li>Won the ‘triple crown’ of biology: <b>Balzan Prize (1983)</b>, <b>International Prize for Biology (1994)</b>, <b>Crafoord Prize (1999)</b>.</li></ul>`,
+terms:[['Biology','Science of life forms and living processes'],['Anthropocentric view','Human-centred view of biology – limited progress'],['Technical question','What is living, as opposed to non-living?'],['Philosophical question','What is the purpose of life? (not attempted by scientists)'],['Ernst Mayr','‘Darwin of the 20th century’; defined biological species']],qk:'living|Mayr|habitat'});
+n5('c1-div',{notes:`
+<h4><span class="num">1.1</span>Diversity in the living world</h4><ul>
+<li>Look around – potted plants, insects, birds, pets… plus many organisms <b>too small to see</b> with the naked eye.</li>
+<li>If you <b>increase the area</b> of observation, the <b>range and variety</b> of organisms increases; a dense forest has a much greater number and kinds of organisms.</li>
+<li>Each different kind of plant, animal or organism represents a <span class="term">species</span>.</li>
+<li>The number of species known and described is <b>1.7 – 1.8 million</b>. This refers to <span class="term">biodiversity</span> – the number and types of organisms present on earth.</li>
+<li>As we explore new areas, and even old ones, <b>new organisms are continuously being identified</b>.</li></ul>
+<h4>Why we need standard names</h4><ul>
+<li>We know organisms in our own area by their <b>local names</b>, which vary from place to place, even within a country – this would create <b>confusion</b>.</li>
+<li>So naming is <b>standardised</b> so that a particular organism is known by the <b>same name all over the world</b> – this process is <span class="term">nomenclature</span>.</li>
+<li>Naming is possible only when the organism is <b>described correctly</b> and we know which organism the name is attached to – this is <span class="term">identification</span>.</li></ul>`,
+terms:[['Species','Each different kind of plant, animal or organism'],['Biodiversity','Number and types of organisms present on earth'],['1.7–1.8 million','Number of species known and described'],['Nomenclature','Standardised naming – same name all over the world'],['Identification','Describing an organism correctly so the name can be attached']],qk:'biodiversity|million|nomenclature|identification|local'});
+n5('c1-nom',{notes:`
+<h4><span class="num">1.1</span>Scientific names</h4><ul>
+<li>Scientists have set procedures to give a <b>scientific name</b> to each known organism, accepted by biologists all over the world.</li>
+<li><b>Plants</b>: names follow the <span class="term">International Code for Botanical Nomenclature (ICBN)</span>.</li>
+<li><b>Animals</b>: the <span class="term">International Code of Zoological Nomenclature (ICZN)</span>.</li>
+<li>Scientific names ensure each organism has <b>only one name</b>, that people anywhere arrive at the <b>same name</b> from its description, and that the name has <b>not been used for any other</b> known organism.</li></ul>
+<h4>Binomial nomenclature</h4><ul>
+<li>Each name has two components – the <b>generic name</b> and the <b>specific epithet</b>. This two-part system is <span class="term">binomial nomenclature</span>, given by <b>Carolus Linnaeus</b>.</li>
+<li>Example: mango is <i>Mangifera indica</i> – <i>Mangifera</i> is the <b>genus</b>, <i>indica</i> is the <b>specific epithet</b>.</li></ul>
+<h4>Universal rules of nomenclature</h4><ul>
+<li><b>1.</b> Biological names are generally in <b>Latin</b> and written in <b>italics</b>; they are Latinised or derived from Latin irrespective of their origin.</li>
+<li><b>2.</b> The <b>first word</b> represents the <b>genus</b>; the <b>second</b> denotes the <b>specific epithet</b>.</li>
+<li><b>3.</b> When <b>handwritten</b>, both words are <b>separately underlined</b>; when printed, they are in <b>italics</b> – to show their Latin origin.</li>
+<li><b>4.</b> The genus starts with a <b>capital letter</b>; the specific epithet with a <b>small letter</b> – <i>Mangifera indica</i>.</li>
+<li>The <b>author’s name</b> appears after the specific epithet, in an <b>abbreviated</b> form – <i>Mangifera indica</i> <b>Linn.</b> – meaning the species was first described by <b>Linnaeus</b>.</li></ul>`,
+terms:[['ICBN','International Code for Botanical Nomenclature – plants'],['ICZN','International Code of Zoological Nomenclature – animals'],['Binomial nomenclature','Two-part name: generic name + specific epithet'],['Carolus Linnaeus','Gave the binomial naming system'],['Generic name','First word – genus, capital letter'],['Specific epithet','Second word – small letter'],['Linn.','Author abbreviation – first described by Linnaeus']],qk:'ICBN|ICZN|binomial|Linnaeus|italic|epithet|Mangifera|capital|underline|Latin'});
+n5('c1-tax',{notes:`
+<h4><span class="num">1.1</span>Classification and taxa</h4><ul>
+<li>It is nearly impossible to study all organisms, so we need <span class="term">classification</span> – grouping anything into <b>convenient categories</b> based on <b>easily observable characters</b>.</li>
+<li>Examples of such groups: plants, animals, dogs, cats, insects, mammals (animals with external ears and body hair), wheat, rice. Saying ‘dog’ brings dogs to mind, not cats; ‘Alsatians’ is more specific still.</li>
+<li>The scientific term for these categories is <span class="term">taxa</span>. Taxa can be at <b>very different levels</b>: ‘plants’ and ‘wheat’ are both taxa; ‘animals’, ‘mammals’ and ‘dogs’ are taxa at different levels – a dog is a mammal and mammals are animals.</li></ul>
+<h4>Taxonomy</h4><ul>
+<li>Classifying all living organisms into different taxa based on characteristics is <span class="term">taxonomy</span>.</li>
+<li>Basis of modern taxonomic studies: <b>external and internal structure</b>, <b>structure of the cell</b>, <b>development process</b> and <b>ecological information</b>.</li>
+<li><b>Characterisation, identification, classification and nomenclature</b> are the processes basic to taxonomy.</li>
+<li>Taxonomy is not new: the <b>earliest classifications were based on the ‘uses’</b> of organisms – for food, clothing and shelter.</li></ul>
+<h4>Systematics</h4><ul>
+<li>Study of the different kinds of organisms, their diversities <b>and the relationships among them</b> = <span class="term">systematics</span>.</li>
+<li>From the Latin <b>‘systema’</b> – systematic arrangement of organisms. Linnaeus titled his publication <b><i>Systema Naturae</i></b>.</li>
+<li>Its scope was later enlarged to include <b>identification, nomenclature and classification</b>. Systematics takes into account <b>evolutionary relationships</b> between organisms.</li></ul>`,
+terms:[['Classification','Grouping into convenient categories by easily observable characters'],['Taxa','Scientific term for categories (singular: taxon)'],['Taxonomy','Classifying organisms into taxa based on characteristics'],['Basic taxonomic processes','Characterisation, identification, classification, nomenclature'],['Earliest classification','Based on uses of organisms'],['Systematics','Kinds of organisms, diversity and relationships'],['Systema Naturae','Linnaeus’ publication; ‘systema’ = systematic arrangement']],qk:'taxa|taxonomy|systematics|classification|Systema|uses'});
+n5('c1-hier',{notes:`
+<h4><span class="num">1.2</span>Taxonomic categories</h4><ul>
+<li>Classification is <b>not a single step</b>; it involves a <b>hierarchy of steps</b>, each step a <b>rank or category</b>.</li>
+<li>Each is called a <span class="term">taxonomic category</span>; all categories together form the <span class="term">taxonomic hierarchy</span>.</li>
+<li>Each category is a <b>unit of classification</b>, represents a <b>rank</b> and is commonly termed a <span class="term">taxon</span> (pl. <b>taxa</b>).</li>
+<li>Example: <b>insects</b> share three pairs of jointed legs – a recognisable concrete group, so they were given a rank. Groups represent category; category denotes rank.</li>
+<li>Taxonomic groups are <b>distinct biological entities</b>, not merely morphological aggregates.</li>
+<li>Common categories: <b>kingdom, phylum or division (for plants), class, order, family, genus, species</b>. <b>Species</b> is the <b>lowest</b> category for all organisms.</li>
+<li>To place an organism in categories you need <b>knowledge of its characters</b> – to find similarities and dissimilarities.</li></ul>
+<h4>The hierarchy (Fig. 1.1)</h4><ul>
+<li>Categories from species to kingdom are shown in <b>ascending order</b> starting with species. Taxonomists have also developed <b>sub-categories</b>.</li>
+<li>Going <b>higher</b> from species to kingdom, the <b>number of common characteristics decreases</b>.</li>
+<li><b>Lower</b> the taxa, <b>more</b> characteristics the members share. <b>Higher</b> the category, <b>greater the difficulty</b> of determining the relationship to other taxa at the same level – classification becomes more complex.</li></ul>`,
+terms:[['Taxonomic category','A rank / step in classification'],['Taxonomic hierarchy','All categories together'],['Taxon','Unit of classification representing a rank (pl. taxa)'],['Lowest category','Species'],['Division','Used for plants in place of phylum'],['Higher category','Fewer common characters, harder to relate']],qk:'hierarch|taxon|lowest|ascending|category|common characteristics'});
+n5('c1-ranks',{notes:`
+<h4><span class="num">1.2.1</span>Species</h4><ul>
+<li>A group of individual organisms with <b>fundamental similarities</b>; distinguishable from closely related species by <b>distinct morphological differences</b>.</li>
+<li>In <i>Mangifera indica</i>, <i>Solanum tuberosum</i> (potato) and <i>Panthera leo</i> (lion): <i>indica, tuberosum, leo</i> are <b>specific epithets</b>; <i>Mangifera, Solanum, Panthera</i> are <b>genera</b>.</li>
+<li>A genus may have more than one specific epithet: <i>Panthera tigris</i>; <i>Solanum nigrum</i> and <i>S. melongena</i>. Human beings: species <i>sapiens</i>, genus <i>Homo</i> – <b><i>Homo sapiens</i></b>.</li></ul>
+<h4><span class="num">1.2.2</span>Genus</h4><ul>
+<li>A group of <b>related species</b> with more characters in common than species of other genera – <b>aggregates of closely related species</b>.</li>
+<li>Potato and brinjal: different species, same genus <i>Solanum</i>. Lion (<i>P. leo</i>), leopard (<i>P. pardus</i>), tiger (<i>P. tigris</i>): genus <i>Panthera</i>, which differs from genus <i>Felis</i> (cats).</li></ul>
+<h4><span class="num">1.2.3</span>Family</h4><ul>
+<li>A group of <b>related genera</b> with still fewer similarities than genus and species. Plant families are characterised on both <b>vegetative and reproductive</b> features.</li>
+<li><i>Solanum, Petunia, Datura</i> → family <b>Solanaceae</b>. <i>Panthera</i> + <i>Felis</i> → family <b>Felidae</b>. Cat and dog → <b>Felidae</b> and <b>Canidae</b>.</li></ul>
+<h4><span class="num">1.2.4</span>Order</h4><ul>
+<li>Higher categories are identified on <b>aggregates of characters</b>. Order is an <b>assemblage of families</b> with a few similar characters.</li>
+<li><b>Convolvulaceae, Solanaceae</b> → order <b>Polymoniales</b> (mainly floral characters). <b>Felidae, Canidae</b> → order <b>Carnivora</b>.</li></ul>
+<h4><span class="num">1.2.5</span>Class</h4><ul>
+<li>Includes <b>related orders</b>: order <b>Primata</b> (monkey, gorilla, gibbon) and order <b>Carnivora</b> (tiger, cat, dog) → class <b>Mammalia</b>, which has other orders too.</li></ul>
+<h4><span class="num">1.2.6</span>Phylum</h4><ul>
+<li>Classes of fishes, amphibians, reptiles, birds and mammals → phylum <b>Chordata</b>, based on the <b>notochord</b> and <b>dorsal hollow neural system</b>.</li>
+<li>In <b>plants</b>, classes with a few similar characters form a higher category called <b>Division</b>.</li></ul>
+<h4><span class="num">1.2.7</span>Kingdom</h4><ul>
+<li>All animals of various phyla → the highest category, <b>Kingdom Animalia</b>. <b>Kingdom Plantae</b> comprises all plants from various divisions.</li></ul>`,
+terms:[['Genus','Aggregate of closely related species'],['Family','Group of related genera'],['Order','Assemblage of families'],['Class','Group of related orders'],['Phylum','Group of classes (animals)'],['Kingdom','Highest category – Animalia, Plantae'],['Chordata','Notochord + dorsal hollow neural system'],['Polymoniales','Order with Convolvulaceae, Solanaceae'],['Carnivora','Order with Felidae, Canidae'],['Felidae / Canidae','Cats (with Panthera) / dogs']],qk:'genus|family|order|class|phylum|kingdom|Panthera|Solanum|Felidae|Carnivora|Chordata|Polymoniales|Primata|Homo'});
+n5('c1-table',{notes:`
+<h4>Table 1.1 – Organisms with their taxonomic categories</h4>
+<table class="cmp"><tr><th>Common name</th><th>Biological name</th><th>Family</th><th>Order</th><th>Class</th><th>Phylum / Division</th></tr>
+<tr><td>Man</td><td><i>Homo sapiens</i></td><td>Hominidae</td><td>Primata</td><td>Mammalia</td><td>Chordata</td></tr>
+<tr><td>Housefly</td><td><i>Musca domestica</i></td><td>Muscidae</td><td>Diptera</td><td>Insecta</td><td>Arthropoda</td></tr>
+<tr><td>Mango</td><td><i>Mangifera indica</i></td><td>Anacardiaceae</td><td>Sapindales</td><td>Dicotyledonae</td><td>Angiospermae</td></tr>
+<tr><td>Wheat</td><td><i>Triticum aestivum</i></td><td>Poaceae</td><td>Poales</td><td>Monocotyledonae</td><td>Angiospermae</td></tr></table>
+<p class="small muted">The genus is the first word of each biological name: <i>Homo, Musca, Mangifera, Triticum</i>.</p>`,
+terms:[['Homo sapiens','Man – Hominidae, Primata, Mammalia, Chordata'],['Musca domestica','Housefly – Muscidae, Diptera, Insecta, Arthropoda'],['Mangifera indica','Mango – Anacardiaceae, Sapindales, Dicotyledonae, Angiospermae'],['Triticum aestivum','Wheat – Poaceae, Poales, Monocotyledonae, Angiospermae']],qk:'Homo|Musca|Triticum|Poaceae|Diptera|Anacardiaceae|Sapindales|Muscidae|Hominidae|Arthropoda|Insecta'});
+n5('c1-summary',{notes:`<ul>
+<li>The living world is rich in variety. Millions of plants and animals have been identified and described, but a <b>large number still remains unknown</b>.</li>
+<li>The range of organisms in size, colour, habitat, physiological and morphological features makes us seek the defining characteristics of living organisms.</li>
+<li>To study the kinds and diversity of organisms, biologists evolved rules and principles for <b>identification, nomenclature and classification</b> – the branch dealing with these is <b>taxonomy</b>.</li>
+<li>Taxonomic studies are useful in <b>agriculture, forestry, industry</b> and for knowing our <b>bio-resources</b> and their diversity.</li>
+<li>Identification, naming and classification are universally evolved under <b>international codes</b>. Each organism gets a correct scientific/biological name of <b>two words</b> – the <b>binomial system</b>.</li>
+<li>Each organism occupies a place in the system of classification. The categories/ranks are <b>taxonomic categories or taxa</b>; together they form the <b>taxonomic hierarchy</b>.</li></ul>`,qk:'.'});
+
+/* ---------- widgets ---------- */
+function twoQuestions(){
+  const el=card(`<h3>What indeed is life?</h3><p class="small muted">The question hides two questions. Tap each one.</p><div class="grid2 tq"></div>`);
+  [['Technical','What is living, as opposed to non-living?','Scientists try to answer this one. This chapter starts the reflection on <b>what is living</b>.'],['Philosophical','What is the purpose of life?','As scientists, we shall <b>not attempt</b> to answer this one.']].forEach(([k,q,a])=>{
+    const b=h(`<button class="opt" style="flex-direction:column;align-items:flex-start;gap:6px;min-height:120px"><span class="pill">${k}</span><b>${q}</b><span class="small muted">Tap to see</span></button>`);
+    b.onclick=()=>{b.lastChild.innerHTML=a;b.lastChild.className='small';b.classList.add('right');};$('.tq',el).appendChild(b);});
+  return el;
+}
+function mayrCard(){
+  const ev=[[1904,'Born 5 July in Kempten, Germany'],[1953,'Joins Harvard’s Faculty of Arts and Sciences'],[1975,'Retires – Alexander Agassiz Professor of Zoology Emeritus'],[1983,'Balzan Prize'],[1994,'International Prize for Biology'],[1999,'Crafoord Prize'],[2004,'Dies at the age of 100']];
+  const el=card(`<h3>Meet Ernst Mayr</h3><p class="small muted">‘The Darwin of the 20th century’. Drag the slider through his life.</p><svg viewBox="0 0 600 120" class="d3w" style="width:100%"><line x1="30" y1="60" x2="570" y2="60" stroke="var(--line)" stroke-width="6" stroke-linecap="round"/><line class="mprog" x1="30" y1="60" x2="30" y2="60" stroke="var(--acc)" stroke-width="6" stroke-linecap="round"/>${ev.map(([y],i)=>{const x=30+(y-1904)/100*540;return `<circle class="mdot" data-i="${i}" cx="${x}" cy="60" r="9" fill="var(--card)" stroke="var(--acc)" stroke-width="3"/><text x="${x}" y="${i%2?100:34}" text-anchor="middle" class="dtext" style="font-size:13px">${y}</text>`;}).join('')}</svg><input type="range" min="0" max="${ev.length-1}" value="0"><div class="note mn"></div><p class="small">He pioneered the currently accepted definition of a <b>biological species</b> and made the <b>origin of species diversity</b> the central question of evolutionary biology. Research areas: ornithology, taxonomy, zoogeography, evolution, systematics, history and philosophy of biology.</p>`);
+  const r=$('input',el),set=()=>{const i=+r.value,[y,t]=ev[i];$('.mn',el).innerHTML=`<b>${y}</b> – ${t}`;$('.mprog',el).setAttribute('x2',30+(y-1904)/100*540);$$('.mdot',el).forEach((d,j)=>d.setAttribute('fill',j<=i?'var(--acc)':'var(--card)'));};r.oninput=set;set();return el;
+}
+function areaWidget(){
+  const el=card(`<h3>Look at a bigger area</h3><p class="small muted">Slide from a potted plant to a dense forest and watch the variety grow.</p><div class="dg"><div class="dg-view"><svg viewBox="0 0 600 300" class="arsvg d3w" style="width:100%"></svg></div></div><input type="range" min="0" max="3" step="1" value="0"><div class="note arn"></div>`);
+  const svg=$('.arsvg',el),r=$('input',el);const P=[['A potted plant',6,3],['Your garden',22,8],['A park',55,14],['A dense forest',130,24]];
+  const shapes=['<circle r="7"/>','<rect x="-6" y="-6" width="12" height="12" rx="3"/>','<path d="M0 -8 L7 6 L-7 6Z"/>','<ellipse rx="9" ry="5"/>','<path d="M-7 0 Q0 -10 7 0 Q0 10 -7 0Z"/>','<path d="M0-8 2 -2 8 -2 3 2 5 8 0 4 -5 8 -3 2 -8 -2 -2 -2Z"/>'];
+  const cols=['#3FAE73','#F3B52B','#D2457C','#2156C4','#7B3FC6','#0F8F8C','#E46B2E','#5A8BEA'];
+  let shown=0;const draw=()=>{const [n,c,k]=P[+r.value];let s='<rect width="600" height="300" class="fw"/>';for(let i=0;i<c;i++){const x=20+rnd(i*7.3)*560,y=20+rnd(i*3.1+9)*260;const t=i%k;s+=`<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)}) scale(1.6)" fill="${cols[t%cols.length]}"><g class="arp" style="animation-delay:${(Math.max(0,i-shown)*0.012).toFixed(3)}s">${shapes[t%shapes.length]}</g></g>`;}
+    svg.innerHTML=s;shown=c;
+    $('.arn',el).innerHTML=`<b>${n}</b> – about ${c} organisms of ${k} different kinds. Each different kind represents a <span class="term">species</span>. The bigger the area, the greater the range and variety.`;};
+  r.oninput=draw;draw();return el;
+}
+function speciesCounter(){
+  const el=card(`<div class="row" style="align-items:flex-end;gap:16px"><div><div class="small muted">Species known and described</div><div class="scnt" style="font-family:var(--head);font-weight:800;font-size:clamp(2.2rem,9vw,3.4rem);line-height:1;color:var(--acc)">0</div></div><p class="small" style="flex:1;min-width:180px;margin:0">This number is <span class="term">biodiversity</span> – the number and types of organisms on earth. It keeps growing: new organisms are continuously being identified.</p></div>`);
+  const n=$('.scnt',el);let done=false;new IntersectionObserver((es,o)=>{if(es[0].isIntersecting&&!done){done=true;o.disconnect();const t0=performance.now();const f=t=>{const k=Math.min(1,(t-t0)/1600),e=1-Math.pow(1-k,3);n.textContent=k<1?(1.7*e).toFixed(2)+' million':'1.7 – 1.8 million';if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);}}).observe(el);return el;
+}
+function localNames(){
+  const names=[['आम','Hindi'],['आंबा','Marathi'],['আম','Bengali'],['மா','Tamil']];
+  const el=card(`<h3>One fruit, many names</h3><p class="small muted">Local names change from place to place, even within one country. Tap <b>Standardise</b>.</p><div class="ln" style="position:relative;height:190px"></div><div class="row"><button class="btn sm lgo">Standardise the name</button><button class="btn ghost sm lre">Reset</button></div><div class="note lnn">Imagine the confusion if everyone used only their own local name.</div>`);
+  const box=$('.ln',el);const draw=()=>{box.innerHTML=names.map(([w,l],i)=>`<div class="lnb" style="position:absolute;left:${[6,52,14,58][i]}%;top:${[8,4,58,54][i]}%;padding:10px 14px;border-radius:14px;background:var(--card2);border:1.5px solid var(--line);font-weight:700;transition:all .8s cubic-bezier(.3,1.2,.5,1)">${w}<div class="small muted">${l}</div></div>`).join('')+`<div class="lnf" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.3);opacity:0;transition:all .7s .5s cubic-bezier(.3,1.4,.5,1);padding:14px 20px;border-radius:16px;background:var(--acc3);border:2px solid var(--acc);font-family:var(--head);font-size:1.5rem;font-weight:800;white-space:nowrap"><i>Mangifera indica</i></div>`;$('.lnn',el).innerHTML='Imagine the confusion if everyone used only their own local name.';};
+  $('.lgo',el).onclick=()=>{$$('.lnb',box).forEach(b=>{b.style.left='42%';b.style.top='38%';b.style.opacity=0;b.style.transform='scale(.4)';});const f=$('.lnf',box);f.style.opacity=1;f.style.transform='translate(-50%,-50%) scale(1)';
+    $('.lnn',el).innerHTML='One name, used all over the world. Standardising names is <span class="term">nomenclature</span>. It is only possible after <span class="term">identification</span> – describing the organism correctly.';};
+  $('.lre',el).onclick=draw;draw();return el;
+}
+
+/* binomial anatomy – Focus Mode diagram */
+const BIN_PARTS=[
+ {id:'gen',name:'Generic name (genus)',desc:'The first word of a biological name. It represents the genus.',fn:'Starts with a capital letter.',eg:'Mangifera – the genus of mango'},
+ {id:'epi',name:'Specific epithet',desc:'The second word of the name, denoting a particular species within the genus.',fn:'Starts with a small letter.',eg:'indica'},
+ {id:'aut',name:'Author name (abbreviated)',desc:'Appears after the specific epithet, at the end of the biological name, in an abbreviated form.',fn:'Shows who first described the species.',eg:'Linn. – first described by Linnaeus'},
+ {id:'ul',name:'Separate underlines',desc:'When handwritten, both words of a biological name are separately underlined.',fn:'Shows their Latin origin (printed names use italics instead).'}];
+const D_BIN=reg({id:'binomial',title:'Anatomy of a scientific name',vb:'0 0 720 300',fs:20,parts:BIN_PARTS,no3d:true,svg:()=>`<rect width="720" height="300" class="fw"/>
+ <g data-part="gen"><rect x="40" y="96" width="300" height="84" rx="14" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2"/><text x="190" y="152" text-anchor="middle" style="font:italic 700 46px Georgia,serif;fill:var(--d-label)">Mangifera</text></g>
+ <g data-part="epi"><rect x="356" y="96" width="196" height="84" rx="14" fill="#fff3cf" stroke="#d99a1b" stroke-width="2"/><text x="454" y="152" text-anchor="middle" style="font:italic 700 46px Georgia,serif;fill:#3a2a05">indica</text></g>
+ <g data-part="aut"><rect x="566" y="106" width="120" height="64" rx="12" fill="#efe6fa" stroke="#7b3fc6" stroke-width="2"/><text x="626" y="148" text-anchor="middle" style="font:700 30px Georgia,serif;fill:#2a1450">Linn.</text></g>
+ <g data-part="ul"><path d="M58 200 Q190 192 322 202" stroke="var(--d-ink)" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M370 202 Q454 194 538 202" stroke="var(--d-ink)" stroke-width="4" fill="none" stroke-linecap="round"/><text x="300" y="250" text-anchor="middle" class="dtext" style="font-size:15px">handwritten: underline each word separately</text></g>`,
+ labels:[['gen',190,96,190,50,'middle','Genus'],['epi',454,96,454,50,'middle','Specific epithet'],['aut',626,106,640,70,'middle','Author']]});
+function writeItRight(){
+  const el=card(`<h3>Write it right</h3><p class="small muted">Switch the rules on until the name is written correctly.</p>
+   <div class="wir" style="text-align:center;padding:22px 8px;border-radius:14px;background:var(--card2);margin:8px 0;font-family:Georgia,serif;font-size:clamp(1.6rem,7vw,2.4rem)"></div>
+   <div class="chips wch"></div><div class="fb wfb"></div>`);
+  const st={ital:false,capG:false,smallE:false,hand:false};const rules=[['ital','Printed in italics'],['capG','Genus starts with a capital'],['smallE','Epithet starts with a small letter'],['hand','Handwritten mode']];
+  const draw=()=>{const g=st.capG?'Mangifera':'mangifera',e=st.smallE?'indica':'Indica';const it=st.ital&&!st.hand;
+    $('.wir',el).innerHTML=st.hand?`<span style="font-family:'Segoe Script','Bradley Hand',cursive;text-decoration:underline;text-underline-offset:6px">${g}</span> <span style="font-family:'Segoe Script','Bradley Hand',cursive;text-decoration:underline;text-underline-offset:6px">${e}</span>`:`<span style="${it?'font-style:italic':''}">${g} ${e}</span>`;
+    const ok=st.capG&&st.smallE&&(st.hand||st.ital);
+    $('.wfb',el).className='fb wfb '+(ok?'ok':'');$('.wfb',el).innerHTML=ok?`<b>Correct!</b>${st.hand?'Handwritten: both words separately underlined.':'Printed in italics: <i>Mangifera indica</i>.'}`:`Still wrong: ${[!st.capG&&'genus needs a capital letter',!st.smallE&&'epithet needs a small letter',!(st.hand||st.ital)&&'printed names must be in italics'].filter(Boolean).join('; ')}.`;if(ok)$('.wir',el).animate([{transform:'scale(1.06)'},{transform:'none'}],{duration:400});};
+  rules.forEach(([k,l])=>{const b=h(`<button class="chip">${l}</button>`);b.onclick=()=>{st[k]=!st[k];b.classList.toggle('on',st[k]);draw();};$('.wch',el).appendChild(b);});draw();return el;
+}
+function codesCard(){return card(`<div class="grid2"><div class="note" style="margin:0"><b class="term">ICBN</b><br>International Code for Botanical Nomenclature – scientific names of <b>plants</b>.</div><div class="note" style="margin:0"><b class="term">ICZN</b><br>International Code of Zoological Nomenclature – scientific names of <b>animals</b>.</div></div><p class="small" style="margin:10px 0 0">Scientific names make sure each organism has <b>only one name</b>, everyone arrives at the <b>same name</b> from a description, and no other known organism already has that name.</p>`);}
+
+/* nested taxa – Focus diagram */
+const TAXA_PARTS=[
+ {id:'ani',name:'Animals',desc:'A taxon at a high level – it contains mammals, insects and many more.',fn:'‘Animals’, ‘mammals’ and ‘dogs’ are all taxa, at different levels.'},
+ {id:'mam',name:'Mammals',desc:'Animals with external ears and body hair.',fn:'A dog is a mammal, and mammals are animals.'},
+ {id:'dog',name:'Dogs',desc:'Say ‘dog’ and each of us sees dogs, not cats.',fn:'A taxon at a lower level than mammals.'},
+ {id:'als',name:'Alsatians',desc:'A particular kind of dog – the more specific the group, the clearer the picture.',fn:'Shows how groups get narrower.'},
+ {id:'cat',name:'Cats',desc:'Another group within mammals, separate from dogs.',fn:'Associating characters with a group lets us tell groups apart.'},
+ {id:'pla',name:'Plants',desc:'‘Plants’ also form a taxon.',fn:'Contains wheat, rice and all other plants.'},
+ {id:'whe',name:'Wheat',desc:'Say ‘wheat’ and we picture wheat plants, not rice.',fn:'‘Wheat’ is also a taxon – at a much lower level than ‘plants’.'},
+ {id:'ric',name:'Rice',desc:'A taxon at the same level as wheat.',fn:'Different characters separate it from wheat.'}];
+const D_TAXA=reg({id:'taxa',title:'Taxa at different levels',vb:'0 0 720 400',fs:19,parts:TAXA_PARTS,svg:()=>`<rect width="720" height="400" class="fw"/>
+ <g data-part="ani"><rect x="20" y="20" width="420" height="360" rx="28" fill="#e3ebfa" stroke="#2156c4" stroke-width="2"/><text x="40" y="58" class="dtitle" style="fill:#14294f;font-size:28px">Animals</text></g>
+ <g data-part="mam"><rect x="52" y="76" width="356" height="250" rx="24" fill="#d6e3fb" stroke="#2156c4" stroke-width="2"/><text x="72" y="112" class="dtitle" style="fill:#14294f;font-size:24px">Mammals</text></g>
+ <g data-part="dog"><rect x="84" y="128" width="190" height="170" rx="20" fill="#c3d6fa" stroke="#2156c4" stroke-width="2"/><text x="102" y="162" class="dtitle" style="fill:#14294f;font-size:22px">Dogs</text></g>
+ <g data-part="als"><rect x="112" y="186" width="130" height="80" rx="16" fill="#a9c3f6" stroke="#2156c4" stroke-width="2"/><text x="177" y="232" text-anchor="middle" class="dtext" style="fill:#14294f;font-size:19px">Alsatians</text></g>
+ <g data-part="cat"><rect x="290" y="128" width="100" height="170" rx="20" fill="#c3d6fa" stroke="#2156c4" stroke-width="2"/><text x="340" y="218" text-anchor="middle" class="dtext" style="fill:#14294f;font-size:20px">Cats</text></g>
+ <g data-part="pla"><rect x="470" y="20" width="230" height="360" rx="28" fill="#e2f0e7" stroke="#1e7b4f" stroke-width="2"/><text x="490" y="58" class="dtitle" style="fill:#0f3d27;font-size:28px">Plants</text></g>
+ <g data-part="whe"><rect x="500" y="90" width="170" height="120" rx="20" fill="#c7e6d2" stroke="#1e7b4f" stroke-width="2"/><text x="585" y="156" text-anchor="middle" class="dtext" style="fill:#0f3d27;font-size:24px">Wheat</text></g>
+ <g data-part="ric"><rect x="500" y="230" width="170" height="120" rx="20" fill="#c7e6d2" stroke="#1e7b4f" stroke-width="2"/><text x="585" y="296" text-anchor="middle" class="dtext" style="fill:#0f3d27;font-size:24px">Rice</text></g>`,labels:[]});
+function taxoProcess(){
+  const P=[['Characterisation','Describing the characters of an organism.'],['Identification','Describing it correctly so we know which organism a name belongs to.'],['Classification','Grouping into convenient categories based on easily observable characters.'],['Nomenclature','Giving the standard scientific name.']];
+  const el=card(`<h3>The four processes basic to taxonomy</h3><p class="small muted">Tap each one.</p><div class="grid2 tp"></div><h4 class="mt">Basis of modern taxonomic studies</h4><div class="chips">${['External structure','Internal structure','Structure of the cell','Development process','Ecological information'].map(t=>`<span class="chip" style="cursor:default">${t}</span>`).join('')}</div>`);
+  P.forEach(([n,d],i)=>{const b=h(`<button class="opt" style="flex-direction:column;align-items:flex-start;gap:4px"><b>${n}</b><span class="small muted">Tap to see</span></button>`);b.onclick=()=>{b.lastChild.textContent=d;b.lastChild.className='small';b.classList.add('right');};$('.tp',el).appendChild(b);});return el;
+}
+function taxVsSys(){return card(`<table class="cmp"><tr><th>Taxonomy</th><th>Systematics</th></tr><tr><td>Classifying organisms into taxa based on characteristics</td><td>Kinds of organisms, their diversity <b>and the relationships among them</b></td></tr><tr><td>Processes: characterisation, identification, classification, nomenclature</td><td>Scope enlarged to include identification, nomenclature and classification</td></tr><tr><td>Earliest classifications based on <b>uses</b> of organisms</td><td>Takes into account <b>evolutionary relationships</b></td></tr><tr><td></td><td>From Latin <b>‘systema’</b>; Linnaeus’ <b><i>Systema Naturae</i></b></td></tr></table>`);}
+
+/* hierarchy pyramid – Focus diagram */
+const RANKS=['Kingdom','Phylum / Division','Class','Order','Family','Genus','Species'];
+const RANK_INFO={Kingdom:['The highest category.','Kingdom Animalia: all animals of various phyla. Kingdom Plantae: all plants from various divisions.'],
+ 'Phylum / Division':['Group of related classes. ‘Division’ is used for plants.','Phylum Chordata: fishes, amphibians, reptiles, birds, mammals – notochord and dorsal hollow neural system.'],
+ Class:['Includes related orders.','Class Mammalia: orders Primata and Carnivora.'],
+ Order:['An assemblage of families with a few similar characters.','Order Polymoniales: Convolvulaceae, Solanaceae. Order Carnivora: Felidae, Canidae.'],
+ Family:['A group of related genera.','Family Solanaceae: Solanum, Petunia, Datura. Family Felidae: Panthera, Felis.'],
+ Genus:['An aggregate of closely related species.','Genus Solanum: potato and brinjal. Genus Panthera: lion, leopard, tiger.'],
+ Species:['The lowest category – individuals with fundamental similarities.','Mangifera indica, Solanum tuberosum, Panthera leo, Homo sapiens.']};
+const HIER_PARTS=RANKS.map((r,i)=>({id:'r'+i,name:r,desc:RANK_INFO[r][0],fn:i===0?'Fewest characters in common; hardest to relate taxa at this level.':i===6?'Members share the most characters.':'Moving up loses common characters; moving down gains them.',eg:RANK_INFO[r][1]}));
+const RCOL=['#1E7B4F','#2E8F5E','#3FA36E','#57B47F','#73C392','#95D3AA','#BCE4C8'];
+const D_HIER=reg({id:'hier',title:'Taxonomic hierarchy (Fig. 1.1)',vb:'0 0 640 470',fs:19,parts:HIER_PARTS,svg:()=>{let s='<rect width="640" height="470" class="fw"/>';
+  RANKS.forEach((r,i)=>{const y=24+i*60,w0=470-i*58,w1=470-(i+1)*58,cx=280;s+=`<g data-part="r${i}" class="hl${i}"><path d="M${cx-w0/2} ${y} L${cx+w0/2} ${y} L${cx+w1/2} ${y+54} L${cx-w1/2} ${y+54} Z" fill="${RCOL[i]}" stroke="#fff" stroke-width="2"/><text x="${cx}" y="${y+34}" text-anchor="middle" style="font:700 ${i>4?22:25}px var(--head),sans-serif;fill:${i<4?'#fff':'#12301f'}">${r}</text></g>`;});
+  s+=`<g><line x1="560" y1="440" x2="560" y2="40" stroke="var(--d-lead)" stroke-width="3" marker-end="url(#ar)"/><text x="582" y="250" transform="rotate(-90 582 250)" text-anchor="middle" class="dtext" style="font-size:18px">ascending – fewer common characters</text></g><defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--d-lead)"/></marker></defs>`;return s;},labels:[]});
+async function buildHier(svg){const gs=$$('[data-part]',svg).filter(g=>/^r\d$/.test(g.dataset.part)).reverse();gs.forEach(g=>{g.style.transition='none';g.style.opacity=0;g.style.transform='translateY(30px)';});await sleep(200);for(const g of gs){g.style.transition='opacity .45s,transform .45s cubic-bezier(.3,1.3,.5,1)';g.style.opacity=1;g.style.transform='none';await sleep(170);}}
+function climbWidget(){
+  const el=card(`<h3>Climb the hierarchy</h3><p class="small muted">Slide from species up to kingdom.</p><input type="range" min="0" max="6" value="0"><div class="row mt" style="gap:16px;align-items:flex-end"><div style="flex:1"><div class="small muted">Characters shared by members</div><div class="bar" style="height:14px"><i class="cb1" style="width:100%"></i></div></div><div style="flex:1"><div class="small muted">Difficulty of relating taxa at this level</div><div class="bar" style="height:14px"><i class="cb2" style="width:10%;background:var(--bad)"></i></div></div></div><div class="note cn"></div>`);
+  const r=$('input',el),set=()=>{const i=+r.value,rank=RANKS[6-i];$('.cb1',el).style.width=(100-i*14)+'%';$('.cb2',el).style.width=(10+i*15)+'%';$('.cn',el).innerHTML=`<b class="term">${rank}</b> – ${RANK_INFO[rank][0]} ${i===0?'<br><b>Lower the taxa, more the characteristics the members share.</b>':i===6?'<br><b>Higher the category, greater the difficulty of determining relationships – classification becomes more complex.</b>':''}`;};r.oninput=set;set();return el;
+}
+
+/* zoom ladder: depth zoom through the ranks */
+const LADDER={animal:{rank:'Kingdom',name:'Animalia',note:'All animals belonging to various phyla.',kids:[
+  {rank:'Phylum',name:'Chordata',note:'Notochord and dorsal hollow neural system.',kids:[
+   {rank:'Class',name:'Fishes'},{rank:'Class',name:'Amphibians'},{rank:'Class',name:'Reptiles'},{rank:'Class',name:'Birds'},
+   {rank:'Class',name:'Mammalia',note:'Includes related orders; has other orders too.',kids:[
+    {rank:'Order',name:'Primata',note:'Monkey, gorilla, gibbon.'},
+    {rank:'Order',name:'Carnivora',note:'Includes families like Felidae and Canidae.',kids:[
+     {rank:'Family',name:'Canidae',note:'Dogs.'},
+     {rank:'Family',name:'Felidae',note:'Panthera and Felis together.',kids:[
+      {rank:'Genus',name:'Felis',note:'Cats.'},
+      {rank:'Genus',name:'Panthera',note:'Lion, leopard and tiger share several common features.',kids:[
+       {rank:'Species',name:'leo',note:'Lion – Panthera leo'},{rank:'Species',name:'pardus',note:'Leopard – P. pardus'},{rank:'Species',name:'tigris',note:'Tiger – P. tigris'}]}]}]}]}]}]},
+ plant:{rank:'Kingdom',name:'Plantae',note:'All plants from various divisions.',kids:[
+  {rank:'Division',name:'Angiospermae',note:'Mango and wheat both belong here (Table 1.1).',kids:[
+   {rank:'Class',name:'Monocotyledonae',note:'Wheat (Table 1.1).'},
+   {rank:'Class',name:'Dicotyledonae',note:'Mango (Table 1.1).',kids:[
+    {rank:'Order',name:'Sapindales',note:'Mango – family Anacardiaceae (Table 1.1).'},
+    {rank:'Order',name:'Polymoniales',note:'Includes Convolvulaceae and Solanaceae, mainly on floral characters.',kids:[
+     {rank:'Family',name:'Convolvulaceae'},
+     {rank:'Family',name:'Solanaceae',note:'Solanum, Petunia and Datura.',kids:[
+      {rank:'Genus',name:'Petunia'},{rank:'Genus',name:'Datura'},
+      {rank:'Genus',name:'Solanum',note:'Potato and brinjal are different species of one genus.',kids:[
+       {rank:'Species',name:'tuberosum',note:'Potato – Solanum tuberosum'},{rank:'Species',name:'melongena',note:'Brinjal – S. melongena'},{rank:'Species',name:'nigrum',note:'S. nigrum'}]}]}]}]}]}]}};
+function ladderWidget(){
+  const el=card(`<h3>Zoom through the ranks</h3><p class="small muted">Start at a kingdom and dive in. Groups you can open have a ring.</p><div class="lseg"></div>
+   <div class="zl-crumb small" style="margin:10px 0;display:flex;flex-wrap:wrap;gap:6px"></div>
+   <div class="zl-stage" style="perspective:900px;border-radius:16px;background:var(--card2);border:1px solid var(--line);padding:14px;min-height:260px;overflow:hidden"><div class="zl-in"></div></div>
+   <div class="row mt"><button class="btn ghost sm zl-up">Zoom out</button><span class="small muted zl-n"></span></div>`);
+  let path=[];let tree='animal';
+  const cur=()=>path.reduce((n,i)=>n.kids[i],LADDER[tree]);
+  const draw=(dir)=>{const n=cur(),inn=$('.zl-in',el);
+    $('.zl-crumb',el).innerHTML=[LADDER[tree],...path.map((_,k)=>path.slice(0,k+1).reduce((m,i)=>m.kids[i],LADDER[tree]))].map((m,k,a)=>`<span class="pill" style="${k===a.length-1?'background:var(--acc);color:#fff':''}">${m.rank}: ${m.name}</span>`).join('');
+    inn.innerHTML=`<div style="font-family:var(--head);font-weight:800;font-size:1.5rem">${n.rank} <span style="color:var(--acc)">${n.rank==='Species'?'<i>'+n.name+'</i>':n.name}</span></div><p class="small" style="margin:4px 0 12px">${n.note||''}</p>
+     ${n.kids?`<div class="grid2" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">${n.kids.map((k,i)=>`<button class="opt zk" data-i="${i}" style="flex-direction:column;align-items:flex-start;gap:2px;${k.kids?'box-shadow:0 0 0 3px var(--acc3);border-color:var(--acc)':''}"><span class="small muted">${k.rank}</span><b>${k.rank==='Species'?'<i>'+k.name+'</i>':k.name}</b></button>`).join('')}</div>`:'<div class="note">This is the lowest category – a species.</div>'}`;
+    if(dir)inn.animate(dir==='in'?[{transform:'translateZ(-260px)',opacity:0},{transform:'none',opacity:1}]:[{transform:'translateZ(220px)',opacity:0},{transform:'none',opacity:1}],{duration:520,easing:'cubic-bezier(.2,.8,.2,1)'});
+    $$('.zk',inn).forEach(b=>b.onclick=()=>{const k=n.kids[+b.dataset.i];if(k.kids){inn.animate([{transform:'none',opacity:1},{transform:'translateZ(240px)',opacity:0}],{duration:280,easing:'ease-in'}).onfinish=()=>{path.push(+b.dataset.i);draw('in');};}else{$('.zl-n',el).innerHTML=`<b>${k.rank} ${k.name}</b>${k.note?' – '+k.note:''}`;b.classList.add('right');}});
+    $('.zl-n',el).textContent='';$('.zl-up',el).disabled=!path.length;};
+  $('.zl-up',el).onclick=()=>{if(!path.length)return;$('.zl-in',el).animate([{transform:'none',opacity:1},{transform:'translateZ(-200px)',opacity:0}],{duration:260}).onfinish=()=>{path.pop();draw('out');};};
+  $('.lseg',el).appendChild(seg([['animal','Animal: lion'],['plant','Plant: potato']],'animal',v=>{tree=v;path=[];draw();}));draw();return el;
+}
+
+/* Table 1.1 explorer */
+const T11=[['Man','Homo sapiens','Homo','Hominidae','Primata','Mammalia','Chordata'],['Housefly','Musca domestica','Musca','Muscidae','Diptera','Insecta','Arthropoda'],['Mango','Mangifera indica','Mangifera','Anacardiaceae','Sapindales','Dicotyledonae','Angiospermae'],['Wheat','Triticum aestivum','Triticum','Poaceae','Poales','Monocotyledonae','Angiospermae']];
+const T11H=['Common name','Biological name','Genus','Family','Order','Class','Phylum / Division'];
+function tableWidget(){
+  const el=card(`<h3>Table 1.1 explorer</h3><p class="small muted">Pick an organism to climb its ladder. Switch on <b>Test me</b> to hide the answers.</p><div class="t11s"></div><div class="row mt"><button class="chip t11t">Test me</button><span class="small muted t11c"></span></div><div class="t11l mt"></div>`);
+  let k=0,test=false,rev={};
+  const draw=()=>{const r=T11[k];rev={};$('.t11l',el).innerHTML=`<div style="display:flex;flex-direction:column-reverse;gap:8px">${T11H.slice(1).map((hd,i)=>`<button class="opt t11r" data-i="${i}" style="justify-content:space-between;margin-left:${(5-i)*0}px;opacity:0;transform:translateY(14px);transition:all .4s ${i*.08}s"><span class="small muted">${hd==='Biological name'?'Species':hd}</span><b class="t11v">${test?'?':(i===0?'<i>'+r[1]+'</i>':r[i+1])}</b></button>`).join('')}</div>`;
+    requestAnimationFrame(()=>$$('.t11r',el).forEach(b=>{b.style.opacity=1;b.style.transform='none';}));
+    $$('.t11r',el).forEach(b=>b.onclick=()=>{if(!test)return;const i=+b.dataset.i;$('.t11v',b).innerHTML=i===0?'<i>'+r[1]+'</i>':r[i+1];b.classList.add('right');rev[i]=1;$('.t11c',el).textContent=Object.keys(rev).length+' of 6 revealed';});
+    $('.t11c',el).textContent=test?'Say each answer, then tap to check':'';};
+  $('.t11s',el).appendChild(seg(T11.map((r,i)=>[String(i),r[0]]),'0',v=>{k=+v;draw();}));
+  $('.t11t',el).onclick=e=>{test=!test;e.target.classList.toggle('on',test);draw();};draw();return el;
+}
+
+/* ---------- lessons ---------- */
+LESSONS[1].push(
+ {id:'c1-intro',n:1,ch:1,title:'Introduction: what is living?',sub:'Diversity of life; two questions; Ernst Mayr',render(el){el.appendChild(twoQuestions());el.appendChild(mayrCard());}},
+ {id:'c1-div',n:2,ch:1,title:'1.1 Diversity in the living world',sub:'Species, biodiversity, local names, identification',render(el){el.appendChild(areaWidget());el.appendChild(speciesCounter());el.appendChild(localNames());}},
+ {id:'c1-nom',n:3,ch:1,title:'1.1 Binomial nomenclature',sub:'ICBN, ICZN, rules for writing scientific names',render(el){el.appendChild(codesCard());el.appendChild(Diagram.create(D_BIN).wrap);el.appendChild(writeItRight());}},
+ {id:'c1-tax',n:4,ch:1,title:'1.1 Classification, taxonomy and systematics',sub:'Taxa, processes of taxonomy, systematics',render(el){el.appendChild(Diagram.create(D_TAXA).wrap);el.appendChild(taxoProcess());el.appendChild(taxVsSys());}},
+ {id:'c1-hier',n:5,ch:1,title:'1.2 Taxonomic categories',sub:'Rank, taxon, hierarchy (Fig. 1.1)',render(el){const b=h(`<button class="btn sm">Build it</button>`);const i=Diagram.create(D_HIER,{tools:[b]});el.appendChild(i.wrap);b.onclick=()=>buildHier(i.svg);setTimeout(()=>buildHier(i.svg),300);el.appendChild(climbWidget());}},
+ {id:'c1-ranks',n:6,ch:1,title:'1.2.1 Species to 1.2.7 Kingdom',sub:'Every category with its textbook examples',render(el){el.appendChild(ladderWidget());}},
+ {id:'c1-table',n:7,ch:1,mark:'T1.1',title:'Table 1.1 Organisms and their categories',sub:'Man, housefly, mango, wheat',render(el){el.appendChild(tableWidget());}},
+ {id:'c1-summary',n:8,ch:1,title:'Chapter 1 summary',sub:'Everything on one page',render(el){
+   const c=card(`<h3>Concept map</h3><p class="small muted">Tap a topic to open its lesson.</p>${[['Diversity','c1-div','1.7–1.8 million species · biodiversity'],['Naming','c1-nom','ICBN · ICZN · binomial · rules'],['Taxonomy','c1-tax','taxa · 4 processes · systematics'],['Hierarchy','c1-hier','rank · taxon · Fig. 1.1'],['Ranks','c1-ranks','species → kingdom'],['Table 1.1','c1-table','man · housefly · mango · wheat']].map(([n,id,d])=>`<div style="margin:8px 0"><button class="chip on" data-id="${id}">${n} ›</button><div class="small muted" style="margin:4px 0 0 12px">${d}</div></div>`).join('')}`);
+   $$('[data-id]',c).forEach(b=>b.onclick=()=>openLesson(b.dataset.id));el.appendChild(c);}});
+
+/* ---------- MCQs ---------- */
+MCQ.push(...[
+[1,'The number of species that are known and described ranges between:',['1.7–1.8 million','17–18 million','1.7–1.8 lakh','170–180 million'],0,'The number of species known and described ranges between 1.7–1.8 million.'],
+[1,'The number and types of organisms present on earth is called:',['Taxonomy','Biodiversity','Systematics','Nomenclature'],1,'This refers to biodiversity.'],
+[1,'Standardising the naming of organisms so that each is known by the same name all over the world is:',['Identification','Classification','Nomenclature','Characterisation'],2,'This process is called nomenclature.'],
+[1,'Describing an organism correctly so that we know which organism a name is attached to is:',['Identification','Nomenclature','Systematics','Taxonomy'],0,'Naming is only possible after identification.'],
+[1,'Scientific names of plants are based on:',['ICZN','ICBN','Systema Naturae','Table 1.1'],1,'Plants follow the International Code for Botanical Nomenclature (ICBN).'],
+[1,'Animal taxonomists have evolved:',['ICBN','ICZN','Binomial key','Herbarium'],1,'International Code of Zoological Nomenclature (ICZN).'],
+[1,'The binomial system of nomenclature was given by:',['Ernst Mayr','Carolus Linnaeus','Charles Darwin','Aristotle'],1,'This naming system given by Carolus Linnaeus is used all over the world.'],
+[1,'In Mangifera indica, the word indica is the:',['Genus','Specific epithet','Family','Author'],1,'The second word denotes the specific epithet.'],
+[1,'Which is the correctly written scientific name of mango?',['Mangifera Indica','mangifera indica','Mangifera indica','Mangifera-indica'],2,'Genus starts with a capital letter, specific epithet with a small letter.'],
+[1,'Biological names are generally written in:',['Greek, in bold','Latin, in italics','English, underlined together','Local language'],1,'They are Latinised and written in italics.'],
+[1,'When handwritten, the two words of a biological name are:',['Underlined together','Separately underlined','Written in capitals','Written in brackets'],1,'Both words are separately underlined.'],
+[1,'In Mangifera indica Linn., ‘Linn.’ indicates that:',['The plant is from Linnaeus’ garden','The species was first described by Linnaeus','It belongs to the order Linnales','It is a Latin word for mango'],1,'The author’s name appears abbreviated after the specific epithet.'],
+[1,'The scientific term for convenient categories like dogs, mammals, wheat and plants is:',['Taxa','Species','Codes','Phyla'],0,'The scientific term for these categories is taxa.'],
+[1,'Classifying all living organisms into different taxa based on characteristics is:',['Systematics','Taxonomy','Nomenclature','Identification'],1,'This process of classification is taxonomy.'],
+[1,'Which is NOT one of the processes basic to taxonomy?',['Characterisation','Identification','Germination','Nomenclature'],2,'Characterisation, identification, classification and nomenclature are basic to taxonomy.'],
+[1,'The earliest classifications were based on:',['Cell structure','The uses of organisms','Evolution','Ecology'],1,'Early humans classified organisms by their uses for food, clothing and shelter.'],
+[1,'The word systematics is derived from the Latin word:',['Systema','Taxis','Nomen','Classis'],0,'‘Systema’ means systematic arrangement of organisms.'],
+[1,'Linnaeus used which title for his publication?',['Origin of Species','Systema Naturae','Species Plantarum Nova','Historia Animalium'],1,'Linnaeus used Systema Naturae as the title of his publication.'],
+[1,'Systematics takes into account:',['Only the uses of organisms','Evolutionary relationships between organisms','Only local names','Only external structure'],1,'Systematics takes into account evolutionary relationships.'],
+[1,'The lowest taxonomic category for all organisms is:',['Genus','Family','Species','Kingdom'],2,'All organisms have species as the lowest category.'],
+[1,'In plants, the category equivalent to phylum is:',['Class','Division','Order','Family'],1,'In plants, classes are assigned to a higher category called Division.'],
+[1,'As we go higher from species to kingdom, the number of common characteristics:',['Increases','Decreases','Stays the same','Doubles'],1,'Higher the category, fewer the common characters.'],
+[1,'Potato and brinjal belong to the same:',['Species','Genus','Variety','Phylum only'],1,'Both belong to the genus Solanum.'],
+[1,'Lion, leopard and tiger belong to the genus:',['Felis','Panthera','Canis','Homo'],1,'Panthera leo, P. pardus and P. tigris.'],
+[1,'Solanum, Petunia and Datura are placed in the family:',['Felidae','Solanaceae','Convolvulaceae','Poaceae'],1,'They are placed in the family Solanaceae.'],
+[1,'Cat and dog are separated into the families:',['Felidae and Canidae','Canidae and Hominidae','Felidae and Muscidae','Primata and Carnivora'],0,'Cats – Felidae; dogs – Canidae.'],
+[1,'Plant families Convolvulaceae and Solanaceae are included in the order:',['Poales','Sapindales','Polymoniales','Carnivora'],2,'Mainly based on floral characters.'],
+[1,'The animal order Carnivora includes:',['Felidae and Canidae','Hominidae','Muscidae','Primata'],0,'Order Carnivora includes families like Felidae and Canidae.'],
+[1,'Monkey, gorilla and gibbon are placed in the order:',['Carnivora','Primata','Diptera','Mammalia'],1,'Order Primata, placed in class Mammalia.'],
+[1,'Phylum Chordata is based on:',['Three pairs of jointed legs','Notochord and dorsal hollow neural system','Body hair and external ears','Floral characters'],1,'All these classes share a notochord and dorsal hollow neural system.'],
+[1,'The family of the housefly (Table 1.1) is:',['Muscidae','Diptera','Insecta','Arthropoda'],0,'Musca domestica – family Muscidae, order Diptera.'],
+[1,'Wheat belongs to the family:',['Anacardiaceae','Poaceae','Solanaceae','Hominidae'],1,'Triticum aestivum – family Poaceae, order Poales.'],
+[1,'Mango belongs to the order:',['Sapindales','Poales','Primata','Polymoniales'],0,'Mangifera indica – family Anacardiaceae, order Sapindales.'],
+[1,'The scientific name of human beings is:',['Homo sapiens','Homo Sapiens','homo sapiens','Hominidae sapiens'],0,'Species sapiens in the genus Homo.'],
+[1,'Insects are grouped together because they share:',['Notochord','Three pairs of jointed legs','Two cotyledons','Body hair'],1,'Insects share three pairs of jointed legs.']
+].map(r=>({id:'m1-'+hashStr(r[1]),ch:r[0],q:r[1],o:r[2],a:r[3],e:r[4]})));
+
+/* ---------- exam Q&A ---------- */
+EXAM.push(
+{id:'e1-1',ch:1,q:'Why are living organisms classified?',a:`<ul><li>There are <b>millions</b> of organisms (1.7–1.8 million species known) – it is nearly <b>impossible to study all</b> of them individually.</li><li><b>Classification</b> groups them into <b>convenient categories</b> based on easily observable characters, which makes study possible.</li><li>It helps in <b>identification</b> and gives each organism a <b>place</b> in a system, showing <b>similarities, differences and relationships</b> among organisms.</li><li>Useful in agriculture, forestry, industry and in knowing our <b>bio-resources</b>.</li></ul>`,dg:'c1-tax'},
+{id:'e1-2',ch:1,q:'Why are the classification systems changing every now and then?',a:`<ul><li><b>New organisms are continuously being identified</b> as we explore new and even old areas, and a large number still remains unknown.</li><li>Modern taxonomy uses more information – <b>external and internal structure, cell structure, development process and ecological information</b> – so organisms may be regrouped.</li><li><b>Systematics</b> takes into account <b>evolutionary relationships</b>; as these become clearer, groups are revised.</li><li>Taxonomists also develop <b>sub-categories</b> for more sound and scientific placement of taxa.</li></ul>`,dg:'c1-tax'},
+{id:'e1-3',ch:1,q:'What different criteria would you choose to classify people that you meet often?',a:`<p>Use <b>easily observable characters</b>, just as in classification:</p><ul><li><b>Relationship</b> – family, friends, classmates, teachers, neighbours.</li><li><b>Age group</b> – children, adults, elders.</li><li><b>Occupation</b> – students, doctors, shopkeepers…</li><li><b>Where you meet them</b> – school, home, tuition, sports ground.</li></ul><p class="small muted">Any sensible criteria work – the idea is grouping into convenient categories, which can be arranged in levels like a hierarchy.</p>`},
+{id:'e1-4',ch:1,q:'What do we learn from identification of individuals and populations?',a:`<ul><li>We learn their <b>characters</b> – the <b>similarities and dissimilarities</b> among individuals of the same kind and of other kinds.</li><li>Correct description lets us attach the <b>correct name</b> (identification comes before nomenclature).</li><li>We can place the organism in the right <b>taxonomic category</b> and understand its <b>relationships</b>.</li><li>It adds to our knowledge of <b>biodiversity</b> and bio-resources.</li></ul>`,dg:'c1-div'},
+{id:'e1-5',ch:1,q:'Given below is the scientific name of Mango. Identify the correctly written name: Mangifera Indica / Mangifera indica',a:`<p><b><i>Mangifera indica</i></b> is correct.</p><ul><li>The <b>genus</b> (<i>Mangifera</i>) starts with a <b>capital</b> letter; the <b>specific epithet</b> (<i>indica</i>) starts with a <b>small</b> letter.</li><li>Printed in <b>italics</b>; when handwritten, both words are <b>separately underlined</b>.</li></ul>`,dg:'c1-nom'},
+{id:'e1-6',ch:1,q:'Define a taxon. Give some examples of taxa at different hierarchical levels.',a:`<p>A <b>taxon</b> (pl. taxa) is a <b>unit of classification</b> – a category that represents a <b>rank</b> in the taxonomic hierarchy.</p><ul><li><b>Kingdom</b>: Animalia, Plantae</li><li><b>Phylum / Division</b>: Chordata, Arthropoda / Angiospermae</li><li><b>Class</b>: Mammalia, Insecta, Dicotyledonae</li><li><b>Order</b>: Primata, Carnivora, Polymoniales</li><li><b>Family</b>: Felidae, Canidae, Solanaceae</li><li><b>Genus</b>: <i>Panthera, Solanum</i></li><li><b>Species</b>: <i>leo, tuberosum</i></li></ul>`,dg:'c1-hier'},
+{id:'e1-7',ch:1,q:'Can you identify the correct sequence of taxonomical categories? (a) Species → Order → Phylum → Kingdom (b) Genus → Species → Order → Kingdom (c) Species → Genus → Order → Phylum',a:`<p><b>(a) Species → Order → Phylum → Kingdom</b> and <b>(c) Species → Genus → Order → Phylum</b> are both in the correct <b>ascending</b> order.</p><p><b>(b) is wrong</b> – species is the lowest category, so it cannot come after genus.</p><p class="small muted">Full ascending order: Species → Genus → Family → Order → Class → Phylum → Kingdom.</p>`,dg:'c1-hier'},
+{id:'e1-8',ch:1,q:'Try to collect all the currently accepted meanings for the word ‘species’. Discuss the meaning of species in case of higher plants and animals on one hand, and bacteria on the other hand.',a:`<ul><li>In this chapter, a <b>species</b> is a group of individual organisms with <b>fundamental similarities</b>, distinguished from closely related species by <b>distinct morphological differences</b>; it is the <b>lowest</b> taxonomic category.</li><li>Each different kind of organism we see represents a species.</li><li><b>Ernst Mayr</b> pioneered the currently accepted definition of a <b>biological species</b>.</li><li>For <b>higher plants and animals</b>, morphological differences are easy to see; for <b>bacteria</b>, which are too small to observe with the naked eye, other characters (such as <b>cell structure</b>, development and ecological information) become important.</li></ul><p class="small muted">This is a discussion question – talk through the different meanings with your teacher.</p>`,dg:'c1-ranks'},
+{id:'e1-9',ch:1,q:'Define and understand the following terms: (i) Phylum (ii) Class (iii) Family (iv) Order (v) Genus',a:`<ul><li><b>Phylum</b> – the category made of related <b>classes</b>, e.g. Chordata (fishes, amphibians, reptiles, birds, mammals – notochord and dorsal hollow neural system). For plants: <b>Division</b>.</li><li><b>Class</b> – includes related <b>orders</b>, e.g. Mammalia (Primata, Carnivora).</li><li><b>Family</b> – a group of related <b>genera</b> with fewer similarities than genus and species, e.g. Solanaceae (<i>Solanum, Petunia, Datura</i>), Felidae.</li><li><b>Order</b> – an assemblage of <b>families</b> with a few similar characters, e.g. Polymoniales, Carnivora.</li><li><b>Genus</b> – an aggregate of closely related <b>species</b>, e.g. <i>Solanum</i> (potato, brinjal), <i>Panthera</i> (lion, leopard, tiger).</li></ul>`,dg:'c1-ranks'},
+{id:'e1-10',ch:1,q:'Illustrate the taxonomical hierarchy with suitable examples of a plant and an animal.',a:`<table class="cmp"><tr><th>Category</th><th>Mango (plant)</th><th>Man (animal)</th></tr><tr><td>Kingdom</td><td>Plantae</td><td>Animalia</td></tr><tr><td>Phylum / Division</td><td>Angiospermae</td><td>Chordata</td></tr><tr><td>Class</td><td>Dicotyledonae</td><td>Mammalia</td></tr><tr><td>Order</td><td>Sapindales</td><td>Primata</td></tr><tr><td>Family</td><td>Anacardiaceae</td><td>Hominidae</td></tr><tr><td>Genus</td><td><i>Mangifera</i></td><td><i>Homo</i></td></tr><tr><td>Species</td><td><i>indica</i></td><td><i>sapiens</i></td></tr></table><p class="small muted">Going up the table, the members share fewer common characters.</p>`,dg:'c1-table'});
+
+/* ---------- games ---------- */
+GAMES.push(['ladder','','Rank Ladder','Put the categories in order, then place Table 1.1 names','',1],['namegame','','Name It Right','Spot the correctly written scientific name','',1]);
+GCODE.ladder='K→S';GCODE.namegame='Aa';
+GAME_NAMES.ladder='Rank Ladder';GAME_NAMES.namegame='Name It Right';
+GAME_FNS.ladder=gLadder;GAME_FNS.namegame=gName;
+function gLadder(scr){
+  const asc=['Species','Genus','Family','Order','Class','Phylum','Kingdom'];let k=0,score=0,mist=0,t0=Date.now();
+  const step1=()=>{scr.innerHTML=`${hud([['s','Score 0'],['m','Mistakes 0']])}<div class="card"><h3>Build the ladder</h3><p class="small muted">Tap the categories in <b>ascending</b> order – lowest first.</p><div class="lad" style="display:flex;flex-direction:column-reverse;gap:6px;min-height:40px;margin:10px 0"></div><div class="chips lch">${shuffle(asc).map(a=>`<button class="chip">${a}</button>`).join('')}</div></div>`;
+    $$('.lch .chip',scr).forEach(b=>b.onclick=()=>{if(b.textContent===asc[k]){k++;score+=10;addScore(2);b.disabled=true;b.style.visibility='hidden';const r=h(`<div class="opt" style="justify-content:center;margin:0 ${(7-k)*4}%"><b>${b.textContent}</b></div>`);$('.lad',scr).appendChild(r);r.animate([{transform:'translateY(-20px) scale(.9)',opacity:0},{transform:'none',opacity:1}],{duration:350,easing:'cubic-bezier(.3,1.4,.5,1)'});$('[data-h=s]',scr).textContent='Score '+score;if(k===7){confetti(30);setTimeout(step2,800);}}
+      else{mist++;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('[data-h=m]',scr).textContent='Mistakes '+mist;mcqWrong('lad'+k,`In ascending order, which category comes right after ${k?asc[k-1]:'nothing (the lowest)'}?`,asc,k,'Species → Genus → Family → Order → Class → Phylum → Kingdom.','Game · Rank Ladder');}});};
+  let r=0;const Q=shuffle(T11.flatMap(row=>row.slice(3).map((v,i)=>[row[0],v,['Family','Order','Class','Phylum / Division'][i]]))).slice(0,6);
+  const step2=()=>{if(r>=Q.length){endCard(scr,'ladder',score,`<p>${mist} mistakes · ${Math.round((Date.now()-t0)/1000)}s</p>`,()=>{k=0;score=0;mist=0;r=0;t0=Date.now();step1();});return;}
+    const [org,val,rank]=Q[r];const opts=['Family','Order','Class','Phylum / Division'];
+    scr.innerHTML=`${hud([['s','Score '+score],['m','Mistakes '+mist],['r','Round '+(r+1)+'/6']])}<div class="card"><h3>Which rank is it?</h3><div class="qtext">For <b>${org}</b>, <b>${val}</b> is its…</div><div class="opts">${opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div><div class="fbx"></div></div>`;
+    $$('.opt',scr).forEach(b=>b.onclick=async()=>{const ok=b.textContent===rank;$$('.opt',scr).forEach(x=>{x.disabled=true;if(x.textContent===rank)x.classList.add('right');else if(x===b)x.classList.add('wrong');});
+      if(ok){score+=10;addScore(3);}else{mist++;mcqWrong('t11'+org+val,`In Table 1.1, ${val} is the ___ of ${org}.`,opts,opts.indexOf(rank),`${org}: see Table 1.1.`,'Game · Rank Ladder');}
+      $('.fbx',scr).innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'Correct!':'Not quite'}</b>${val} is the ${rank.toLowerCase()} of ${org}.</div>`;r++;await nextBtn($('.card',scr));step2();});};
+  step1();
+}
+function gName(scr){
+  const N=[['Mangifera','indica'],['Homo','sapiens'],['Panthera','leo'],['Solanum','tuberosum'],['Musca','domestica'],['Triticum','aestivum'],['Panthera','tigris'],['Solanum','melongena'],['Panthera','pardus'],['Solanum','nigrum']];
+  const cap=s=>s[0].toUpperCase()+s.slice(1),low=s=>s[0].toLowerCase()+s.slice(1);
+  let r=0,score=0,streak=0;const rounds=shuffle(N).slice(0,8);
+  const next=()=>{if(r>=rounds.length){endCard(scr,'namegame',score,'',()=>gName(scr));return;}
+    const [g,e]=rounds[r];const right=`<i>${g} ${e}</i>`;const wrong=[`<i>${g} ${cap(e)}</i>`,`<i>${low(g)} ${e}</i>`,`${g} ${e}`,`<i>${cap(e)} ${g.toLowerCase()}</i>`];const opts=shuffle([right,...shuffle(wrong).slice(0,3)]);
+    scr.innerHTML=`${hud([['s','Score '+score],['k','Streak '+streak],['r',(r+1)+' of '+rounds.length]])}<div class="card"><h3>Which is written correctly (printed)?</h3><div class="opts" style="font-family:Georgia,serif;font-size:1.25rem">${opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div><div class="fbx"></div></div>`;
+    $$('.opt',scr).forEach(b=>b.onclick=async()=>{const ok=b.innerHTML===right;$$('.opt',scr).forEach(x=>{x.disabled=true;if(x.innerHTML===right)x.classList.add('right');else if(x===b)x.classList.add('wrong');});
+      if(ok){streak++;score+=10+streak*2;addScore(3);}else{streak=0;mcqWrong('nm'+g+e,`Which is the correctly written scientific name?`,[`${g} ${e} (italic)`,`${g} ${cap(e)} (italic)`,`${low(g)} ${e} (italic)`,`${g} ${e} (not italic)`],0,'Genus with a capital, epithet with a small letter, printed in italics.','Game · Name It Right');}
+      $('.fbx',scr).innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'Correct!':'Not quite'}</b>Genus capital, epithet small, printed in italics: ${right}.</div>`;r++;await nextBtn($('.card',scr));next();});};
+  next();
+}
+
+/* ===== Splash, subject themes, game intro ===== */
+const SUBJ_LOOK={
+  bio:{tag:'The living world, from cells to flowering plants.',hello:'Biology'},
+  chem:{tag:'Atoms, bonds and the reactions between them.',hello:'Chemistry'},
+  phy:{tag:'Motion, forces and the laws behind them.',hello:'Physics'}};
+
+/* small animated pictures for each subject – transform/opacity only */
+function motif(id,cls=''){
+  if(id==='bio')return `<svg class="mo mo-bio ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
+    <g class="cellA"><circle r="13" cx="-34" cy="-30" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="4.5" cx="-34" cy="-30" fill="var(--bio)"/></g>
+    <g class="cellB"><circle r="9" cx="36" cy="-36" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="3.2" cx="36" cy="-36" fill="var(--bio)"/></g>
+    <g class="leaf"><path d="M0 50 C-36 30 -34 -18 0 -40 C34 -18 36 30 0 50Z" fill="var(--bio)"/><path d="M0 50 V-30 M0 -8 L-15 -20 M0 8 L15 -6 M0 24 L-15 12" stroke="var(--bio-soft)" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`;
+  if(id==='chem')return `<svg class="mo mo-chem ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
+    ${[0,60,120].map((r,i)=>`<g transform="rotate(${r})"><ellipse rx="50" ry="17" fill="none" stroke="var(--chem)" stroke-width="2.2" opacity=".55"/><g transform="scale(1 .34)"><g class="orb o${i}"><circle cx="50" r="7" fill="var(--chem)"/></g></g></g>`).join('')}
+    <g class="nuc"><circle r="13" fill="var(--chem)"/><circle r="5" cx="-4" cy="-4" fill="var(--chem-soft)" opacity=".7"/></g></svg>`;
+  return `<svg class="mo mo-phy ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
+    <path d="M-50 40 H54" stroke="var(--phy)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-46 36 Q4 -86 50 36" fill="none" stroke="var(--phy)" stroke-width="2.2" stroke-dasharray="4 6" opacity=".5"/>
+    <path d="M-46 36 L-30 6" stroke="var(--phy)" stroke-width="3" stroke-linecap="round"/><path d="M-30 6 l-1 9 m1 -9 l-8 4" stroke="var(--phy)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <g class="bx"><g class="by"><circle cx="-46" cy="36" r="8" fill="var(--phy)"/></g></g></svg>`;
+}
+
+/* ---------- splash: waits for "Let's get started" ---------- */
+function mascot(id){/* little characters with faces */
+  const eyes=(x,y,c='#fff')=>`<g class="eyes"><ellipse cx="${x-6}" cy="${y}" rx="3.2" ry="4" fill="${c}"/><ellipse cx="${x+6}" cy="${y}" rx="3.2" ry="4" fill="${c}"/><circle cx="${x-5}" cy="${y+1}" r="1.7" fill="#142027"/><circle cx="${x+7}" cy="${y+1}" r="1.7" fill="#142027"/></g>`;
+  if(id==='bio')return `<svg viewBox="-30 -30 60 60"><circle r="24" fill="#DDF1E4" stroke="var(--bio)" stroke-width="3"/><circle cx="9" cy="10" r="6" fill="var(--bio)" opacity=".5"/>${eyes(0,-4)}<path d="M-6 6 Q0 11 6 6" stroke="#142027" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+  if(id==='chem')return `<svg viewBox="-30 -30 60 60"><ellipse rx="28" ry="9" fill="none" stroke="var(--chem)" stroke-width="2.5" opacity=".6" class="ring"/><circle r="17" fill="var(--chem)"/>${eyes(0,-3)}<path d="M-5 6 Q0 10 5 6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="-30 -30 60 60"><circle r="20" fill="var(--phy)"/><path d="M-20 0 A20 20 0 0 1 20 0" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="5"/>${eyes(0,-3)}<path d="M-5 6 Q0 10 5 6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+}
+const Splash={
+  show(){
+    const d=document.createElement('div');d.id='splash';
+    const parts=`<div class="au a1"></div><div class="au a2"></div><div class="au a3"></div>`+Array.from({length:18},(_,i)=>{const r=n=>((Math.sin((i+1)*n*12.9898)*43758.5453)%1+1)%1;const k=['bio','chem','phy'][i%3];
+      return `<i class="bk s-${k}" style="left:${(r(1)*100).toFixed(1)}%;--h1:var(--acc);--sz:${(5+r(2)*10).toFixed(1)}px;--t:${(9+r(3)*9).toFixed(1)}s;--dl:${(-r(4)*16).toFixed(1)}s;--sw:${(r(5)*60-30).toFixed(0)}px"></i>`;}).join('');
+    d.innerHTML=`<div class="sp-pts" aria-hidden="true">${parts}</div>
+      <div class="sp-in">
+      <div class="sp-orbit">${['bio','chem','phy'].map((s,i)=>`<div class="sp-o s-${s}" style="--i:${i}">${motif(s,'live')}</div>`).join('')}<div class="sp-core">MD</div></div>
+      <h1 class="sp-h">${'Welcome'.split('').map((c,i)=>`<span style="--k:${i}">${c}</span>`).join('')}</h1>
+      <p class="sp-p">Let’s revise.</p>
+      <div class="sp-chips">${SUBJECTS.map((s,i)=>`<span class="s-${s.id}" style="--k:${i}">${s.name}</span>`).join('')}</div>
+      <button class="sp-go" id="spGo"><span>Let’s get started</span>${icon('next')}</button></div>
+      <div class="sp-lane" aria-hidden="true">${['bio','chem','phy'].map((s,i)=>`<div class="mc s-${s}" style="--i:${i}"><div class="mc-b">${mascot(s)}</div><i class="mc-sh"></i></div>`).join('')}</div>`;
+    document.body.appendChild(d);document.body.classList.add('splashing');
+    let gone=false;const end=()=>{if(gone)return;gone=true;document.removeEventListener('keydown',key);document.body.classList.remove('splashing');
+      const btn=$('#spGo',d);btn.animate([{transform:'scale(1)'},{transform:'scale(.92)'},{transform:'scale(1.08)'}],{duration:260,easing:'ease-out'});
+      d.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(1.08)'}],{duration:480,delay:150,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).onfinish=()=>d.remove();
+      const m=$('#main');m&&m.animate([{opacity:0,transform:'translateY(24px) scale(.97)'},{opacity:1,transform:'none'}],{duration:560,delay:250,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});};
+    const key=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();end();}};
+    $('#spGo',d).onclick=end;document.addEventListener('keydown',key);
+  }};
+
+/* ---------- choosing a subject re-themes everything ---------- */
+function setSubject(id,ev,after){
+  if(id===App.subj){after&&after();return;}
+  const go=()=>{App.subj=id;after?after():App.render(false,true);};
+  if(!id||matchMedia('(prefers-reduced-motion: reduce)').matches){go();return;}
+  const x=ev&&ev.clientX!=null?ev.clientX:innerWidth/2,y=ev&&ev.clientY!=null?ev.clientY:innerHeight/2;
+  const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+  const w=document.createElement('div');w.className='wipe s-'+id;
+  w.innerHTML=`<i style="left:${x-R}px;top:${y-R}px;width:${2*R}px;height:${2*R}px"></i><div class="wc">${motif(id,'live')}<b>${SUBJ_LOOK[id].hello}</b></div>`;
+  document.body.appendChild(w);const c=$('i',w),wc=$('.wc',w);
+  c.animate([{transform:'scale(0)'},{transform:'scale(1)'}],{duration:480,easing:'cubic-bezier(.6,0,.3,1)',fill:'forwards'});
+  wc.animate([{opacity:0,transform:'scale(.7)'},{opacity:1,transform:'scale(1)'}],{duration:420,delay:200,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'forwards'});
+  setTimeout(()=>{go();window.scrollTo({top:0,behavior:'instant'});
+    w.animate([{opacity:1},{opacity:0}],{duration:420,delay:380,easing:'ease',fill:'forwards'}).onfinish=()=>w.remove();},560);
+}
+function clearSubject(){if(App.stack.length)App.stack=[];App.subj=null;App.go('home');}
+function subjChooser(){/* big neutral cards */
+  const d=h(`<div class="pick3">${SUBJECTS.map(s=>{const has=s.chapters.length;const p=subjProgress(s);
+    return `<button class="pk s-${s.id}" data-s="${s.id}"><div class="pk-art">${motif(s.id,'live')}</div><div class="pk-tx"><div class="pk-n">${s.name}</div><div class="pk-m">${has?s.chapters.length+' chapters · '+pct(p)+' done':'Coming soon'}</div></div><span class="pk-go">${icon('next')}</span></button>`;}).join('')}</div>`);
+  $$('.pk',d).forEach(b=>b.onclick=e=>setSubject(b.dataset.s,e));return d;
+}
+function needSubject(el,title,sub){el.innerHTML=`<div class="ph"><h1>${title}</h1><p>${sub}</p></div><h2 class="sech">Choose a subject</h2>`;el.appendChild(subjChooser());}
+
+/* ---------- home ---------- */
+function renderHome(el){
+  const n=wrongCount();const hr=new Date().getHours();
+  const greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  const s=SUBJECTS.find(x=>x.id===App.subj);
+  if(!s){
+    el.innerHTML=`<div class="ph"><h1>${greet}</h1><p>What are we revising today?</p></div>`;
+    el.appendChild(subjChooser());
+    el.insertAdjacentHTML('beforeend',`<div class="neutral-stats"><div class="stat"><b>${S.score||0}</b><span>points</span></div><div class="stat"><b>${Object.keys(S.lessons).length}</b><span>lessons done</span></div><button class="stat" id="hWrong"><b>${n}</b><span>in Wrong Tab</span></button></div>`);
+    $('#hWrong',el).onclick=()=>App.go('wrong');return;
+  }
+  const look=SUBJ_LOOK[s.id];const has=s.chapters.length;
+  el.innerHTML=`<div class="hero"><div class="hero-tx"><div class="hero-k">${greet}</div><h1>${s.name}</h1><p>${look.tag}</p>
+    ${has?`<div class="hero-p">${ringSVG(subjProgress(s),58,7)}<div><b>${pct(subjProgress(s))}</b><span>of ${s.name} done</span></div></div>`:''}</div>
+    <div class="hero-art">${motif(s.id,'live big')}</div></div>
+    <div class="hw"></div>
+    <button class="btn ghost w100 mt" id="swSub">Switch subject</button>`;
+  $('#swSub',el).onclick=clearSubject;
+  const w=$('.hw',el);
+  if(!has){w.innerHTML=emptySubject(s);return;}
+  const last=S.last&&S.last.lesson&&allLessons().find(x=>x.id===S.last.lesson);
+  const L=(last&&subjOf(last.ch)===s)?last:LESSONS[s.chapters[0].key][0];const Lc=chapOf(L.ch);const isLast=L===last;
+  w.innerHTML=`<button class="cont" id="contBtn"><div class="ct"><b>${lessonMark(L)}</b><span>${Lc.code}</span></div><div style="min-width:0"><div class="small muted">${isLast?'Continue where you left off':'Let\'s get started'} · Chapter ${Lc.num}</div><div class="tt">${lessonName(L)}</div></div><span class="go">${icon('next')}</span></button>
+  <h2 class="sech">Chapters <small>${s.chapters.length}</small></h2><div class="chl">${s.chapters.map(c=>chapRow(c,s)).join('')}</div>
+  <h2 class="sech">Quick practice</h2>
+  <div class="quick"><button class="qa" id="hQuiz">${icon('quiz')}<b>Quick quiz</b><span>10 mixed questions</span></button><button class="qa" id="hGame">${icon('bolt')}<b>Speed round</b><span>Best: ${S.games.speed||0}</span></button><button class="qa" id="hWrong">${icon('wrong')}<b>${n?n+' to fix':'Nothing to fix'}</b><span>Wrong Tab</span></button></div>`;
+  $$('.chr',w).forEach(b=>b.onclick=()=>openChapter(+b.dataset.k));
+  $('#hWrong',w).onclick=()=>App.go('wrong');
+  $('#contBtn',w).onclick=()=>openLesson(L.id);
+  $('#hQuiz',w).onclick=()=>{App.go('practice');startQuiz('mix',10);};
+  $('#hGame',w).onclick=()=>{App.go('games');openGame('speed');};
+}
+
+/* ---------- game intro: 3 · 2 · 1 · Go ---------- */
+function gameIntro(scr,g,start){
+  scr.innerHTML=`<div class="gi" style="--gbg:${g[4]}"><div class="gi-card"><div class="gi-code">${GCODE[g[0]]||g[1]}</div><h2>${g[2]}</h2><p>${g[3]}</p><div class="gi-n" aria-live="polite"></div><div class="gi-hint">Get ready…</div></div><button class="btn ghost sm gi-skip">Skip</button></div>`;
+  const n=$('.gi-n',scr),hint=$('.gi-hint',scr);let k=0,done=false,t;
+  const fire=()=>{if(done||!scr.isConnected)return;done=true;clearTimeout(t);start();};
+  const steps=['3','2','1','Go!'];
+  const tick=()=>{if(done||!scr.isConnected)return;if(k>=steps.length)return fire();
+    const v=steps[k++];n.textContent=v;n.classList.toggle('go',v==='Go!');if(k===1)hint.textContent='Starting in…';if(v==='Go!')hint.textContent='';
+    n.animate([{transform:'scale(2.2)',opacity:0},{transform:'scale(.92)',opacity:1,offset:.55},{transform:'scale(1)',opacity:1}],{duration:480,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+    t=setTimeout(tick,v==='Go!'?520:720);};
+  t=setTimeout(tick,650);$('.gi-skip',scr).onclick=fire;
+}
+
+/* ---------- moving background (Full effects only) ---------- */
+const BgFx={
+  init(){if($('#bgfx'))return;const d=document.createElement('div');d.id='bgfx';d.setAttribute('aria-hidden','true');
+    const art={
+      bio:`<svg viewBox="-100 -100 200 200"><circle r="92" fill="none" stroke="currentColor" stroke-width="1.2"/><circle r="84" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="2 5"/><circle r="26" cx="-14" cy="-10" fill="none" stroke="currentColor" stroke-width="1.2"/><circle r="9" cx="-14" cy="-10" fill="none" stroke="currentColor" stroke-width="1"/><ellipse rx="20" ry="9" cx="40" cy="30" transform="rotate(-25 40 30)" fill="none" stroke="currentColor" stroke-width="1"/><path d="M28 30 q6-6 12 0 t12 0" fill="none" stroke="currentColor" stroke-width=".8"/><ellipse rx="12" ry="6" cx="-40" cy="44" fill="none" stroke="currentColor" stroke-width="1"/><circle r="3" cx="30" cy="-46" fill="currentColor"/><circle r="2" cx="52" cy="-20" fill="currentColor"/><circle r="2.5" cx="-56" cy="10" fill="currentColor"/></svg>`,
+      chem:`<svg viewBox="-100 -100 200 200">${[0,1,2,3,4,5].map(k=>{const a=k*Math.PI/3,x=(Math.cos(a)*52).toFixed(1),y=(Math.sin(a)*52).toFixed(1);return `<g transform="translate(${x} ${y})"><polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" fill="none" stroke="currentColor" stroke-width="1"/></g>`;}).join('')}<polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" fill="none" stroke="currentColor" stroke-width="1.6"/><circle r="15" fill="none" stroke="currentColor" stroke-width="1"/><circle r="96" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="1 6"/></svg>`,
+      phy:`<svg viewBox="-100 -100 200 200">${[30,48,66,84].map(r=>`<circle r="${r}" fill="none" stroke="currentColor" stroke-width="${r===84?1.2:.7}"/>`).join('')}<path d="M-96 60 Q0 -150 96 60" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 5"/><path d="M-100 0H100M0 -100V100" stroke="currentColor" stroke-width=".5"/><circle r="4" cx="-40" cy="-8" fill="currentColor"/></svg>`};
+    let html=`<div class="au a1"></div><div class="au a2"></div><div class="au a3"></div>`;
+    ['bio','chem','phy'].forEach(s=>{html+=`<div class="bart bart-${s}">${art[s]}</div>`;});
+    for(let i=0;i<14;i++){const r=n=>((Math.sin((i+1)*n*12.9898)*43758.5453)%1+1)%1;
+      html+=`<i class="bk" style="left:${(r(1)*100).toFixed(1)}%;--sz:${(4+r(2)*9).toFixed(1)}px;--t:${(22+r(3)*26).toFixed(1)}s;--dl:${(-r(4)*48).toFixed(1)}s;--sw:${(r(5)*60-30).toFixed(0)}px"></i>`;}
+    d.innerHTML=html;document.body.prepend(d);}};
+
+Object.keys(LESSONS).forEach(c=>LESSONS[c].sort((a,b)=>a.n-b.n));buildFlash();Store.loadLocal();App.init();Store.initRemote();
 </script>
 </body></html>
