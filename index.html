@@ -661,6 +661,46 @@ html.lite #bgfx{display:none}
 #updbar span{flex:1;font-weight:700;font-size:.92rem}
 #updbar .iconbtn{width:36px;height:36px;background:transparent;border-color:color-mix(in srgb,var(--bg) 30%,transparent);color:var(--bg)}
 @media (min-width:900px){#updbar{bottom:20px;left:calc(var(--rail) + 20px)}}
+
+/* compact notes */
+.notes ul ul{margin:3px 0 4px;padding-left:16px}
+.notes ul ul li{margin:2px 0;color:var(--ink2)}
+.notes ul ul li::marker{content:"– ";color:var(--ink3)}
+.notes li::marker{color:var(--acc)}
+@media (max-width:600px){
+ .notes{font-size:.94rem;line-height:1.45;padding:14px 14px 12px}
+ .notes h4{margin:12px 0 2px;font-size:.98rem}
+ .notes h4:first-child{margin-top:0}
+ .notes ul{padding-left:17px;margin:2px 0 6px}
+ .notes li{margin:3px 0}
+ .notes ul ul{padding-left:14px}
+}
+
+/* version groups */
+.clgr{border:1px solid var(--line);border-radius:14px;margin:10px 0;background:var(--card2);overflow:hidden}
+.clgr summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.clgr summary::-webkit-details-marker{display:none}
+.clgr summary b{font-family:var(--head);font-size:1.08rem}
+.clgr summary em{font-style:normal;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--acc3);color:var(--acc)}
+.clgr summary .chev{margin-left:auto;transition:transform .3s;display:grid}
+.clgr summary .chev .ic{width:18px;height:18px}
+.clgr[open] summary .chev{transform:rotate(90deg)}
+.clgr .cl{margin:0 14px 12px 22px}
+.clgr[open] .cl{animation:rise .35s cubic-bezier(.2,.8,.2,1)}
+.clgr.cur{border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+/* updating + what's new */
+#updating{position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 92%,transparent)}
+.up-in{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.up-in b{font-family:var(--head);font-size:1.3rem}.up-in span{color:var(--ink3);font-weight:700}
+.up-spin{width:46px;height:46px;border-radius:50%;border:5px solid var(--line);border-top-color:var(--acc);animation:spin .8s linear infinite}
+#whatsnew{position:fixed;inset:0;z-index:350;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.45)}
+.wn-card{width:100%;max-width:440px;max-height:86vh;overflow:auto;background:var(--card);border-radius:24px;padding:22px 20px 14px;border:1px solid var(--line);box-shadow:0 20px 50px -20px rgba(0,0,0,.6);text-align:center}
+.wn-badge{width:58px;height:58px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;background:var(--ok);color:#fff}
+.wn-badge .ic{width:30px;height:30px}
+.wn-card h2{margin:4px 0 10px}
+.wn-card h3{text-align:left;margin:0 0 4px;color:var(--acc)}
+.wn-card ul{text-align:left;margin:0 0 16px;padding-left:1.15em}.wn-card li{margin:6px 0}
+.wn-card .ablink{margin-top:6px}
 </style></head>
 <body>
 <header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">MD</span><span class="t" id="ttl">Class 11 Revision</span></div><button class="subjbtn hidden" id="subjBtn" aria-label="Switch subject"></button><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
@@ -703,7 +743,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 /* Version rule (set by Mrudul): 1.0 = first release (Ch 5, 6). Each new chapter adds 1 to the middle number
    and resets the bug-fix count; each bug fix adds 1 to the last number. e.g. 1.1 → 1.1.1 … 1.1.5 → (new chapter) 1.2
    History: 1.0 – Ch 5 & 6 · 1.1 – Ch 1 The Living World */
-const APP_VERSION='1.3.16'; /* rule: 1.<chapters>.<changes since last chapter>. Full history lives in CHANGELOG (about.js) – add a line there with every version bump. New chapter -> 1.4 (last number resets). */
+const APP_VERSION='1.3.21'; /* rule: 1.<chapters>.<changes since last chapter>. Full history lives in CHANGELOG (about.js) – add a line there with every version bump. New chapter -> 1.4 (last number resets). */
 const LESSONS={1:[],5:[],6:[]};
 const allLessons=()=>Object.values(LESSONS).flat();
 const DIAGRAMS={};
@@ -765,7 +805,7 @@ function removeWrong(key){if(S.wrong[key]){delete S.wrong[key];save();updateBadg
 function updateBadge(pop){const b=$('#wrongBadge');const n=wrongCount();b.textContent=n;b.classList.toggle('hidden',n===0);if(pop){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}}
 
 /* ---------- icons ---------- */
-const IC={swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+const IC={check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
  learn:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6"/>',
  practice:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/>',
  games:'<rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r=".9"/><circle cx="17.8" cy="13.8" r=".9"/>',
@@ -803,6 +843,18 @@ function animateScreen(scr){
   $$('.tile,.cont,.qa,.chr,.lcard,.psub,.exq,.stat,.ph,.sech,.empty',scr).forEach((e,k)=>{e.style.setProperty('--d',Math.min(k,14)*38+'ms');e.classList.add('ai');});
   $$('.stat b',scr).forEach(b=>{const tn=b.firstChild;if(!tn||tn.nodeType!==3)return;const v=parseInt(tn.textContent);if(!(v>0))return;const t0=performance.now();tn.textContent='0';const f=n=>{const k=Math.min(1,(n-t0)/850);tn.textContent=Math.round(v*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);});
 }
+/* split long note bullets into short pointers at sentence and semicolon breaks (content unchanged) */
+function compactNotes(root){
+  $$(':scope > ul > li',root).forEach(li=>{if(li.querySelector('ul')||li.textContent.length<95)return;
+    const groups=[[]];
+    [...li.childNodes].forEach(n=>{
+      if(n.nodeType===3){const parts=n.textContent.split(/(?<=[.;])\s+(?=[A-Z(‘“])/);
+        parts.forEach((p,i)=>{if(i>0)groups.push([]);let t=p.replace(/;\s*$/,'');if(t.trim())groups[groups.length-1].push(document.createTextNode(i>0?t.replace(/^\s+/,''):t));});}
+      else groups[groups.length-1].push(n);});
+    const g=groups.filter(x=>x.length&&x.some(n=>n.textContent.trim()));if(g.length<2)return;
+    const frag=document.createDocumentFragment();g.forEach(nodes=>{const l=document.createElement('li');nodes.forEach(n=>l.appendChild(n));frag.appendChild(l);});
+    li.replaceWith(frag);});
+}
 function revealOnScroll(root){if(!('IntersectionObserver' in window))return;const els=$$('.lbody > .card, .lbody > .seg, .lbody > .sec, .notes, .terms, .qcw > .card, .lbody > div > .card',root);
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('seen');io.unobserve(e.target);}}),{rootMargin:'0px 0px -6% 0px'});
   els.forEach(e=>{e.classList.add('rv');io.observe(e);});}
@@ -818,7 +870,7 @@ const App={tab:'home',stack:[],subj:null,learnCh:5,
     $('#backBtn').onclick=()=>this.back();$('#subjBtn').onclick=clearSubject;
     window.addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(TABS.some(x=>x[0]===t)&&t!==this.tab)this.go(t,true);});
     applyTheme();updateBadge();FX.init();BgFx.init();Updater.init();
-    const t=location.hash.slice(1);this.go(TABS.some(x=>x[0]===t)?t:'home',true);Splash.show();
+    const t=location.hash.slice(1);this.go(TABS.some(x=>x[0]===t)?t:'home',true);if(/[?&]v=/.test(location.search)||WhatsNew.justUpdated()){try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}WhatsNew.maybe();}else{Splash.show();WhatsNew.maybe();}
   },
   go(tab,noHash){this.tab=tab;this.stack=[];if(!noHash){try{history.replaceState(null,'','#'+tab);}catch(e){}}
     $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));this.render();},
@@ -830,13 +882,13 @@ const App={tab:'home',stack:[],subj:null,learnCh:5,
     const main=$('#main');const top=this.stack[this.stack.length-1];
     main.innerHTML='';const scr=document.createElement('div');scr.className='screen'+(isBack?' back':'');if(quiet)scr.style.animation='none';main.appendChild(scr);
     let subj=this.subj;if(top&&top.opts.ch){const s=subjOf(top.opts.ch);if(s)subj=s.id;}
-    document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);{const pt=$('#tabs [data-tab=progress]');if(pt)pt.classList.toggle('hidden',!!this.subj);}updateBadge();if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
+    document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);{if(!top&&typeof Updater!=='undefined')setTimeout(()=>Updater.tryApply(),400);const pt=$('#tabs [data-tab=progress]');if(pt)pt.classList.toggle('hidden',!!this.subj);}updateBadge();if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
     $('#backBtn').classList.toggle('show',!!top);
     const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'MD';
     if(top){$('#ttl').textContent=top.title;top.fn(scr);animateScreen(scr);}
     else{$('#ttl').textContent={home:'Class 11 Revision',learn:'Learn',practice:'Practice',games:'Games',wrong:'Wrong Tab',progress:'Progress'}[this.tab];
       ({home:renderHome,learn:renderLearn,practice:renderPractice,games:renderGames,wrong:renderWrong,progress:renderProgress})[this.tab](scr);
-      animateScreen(scr);scr.insertAdjacentHTML('beforeend',`<footer class="foot"><button class="ablink">About this site</button><br>Version ${APP_VERSION}<br>© ${new Date().getFullYear()} Mrudul. All rights reserved.</footer>`);$('.ablink',scr).onclick=openAbout;}
+      animateScreen(scr);scr.insertAdjacentHTML('beforeend',`<footer class="foot">${App.subj?'':'<button class="ablink">About this site</button><br>'}Version ${APP_VERSION}<br>© ${new Date().getFullYear()} Mrudul. All rights reserved.</footer>`);$('.ablink',scr)&&($('.ablink',scr).onclick=openAbout);}
     if(!quiet)window.scrollTo({top:0,behavior:'instant'});
   }
 };
@@ -886,7 +938,7 @@ function openLesson(id){
     <div class="qcw"></div>
     <div class="card flat center"><button class="btn ${S.lessons[id]?'ok':''} w100" id="doneBtn">${S.lessons[id]?'✓ Lesson completed':'Mark lesson as done'}</button></div>
     <div class="lnav">${idx>0?`<button class="btn ghost" id="prevL">‹ ${lessonName(list[idx-1])}</button>`:''}${idx<list.length-1?`<button class="btn ghost" id="nextL">${lessonName(list[idx+1])} ›</button>`:''}</div>`;
-    l.render($('.lbody',scr));revealOnScroll(scr);
+    l.render($('.lbody',scr));$$('.notes',scr).forEach(compactNotes);revealOnScroll(scr);
     if(N.terms)$$('.terms button',scr).forEach((b,i)=>b.onclick=()=>{b.classList.toggle('on');$('span',b).textContent=b.classList.contains('on')?N.terms[i][1]:'Tap to reveal';});
     if(N.qk){const re=new RegExp(N.qk,'i');const qs=shuffle(MCQ.filter(q=>q.ch===l.ch&&re.test(q.q+' '+q.o[q.a]))).slice(0,3);
       if(qs.length){const w=$('.qcw',scr);w.innerHTML=`<h2 class="sech">Quick check <small>${qs.length} questions</small></h2>`;
@@ -1356,352 +1408,622 @@ const NOTES={};
 const n5=(id,o)=>NOTES[id]=o;
 n5('c5-plant',{notes:`
 <h4>Why study morphology?</h4><ul>
-<li>Angiosperms show a <b>large diversity in external structure (morphology)</b>, but all are characterised by the presence of <b>roots, stems, leaves, flowers and fruits</b>.</li>
-<li>For successful <b>classification</b> and understanding of any higher plant we need <b>standard technical terms</b> and <b>standard definitions</b>.</li>
-<li>We also need to know the <b>variations</b> in different parts – found as <b>adaptations</b> to the environment, e.g. adaptations to various habitats, for <b>protection, climbing, storage</b>, etc.</li></ul>
+<li>Angiosperms show a <b>large diversity</b> in external structure (<b>morphology</b>).</li>
+<li>Yet all have:<ul><li><b>roots · stems · leaves · flowers · fruits</b></li></ul></li>
+<li>For <b>classification</b> and understanding we need:<ul>
+ <li><b>standard technical terms</b></li><li><b>standard definitions</b></li></ul></li>
+<li>We also study <b>variations</b> in plant parts.<ul>
+ <li>they are <b>adaptations</b> to the environment</li>
+ <li>e.g. to various habitats</li>
+ <li>for <b>protection</b>, <b>climbing</b>, <b>storage</b>, etc.</li></ul></li></ul>
 <h4>Root system and shoot system (Fig. 5.1)</h4><ul>
-<li>Pull out any weed – all have <b>roots, stems and leaves</b>; they may bear <b>flowers and fruits</b>.</li>
-<li>The <b>underground</b> part of the flowering plant is the <span class="term">root system</span>.</li>
-<li>The portion <b>above the ground</b> forms the <span class="term">shoot system</span>.</li>
-<li>Fig. 5.1 labels: <b>flower, fruit, stem, leaf, node, internode, bud</b> (shoot system); <b>primary root, secondary root</b> (root system).</li></ul>`,
+<li>Pull out any weed – all have <b>roots, stems, leaves</b>.</li>
+<li>They may bear <b>flowers</b> and <b>fruits</b>.</li>
+<li><b>Underground</b> part → <span class="term">root system</span></li>
+<li>Part <b>above the ground</b> → <span class="term">shoot system</span></li>
+<li>Fig. 5.1 labels:<ul>
+ <li>shoot – <b>flower, fruit, stem, leaf, node, internode, bud</b></li>
+ <li>root – <b>primary root, secondary root</b></li></ul></li></ul>`,
 terms:[['Morphology','Study of external structure / form of the plant'],['Root system','Underground part of the flowering plant'],['Shoot system','Portion of the plant above the ground'],['Angiosperms','Flowering plants – have roots, stems, leaves, flowers and fruits']],qk:'shoot|root system|morpholog'});
 
 n5('c5-roots',{notes:`
 <h4><span class="num">5.1</span>The root – how root systems form</h4><ul>
-<li>In <b>majority of dicotyledonous plants</b>, the <b>direct elongation of the radicle</b> forms the <span class="term">primary root</span>, which grows inside the soil.</li>
-<li>It bears <b>lateral roots of several orders</b> – called <b>secondary, tertiary</b>, etc. roots.</li>
-<li>The primary root and its branches constitute the <span class="term">tap root system</span>, e.g. <span class="eg">mustard</span> (Fig. 5.2a).</li>
-<li>In <b>monocotyledonous</b> plants, the primary root is <b>short-lived</b> and is replaced by a <b>large number of roots</b> which originate from the <b>base of the stem</b> – the <span class="term">fibrous root system</span>, e.g. <span class="eg">wheat</span> (Fig. 5.2b).</li>
-<li>In some plants, roots arise from <b>parts of the plant other than the radicle</b> – <span class="term">adventitious roots</span>, e.g. <span class="eg">grass, Monstera, banyan tree</span> (Fig. 5.2c).</li></ul>
+<li><span class="term">Tap root system</span> – most <b>dicots</b>:<ul>
+ <li><b>radicle elongates directly</b> → <span class="term">primary root</span></li>
+ <li>primary root grows inside the soil</li>
+ <li>bears <b>lateral roots</b> of several orders – <b>secondary, tertiary</b>…</li>
+ <li>primary root + its branches = tap root system</li>
+ <li>e.g. <span class="eg">mustard</span> (Fig. 5.2a)</li></ul></li>
+<li><span class="term">Fibrous root system</span> – <b>monocots</b>:<ul>
+ <li>primary root is <b>short-lived</b></li>
+ <li>replaced by <b>many roots</b> from the <b>base of the stem</b></li>
+ <li>e.g. <span class="eg">wheat</span> (Fig. 5.2b)</li></ul></li>
+<li><span class="term">Adventitious roots</span>:<ul>
+ <li>arise from parts <b>other than the radicle</b></li>
+ <li>e.g. <span class="eg">grass, Monstera, banyan tree</span> (Fig. 5.2c)</li></ul></li></ul>
 <h4>Main functions of the root system</h4><ul>
-<li><b>Absorption</b> of water and minerals from the soil.</li><li>Providing proper <b>anchorage</b> to the plant parts.</li><li><b>Storing reserve food</b> material.</li><li><b>Synthesis of plant growth regulators</b>.</li></ul>
-<div class="note">📌 Summary point: Generally <b>dicots have tap roots</b> while <b>monocots have fibrous roots</b>. Roots in some plants get modified for <b>storage of food, mechanical support and respiration</b>.</div>`,
+<li><b>Absorption</b> of water and minerals from soil</li>
+<li>Proper <b>anchorage</b> of plant parts</li>
+<li><b>Storing reserve food</b></li>
+<li><b>Synthesis of plant growth regulators</b></li></ul>
+<div class="note">📌 Generally <b>dicots → tap roots</b>, <b>monocots → fibrous roots</b>. Some roots are modified for <b>storage of food, mechanical support and respiration</b>.</div>`,
 terms:[['Radicle','Embryonic root – elongates to form the primary root'],['Primary root','Formed by direct elongation of the radicle'],['Tap root system','Primary root + its branches (mustard)'],['Fibrous root system','Many roots from the base of the stem (wheat)'],['Adventitious roots','Arise from parts other than radicle (grass, Monstera, banyan)'],['Lateral roots','Secondary, tertiary… roots on the primary root']],qk:'tap root|fibrous|adventitious|root system'});
 
 n5('c5-roottip',{notes:`
 <h4><span class="num">5.1.1</span>Regions of the root (Fig. 5.3)</h4><ul>
-<li><span class="term">Root cap</span> – the root is covered at the apex by a <b>thimble-like</b> structure. It <b>protects the tender apex</b> of the root as it makes its way through the soil.</li>
-<li><span class="term">Region of meristematic activity</span> – a few millimetres <b>above the root cap</b>. Cells are <b>very small, thin-walled, with dense protoplasm</b>. They <b>divide repeatedly</b>.</li>
-<li><span class="term">Region of elongation</span> – cells proximal to the meristematic region undergo <b>rapid elongation and enlargement</b>; they are responsible for the <b>growth of the root in length</b>.</li>
-<li><span class="term">Region of maturation</span> – cells of the elongation zone gradually <b>differentiate and mature</b>; this zone is proximal to the region of elongation.</li>
-<li><span class="term">Root hairs</span> – from the region of maturation some <b>epidermal cells</b> form very fine, delicate, <b>thread-like</b> structures. Root hairs <b>absorb water and minerals</b> from the soil.</li></ul>
-<div class="note">🧭 Order from the tip upwards: <b>root cap → meristematic region → region of elongation → region of maturation (root hairs)</b>.</div>`,
+<li><span class="term">Root cap</span><ul>
+ <li><b>thimble-like</b> cover at the apex</li>
+ <li><b>protects the tender apex</b> as it pushes through soil</li></ul></li>
+<li><span class="term">Region of meristematic activity</span><ul>
+ <li>a few mm <b>above the root cap</b></li>
+ <li>cells <b>very small, thin-walled</b>, <b>dense protoplasm</b></li>
+ <li>cells <b>divide repeatedly</b></li></ul></li>
+<li><span class="term">Region of elongation</span><ul>
+ <li>just proximal to the meristematic region</li>
+ <li>cells <b>elongate and enlarge rapidly</b></li>
+ <li>→ <b>growth of root in length</b></li></ul></li>
+<li><span class="term">Region of maturation</span><ul>
+ <li>proximal to the region of elongation</li>
+ <li>cells gradually <b>differentiate and mature</b></li></ul></li>
+<li><span class="term">Root hairs</span><ul>
+ <li>formed by some <b>epidermal cells</b> of the maturation region</li>
+ <li>very fine, delicate, <b>thread-like</b></li>
+ <li><b>absorb water and minerals</b></li></ul></li></ul>
+<div class="note">🧭 From the tip up: <b>root cap → meristematic → elongation → maturation (root hairs)</b>.</div>`,
 terms:[['Root cap','Thimble-like cover protecting the root apex'],['Meristematic region','Small, thin-walled cells with dense protoplasm that divide repeatedly'],['Region of elongation','Cells elongate rapidly – root grows in length'],['Region of maturation','Cells differentiate and mature; root hairs form here'],['Root hairs','Fine thread-like epidermal outgrowths – absorb water & minerals']],qk:'root cap|meristematic|elongation|maturation|root hair'});
 
 n5('c5-stem',{notes:`
 <h4><span class="num">5.2</span>The stem</h4><ul>
-<li><b>What distinguishes a stem from a root?</b> The stem is the <b>ascending part of the axis</b> bearing <b>branches, leaves, flowers and fruits</b>.</li>
-<li>It develops from the <span class="term">plumule</span> of the embryo of a germinating seed.</li>
-<li>The stem bears <span class="term">nodes</span> and <span class="term">internodes</span>: nodes are regions where <b>leaves are born</b>; internodes are the <b>portions between two nodes</b>.</li>
-<li>The stem bears <span class="term">buds</span>, which may be <b>terminal or axillary</b>.</li>
-<li>Stem is generally <b>green when young</b> and later often becomes <b>woody and dark brown</b>.</li></ul>
+<li>Stem = <b>ascending part of the axis</b>.</li>
+<li>Bears <b>branches, leaves, flowers, fruits</b>.</li>
+<li>Develops from the <span class="term">plumule</span> of the germinating seed’s embryo.</li>
+<li>Has <span class="term">nodes</span> and <span class="term">internodes</span>:<ul>
+ <li>node – where <b>leaves are born</b></li>
+ <li>internode – portion <b>between two nodes</b></li></ul></li>
+<li>Bears <span class="term">buds</span> – <b>terminal</b> or <b>axillary</b>.</li>
+<li>Colour:<ul><li><b>green</b> when young</li><li>later often <b>woody</b> and <b>dark brown</b></li></ul></li></ul>
 <h4>Functions of the stem</h4><ul>
-<li>Main function: <b>spreading out branches</b> bearing leaves, flowers and fruits.</li>
-<li><b>Conducts</b> water, minerals and photosynthates.</li>
-<li>Some stems perform <b>storage of food, support, protection</b> and <b>vegetative propagation</b>.</li></ul>
-<div class="note">📌 Summary point: <b>nodes and internodes, multicellular hair</b> and <b>positively phototropic</b> nature help to differentiate stems from roots.</div>`,
+<li>Main: <b>spreading out branches</b> with leaves, flowers, fruits</li>
+<li><b>Conducts</b> water, minerals, photosynthates</li>
+<li>Some stems also:<ul>
+ <li><b>store food</b> · give <b>support</b></li>
+ <li>give <b>protection</b> · <b>vegetative propagation</b></li></ul></li></ul>
+<div class="note">📌 Stem vs root: <b>nodes and internodes</b>, <b>multicellular hair</b>, <b>positively phototropic</b>.</div>`,
 terms:[['Plumule','Part of embryo that develops into the stem'],['Node','Region of stem where leaves are born'],['Internode','Portion of stem between two nodes'],['Terminal bud','Bud at the tip of the stem'],['Axillary bud','Bud in the axil of a leaf – grows into a branch'],['Photosynthates','Food made by photosynthesis – conducted by the stem']],qk:'stem|node|plumule'});
 
 n5('c5-leaf',{notes:`
 <h4><span class="num">5.3</span>The leaf</h4><ul>
-<li>A <b>lateral, generally flattened</b> structure borne on the stem.</li>
-<li>It develops at the <b>node</b> and bears a <b>bud in its axil</b>; the axillary bud later develops into a <b>branch</b>.</li>
-<li>Leaves originate from <b>shoot apical meristems</b> and are arranged in an <b>acropetal order</b>.</li>
-<li>They are the most important vegetative organs for <b>photosynthesis</b>.</li></ul>
+<li>A <b>lateral</b>, generally <b>flattened</b> structure on the stem.</li>
+<li>Develops at the <b>node</b>.</li>
+<li>Bears a <b>bud in its axil</b> → later becomes a <b>branch</b>.</li>
+<li>Originates from <b>shoot apical meristems</b>.</li>
+<li>Arranged in <b>acropetal order</b>.</li>
+<li>Most important vegetative organ for <b>photosynthesis</b>.</li></ul>
 <h4>Parts of a typical leaf (Fig. 5.4a)</h4><ul>
-<li><span class="term">Leaf base</span> – attaches the leaf to the stem; may bear two lateral small leaf-like <span class="term">stipules</span>. In <b>monocots</b> the leaf base expands into a <b>sheath</b> covering the stem partially or wholly. In some <b>leguminous</b> plants the leaf base becomes swollen – the <span class="term">pulvinus</span>.</li>
-<li><span class="term">Petiole</span> – helps hold the blade to light. <b>Long thin flexible petioles</b> let leaf blades <b>flutter in wind</b>, thereby <b>cooling the leaf</b> and bringing <b>fresh air</b> to the leaf surface.</li>
-<li><span class="term">Lamina (leaf blade)</span> – the <b>green expanded part</b> with <b>veins and veinlets</b>. Usually a middle prominent vein – the <span class="term">midrib</span>. Veins provide <b>rigidity</b> to the blade and act as <b>channels of transport</b> for water, minerals and food. The <b>shape, margin, apex, surface and extent of incision</b> of lamina vary in different leaves.</li></ul>
+<li><span class="term">Leaf base</span><ul>
+ <li>attaches leaf to stem</li>
+ <li>may bear two small leaf-like <span class="term">stipules</span></li>
+ <li><b>monocots</b>: expands into a <b>sheath</b> around the stem</li>
+ <li>some <b>legumes</b>: swollen base = <span class="term">pulvinus</span></li></ul></li>
+<li><span class="term">Petiole</span><ul>
+ <li>holds the blade to <b>light</b></li>
+ <li>long, thin, flexible → blade <b>flutters in wind</b></li>
+ <li>this <b>cools the leaf</b> and brings <b>fresh air</b></li></ul></li>
+<li><span class="term">Lamina</span> (leaf blade)<ul>
+ <li><b>green expanded part</b> with veins and veinlets</li>
+ <li>prominent middle vein = <span class="term">midrib</span></li>
+ <li>veins give <b>rigidity</b></li>
+ <li>veins are <b>channels</b> for water, minerals, food</li>
+ <li>varies in <b>shape, margin, apex, surface, incision</b></li></ul></li></ul>
 <h4><span class="num">5.3.1</span>Venation</h4><ul>
-<li>Arrangement of veins and veinlets in the lamina = <span class="term">venation</span>.</li>
-<li><b>Reticulate</b> – veinlets form a <b>network</b> (Fig. 5.4b); generally in <b>dicots</b>.</li>
-<li><b>Parallel</b> – veins run <b>parallel</b> to each other within the lamina (Fig. 5.4c); characteristic of <b>most monocots</b>.</li></ul>
+<li><span class="term">Venation</span> = arrangement of veins and veinlets.</li>
+<li><b>Reticulate</b> – veinlets form a <b>network</b><ul><li>generally <b>dicots</b> (Fig. 5.4b)</li></ul></li>
+<li><b>Parallel</b> – veins run <b>parallel</b><ul><li>most <b>monocots</b> (Fig. 5.4c)</li></ul></li></ul>
 <h4><span class="num">5.3.2</span>Types of leaves</h4><ul>
-<li><span class="term">Simple</span> – lamina is entire or, when incised, the <b>incisions do not touch the midrib</b>.</li>
-<li><span class="term">Compound</span> – incisions reach up to the midrib, breaking it into a number of <b>leaflets</b>.</li>
-<li>A <b>bud is present in the axil of the petiole</b> in both simple and compound leaves, but <b>not in the axil of leaflets</b> of a compound leaf.</li>
-<li><b>Pinnately compound</b> – leaflets on a common axis, the <span class="term">rachis</span> (represents the midrib), e.g. <span class="eg">neem</span>.</li>
-<li><b>Palmately compound</b> – leaflets attached at a <b>common point, the tip of the petiole</b>, e.g. <span class="eg">silk cotton</span>.</li></ul>
+<li><span class="term">Simple</span><ul><li>lamina entire, or</li><li>incisions <b>do not touch the midrib</b></li></ul></li>
+<li><span class="term">Compound</span><ul><li>incisions <b>reach the midrib</b></li><li>blade breaks into <b>leaflets</b></li></ul></li>
+<li>Bud is in the <b>axil of the petiole</b> in both.</li>
+<li><b>No bud</b> in the axil of <b>leaflets</b>.</li>
+<li><b>Pinnately compound</b><ul>
+ <li>leaflets on a common axis – <span class="term">rachis</span></li>
+ <li>rachis represents the midrib</li>
+ <li>e.g. <span class="eg">neem</span></li></ul></li>
+<li><b>Palmately compound</b><ul>
+ <li>leaflets at a <b>common point</b> – tip of petiole</li>
+ <li>e.g. <span class="eg">silk cotton</span></li></ul></li></ul>
 <h4><span class="num">5.3.3</span>Phyllotaxy</h4><ul>
-<li>The pattern of arrangement of leaves on the stem or branch = <span class="term">phyllotaxy</span>. Three types (Fig. 5.6):</li>
-<li><b>Alternate</b> – a single leaf at each node in alternate manner: <span class="eg">china rose, mustard, sunflower</span>.</li>
-<li><b>Opposite</b> – a pair of leaves at each node, opposite each other: <span class="eg">Calotropis, guava</span>.</li>
-<li><b>Whorled</b> – more than two leaves at a node forming a whorl: <span class="eg">Alstonia</span>.</li></ul>`,
+<li><span class="term">Phyllotaxy</span> = arrangement of leaves on stem or branch.</li>
+<li>Three types (Fig. 5.6):</li>
+<li><b>Alternate</b> – one leaf per node, alternately<ul><li><span class="eg">china rose, mustard, sunflower</span></li></ul></li>
+<li><b>Opposite</b> – a pair per node, facing each other<ul><li><span class="eg">Calotropis, guava</span></li></ul></li>
+<li><b>Whorled</b> – more than two per node, in a whorl<ul><li><span class="eg">Alstonia</span></li></ul></li></ul>`,
 terms:[['Stipules','Two small lateral leaf-like structures at the leaf base'],['Pulvinus','Swollen leaf base in some leguminous plants'],['Lamina','Green expanded leaf blade with veins'],['Midrib','Middle prominent vein of lamina'],['Venation','Arrangement of veins and veinlets in lamina'],['Rachis','Common axis of a pinnate leaf – represents the midrib'],['Phyllotaxy','Pattern of arrangement of leaves on stem'],['Acropetal','Younger towards the apex, older at the base']],qk:'leaf|venation|phyllotaxy|pinnate|palmate|pulvinus|leaflet'});
 
 n5('c5-infl',{notes:`
 <h4><span class="num">5.4</span>The inflorescence</h4><ul>
-<li>A <span class="term">flower is a modified shoot</span> wherein the <b>shoot apical meristem changes to floral meristem</b>.</li>
-<li><b>Internodes do not elongate</b> and the axis gets <b>condensed</b>.</li>
-<li>The apex produces different kinds of <b>floral appendages laterally at successive nodes</b> instead of leaves.</li>
-<li>When a shoot tip transforms into a flower, it is always <b>solitary</b>.</li>
-<li>The arrangement of flowers on the floral axis = <span class="term">inflorescence</span>.</li>
-<li>Two major types, depending on whether the <b>apex develops into a flower or continues to grow</b>:</li></ul>
-<table class="cmp"><tr><th>Racemose (Fig. 5.7)</th><th>Cymose (Fig. 5.8)</th></tr><tr><td>Main axis <b>continues to grow</b></td><td>Main axis <b>terminates in a flower</b> – limited growth</td></tr><tr><td>Flowers borne laterally in <b>acropetal succession</b></td><td>Flowers borne in <b>basipetal order</b></td></tr></table>`,
+<li>A <span class="term">flower is a modified shoot</span>.</li>
+<li>Shoot apical meristem → <b>floral meristem</b>.</li>
+<li><b>Internodes do not elongate</b> → axis gets <b>condensed</b>.</li>
+<li>At successive nodes, apex makes <b>floral appendages</b> instead of leaves.</li>
+<li>A shoot tip turned into a flower is always <b>solitary</b>.</li>
+<li><span class="term">Inflorescence</span> = arrangement of flowers on the floral axis.</li>
+<li>Two main types – does the apex <b>become a flower</b> or <b>keep growing</b>?</li></ul>
+<table class="cmp"><tr><th>Racemose (Fig. 5.7)</th><th>Cymose (Fig. 5.8)</th></tr><tr><td>Main axis <b>continues to grow</b></td><td>Main axis <b>ends in a flower</b> – limited growth</td></tr><tr><td>Flowers lateral, <b>acropetal</b> succession</td><td>Flowers in <b>basipetal</b> order</td></tr></table>`,
 terms:[['Floral meristem','Shoot apical meristem changed to form a flower'],['Inflorescence','Arrangement of flowers on the floral axis'],['Racemose','Axis keeps growing; flowers acropetal'],['Cymose','Axis ends in a flower; flowers basipetal'],['Acropetal succession','Older flowers below, younger towards the apex'],['Basipetal order','Older flower at the top, younger ones below']],qk:'racemose|cymose|inflorescence'});
 
 n5('c5-flower',{notes:`
 <h4><span class="num">5.5</span>The flower</h4><ul>
-<li>The flower is the <b>reproductive unit</b> in angiosperms, meant for <b>sexual reproduction</b>.</li>
-<li>A typical flower has <b>four kinds of whorls</b> arranged successively on the swollen end of the stalk or <span class="term">pedicel</span>, called <span class="term">thalamus or receptacle</span>: <b>calyx, corolla, androecium, gynoecium</b>.</li>
-<li><b>Calyx and corolla</b> are <b>accessory organs</b>; <b>androecium and gynoecium</b> are <b>reproductive organs</b>.</li>
-<li>In some flowers like <span class="eg">lily</span>, calyx and corolla are not distinct – termed <span class="term">perianth</span>.</li>
-<li>Flower with both androecium and gynoecium = <b>bisexual</b>; with only stamens or only carpels = <b>unisexual</b>.</li></ul>
+<li><b>Reproductive unit</b> of angiosperms.</li>
+<li>Meant for <b>sexual reproduction</b>.</li>
+<li>Stalk = <span class="term">pedicel</span>; its swollen end = <span class="term">thalamus / receptacle</span>.</li>
+<li>Four whorls on the thalamus:<ul><li><b>calyx · corolla · androecium · gynoecium</b></li></ul></li>
+<li><b>Accessory</b> organs – calyx, corolla</li>
+<li><b>Reproductive</b> organs – androecium, gynoecium</li>
+<li>Calyx and corolla not distinct → <span class="term">perianth</span><ul><li>e.g. <span class="eg">lily</span></li></ul></li>
+<li><b>Bisexual</b> – both androecium and gynoecium</li>
+<li><b>Unisexual</b> – only stamens or only carpels</li></ul>
 <h4>Symmetry</h4><ul>
-<li><span class="term">Actinomorphic</span> (radial symmetry) – can be divided into two equal radial halves in <b>any radial plane</b> through the centre: <span class="eg">mustard, datura, chilli</span>.</li>
-<li><span class="term">Zygomorphic</span> (bilateral symmetry) – divided into two similar halves <b>only in one particular vertical plane</b>: <span class="eg">pea, gulmohur, bean, Cassia</span>.</li>
-<li><span class="term">Asymmetric (irregular)</span> – cannot be divided into two similar halves by any vertical plane through the centre: <span class="eg">canna</span>.</li></ul>
+<li><span class="term">Actinomorphic</span> – radial symmetry<ul>
+ <li>two equal halves in <b>any radial plane</b></li>
+ <li><span class="eg">mustard, datura, chilli</span></li></ul></li>
+<li><span class="term">Zygomorphic</span> – bilateral symmetry<ul>
+ <li>similar halves in <b>only one vertical plane</b></li>
+ <li><span class="eg">pea, gulmohur, bean, Cassia</span></li></ul></li>
+<li><span class="term">Asymmetric</span> (irregular)<ul>
+ <li><b>no</b> vertical plane gives similar halves</li>
+ <li><span class="eg">canna</span></li></ul></li></ul>
 <h4>Number of parts & bracts</h4><ul>
-<li><b>Trimerous, tetramerous, pentamerous</b> – floral appendages in multiples of <b>3, 4 or 5</b>.</li>
-<li><span class="term">Bract</span> – reduced leaf at the base of the pedicel. Flowers with bracts = <b>bracteate</b>; without = <b>ebracteate</b>.</li></ul>
+<li>Parts in multiples of 3, 4, 5:<ul><li><b>trimerous · tetramerous · pentamerous</b></li></ul></li>
+<li><span class="term">Bract</span> – reduced leaf at base of pedicel</li>
+<li>With bracts → <b>bracteate</b>; without → <b>ebracteate</b></li></ul>
 <h4>Position of floral parts on thalamus (Fig. 5.9)</h4><ul>
-<li>Based on the position of <b>calyx, corolla and androecium</b> with respect to the <b>ovary</b> on the thalamus:</li>
-<li><span class="term">Hypogynous</span> – gynoecium occupies the <b>highest position</b>; other parts below it. Ovary <b>superior</b>: <span class="eg">mustard, china rose, brinjal</span>.</li>
-<li><span class="term">Perigynous</span> – gynoecium in the centre; other parts on the <b>rim of the thalamus almost at the same level</b>. Ovary <b>half inferior</b>: <span class="eg">plum, rose, peach</span>.</li>
-<li><span class="term">Epigynous</span> – margin of thalamus <b>grows upward enclosing the ovary completely and fusing with it</b>; other parts arise <b>above the ovary</b>. Ovary <b>inferior</b>: <span class="eg">guava, cucumber, ray florets of sunflower</span>.</li></ul>`,
+<li>Based on position of <b>calyx, corolla, androecium</b> relative to the <b>ovary</b>.</li>
+<li><span class="term">Hypogynous</span><ul>
+ <li>gynoecium at the <b>highest</b> position</li>
+ <li>other parts below it</li>
+ <li>ovary <b>superior</b></li>
+ <li><span class="eg">mustard, china rose, brinjal</span></li></ul></li>
+<li><span class="term">Perigynous</span><ul>
+ <li>gynoecium in the centre</li>
+ <li>other parts on the <b>rim of thalamus</b>, almost same level</li>
+ <li>ovary <b>half inferior</b></li>
+ <li><span class="eg">plum, rose, peach</span></li></ul></li>
+<li><span class="term">Epigynous</span><ul>
+ <li>thalamus margin <b>grows up</b>, encloses and <b>fuses</b> with ovary</li>
+ <li>other parts arise <b>above</b> the ovary</li>
+ <li>ovary <b>inferior</b></li>
+ <li><span class="eg">guava, cucumber, ray florets of sunflower</span></li></ul></li></ul>`,
 terms:[['Thalamus / receptacle','Swollen end of the pedicel bearing the whorls'],['Perianth','Calyx and corolla not distinct (lily)'],['Bisexual','Has both androecium and gynoecium'],['Unisexual','Only stamens or only carpels'],['Actinomorphic','Radial symmetry (mustard, datura, chilli)'],['Zygomorphic','Bilateral symmetry (pea, gulmohur, bean, Cassia)'],['Bracteate','Flower with a bract at the base of pedicel'],['Hypogynous','Ovary superior – highest position'],['Perigynous','Ovary half inferior – parts on rim of thalamus'],['Epigynous','Ovary inferior – thalamus fused around it']],qk:'actinomorphic|zygomorphic|asymmetric|inferior|superior|perigynous|hypogynous|epigynous|thalamus'});
 
 n5('c5-calcor',{notes:`
-<h4><span class="num">5.5.1</span>Parts of a flower (Fig. 5.10)</h4><p>Each flower normally has four floral whorls – <b>calyx, corolla, androecium and gynoecium</b>.</p>
+<h4><span class="num">5.5.1</span>Parts of a flower (Fig. 5.10)</h4><ul><li>Four floral whorls: <b>calyx · corolla · androecium · gynoecium</b></li></ul>
 <h4><span class="num">5.5.1.1</span>Calyx</h4><ul>
-<li>The <b>outermost whorl</b>; its members are <span class="term">sepals</span>.</li>
-<li>Sepals are generally <b>green, leaf-like</b> and <b>protect the flower in the bud stage</b>.</li>
-<li><b>Gamosepalous</b> (sepals united) or <b>polysepalous</b> (sepals free).</li></ul>
+<li><b>Outermost</b> whorl; members = <span class="term">sepals</span>.</li>
+<li>Sepals: generally <b>green, leaf-like</b>.</li>
+<li>Function: <b>protect the flower in bud</b>.</li>
+<li><b>Gamosepalous</b> – sepals united</li>
+<li><b>Polysepalous</b> – sepals free</li></ul>
 <h4><span class="num">5.5.1.2</span>Corolla</h4><ul>
-<li>Composed of <span class="term">petals</span>, usually <b>brightly coloured to attract insects for pollination</b>.</li>
-<li><b>Gamopetalous</b> (petals united) or <b>polypetalous</b> (petals free).</li>
-<li>Shape and colour vary greatly: corolla may be <b>tubular, bell-shaped, funnel-shaped or wheel-shaped</b>.</li></ul>
+<li>Made of <span class="term">petals</span>.</li>
+<li>Usually <b>brightly coloured</b> → attract insects for <b>pollination</b>.</li>
+<li><b>Gamopetalous</b> – petals united</li>
+<li><b>Polypetalous</b> – petals free</li>
+<li>Shapes:<ul><li><b>tubular · bell-shaped · funnel-shaped · wheel-shaped</b></li></ul></li></ul>
 <h4>Aestivation (Fig. 5.11)</h4><ul>
-<li>The mode of arrangement of <b>sepals or petals in the floral bud</b> with respect to the other members of the <b>same whorl</b>.</li>
-<li><b>Valvate</b> – sepals or petals <b>just touch</b> one another at the margin, <b>without overlapping</b>: <span class="eg">Calotropis</span>.</li>
-<li><b>Twisted</b> – <b>one margin overlaps that of the next one</b> and so on: <span class="eg">china rose, lady's finger, cotton</span>.</li>
-<li><b>Imbricate</b> – margins overlap one another but <b>not in any particular direction</b>: <span class="eg">Cassia, gulmohur</span>.</li>
-<li><b>Vexillary / papilionaceous</b> – in <span class="eg">pea and bean</span>, five petals: the largest <b>standard</b> overlaps the two lateral <b>wings</b>, which in turn overlap the two smallest anterior petals, the <b>keel</b>.</li></ul>`,
+<li>Arrangement of sepals/petals in the <b>floral bud</b>,<ul><li>relative to other members of the <b>same whorl</b></li></ul></li>
+<li><b>Valvate</b><ul><li>margins <b>just touch</b>, no overlap</li><li><span class="eg">Calotropis</span></li></ul></li>
+<li><b>Twisted</b><ul><li>each margin <b>overlaps the next</b>, in one direction</li><li><span class="eg">china rose, lady’s finger, cotton</span></li></ul></li>
+<li><b>Imbricate</b><ul><li>margins overlap, <b>no particular direction</b></li><li><span class="eg">Cassia, gulmohur</span></li></ul></li>
+<li><b>Vexillary / papilionaceous</b> – <span class="eg">pea, bean</span><ul>
+ <li>five petals</li>
+ <li>largest = <b>standard</b> – overlaps the two <b>wings</b></li>
+ <li>wings overlap the two smallest anterior petals = <b>keel</b></li></ul></li></ul>`,
 terms:[['Sepals','Members of calyx – green, protect bud'],['Gamosepalous','Sepals united'],['Polysepalous','Sepals free'],['Gamopetalous','Petals united'],['Polypetalous','Petals free'],['Aestivation','Arrangement of sepals/petals in bud'],['Valvate','Margins just touch (Calotropis)'],['Twisted','One margin overlaps the next (china rose)'],['Imbricate','Overlap in no particular direction (Cassia)'],['Vexillary','Standard > wings > keel (pea, bean)']],qk:'aestivation|valvate|twisted|imbricate|vexillary|sepal|petal'});
 
 n5('c5-andgyn',{notes:`
 <h4><span class="num">5.5.1.3</span>Androecium</h4><ul>
-<li>Composed of <span class="term">stamens</span>. Each stamen = <b>male reproductive organ</b>, consisting of a stalk or <b>filament</b> and an <b>anther</b>.</li>
-<li>Each anther is usually <b>bilobed</b> and each lobe has <b>two chambers, the pollen-sacs</b>. <b>Pollen grains</b> are produced in pollen-sacs.</li>
-<li>A <b>sterile stamen</b> = <span class="term">staminode</span>.</li>
-<li>Stamens may be united with other members: <b>epipetalous</b> – attached to petals (<span class="eg">brinjal</span>); <b>epiphyllous</b> – attached to perianth (<span class="eg">lily</span>).</li>
-<li>Stamens may be <b>free (polyandrous)</b> or united in varying degrees: <b>monoadelphous</b> – one bundle (<span class="eg">china rose</span>); <b>diadelphous</b> – two bundles (<span class="eg">pea</span>); <b>polyadelphous</b> – more than two bundles (<span class="eg">citrus</span>).</li>
-<li>Filament length may vary within a flower: <span class="eg">Salvia, mustard</span>.</li></ul>
+<li>Made of <span class="term">stamens</span> – the <b>male</b> reproductive organs.</li>
+<li>Stamen = <b>filament</b> (stalk) + <b>anther</b>.</li>
+<li>Anther usually <b>bilobed</b>.</li>
+<li>Each lobe has <b>two chambers</b> = <b>pollen-sacs</b>.</li>
+<li><b>Pollen grains</b> form in pollen-sacs.</li>
+<li>Sterile stamen = <span class="term">staminode</span>.</li>
+<li>Stamens joined to other parts:<ul>
+ <li><b>epipetalous</b> – to petals (<span class="eg">brinjal</span>)</li>
+ <li><b>epiphyllous</b> – to perianth (<span class="eg">lily</span>)</li></ul></li>
+<li>Stamens free = <b>polyandrous</b>.</li>
+<li>Stamens united:<ul>
+ <li><b>monoadelphous</b> – one bundle (<span class="eg">china rose</span>)</li>
+ <li><b>diadelphous</b> – two bundles (<span class="eg">pea</span>)</li>
+ <li><b>polyadelphous</b> – more than two (<span class="eg">citrus</span>)</li></ul></li>
+<li>Filament length may vary in one flower – <span class="eg">Salvia, mustard</span>.</li></ul>
 <h4><span class="num">5.5.1.4</span>Gynoecium</h4><ul>
-<li>The <b>female reproductive part</b>, made up of one or more <span class="term">carpels</span>.</li>
-<li>A carpel has three parts: <b>stigma, style and ovary</b>. Ovary = enlarged basal part; style = elongated tube connecting ovary to stigma; stigma = usually at the tip of the style, the <b>receptive surface for pollen grains</b>.</li>
-<li>Each ovary bears one or more <b>ovules</b> attached to a flattened, cushion-like <span class="term">placenta</span>.</li>
-<li>More than one carpel: <b>apocarpous</b> when free (<span class="eg">lotus, rose</span>); <b>syncarpous</b> when fused (<span class="eg">mustard, tomato</span>).</li>
-<li>After fertilisation, <b>ovules → seeds</b> and <b>ovary → fruit</b>.</li></ul>
+<li><b>Female</b> reproductive part.</li>
+<li>Made of one or more <span class="term">carpels</span>.</li>
+<li>Carpel = <b>stigma + style + ovary</b>:<ul>
+ <li><b>ovary</b> – enlarged basal part</li>
+ <li><b>style</b> – tube joining ovary to stigma</li>
+ <li><b>stigma</b> – at style tip; <b>receives pollen</b></li></ul></li>
+<li>Ovary bears <b>ovules</b>.</li>
+<li>Ovules sit on a cushion-like <span class="term">placenta</span>.</li>
+<li>More than one carpel:<ul>
+ <li>free → <b>apocarpous</b> (<span class="eg">lotus, rose</span>)</li>
+ <li>fused → <b>syncarpous</b> (<span class="eg">mustard, tomato</span>)</li></ul></li>
+<li>After fertilisation:<ul><li><b>ovules → seeds</b></li><li><b>ovary → fruit</b></li></ul></li></ul>
 <h4>Placentation (Fig. 5.12)</h4><ul>
-<li>The arrangement of <b>ovules within the ovary</b>.</li>
-<li><b>Marginal</b> – placenta forms a ridge along the <b>ventral suture</b>; ovules in <b>two rows</b>: <span class="eg">pea</span>.</li>
-<li><b>Axile</b> – placenta <b>axial</b>, ovules attached to it in a <b>multilocular</b> ovary: <span class="eg">china rose, tomato, lemon</span>.</li>
-<li><b>Parietal</b> – ovules on the <b>inner wall / peripheral part</b>; ovary one-chambered but becomes <b>two-chambered due to a false septum</b>: <span class="eg">mustard, Argemone</span>.</li>
-<li><b>Free central</b> – ovules on a <b>central axis</b>, <b>septa absent</b>: <span class="eg">Dianthus, Primrose</span>.</li>
-<li><b>Basal</b> – placenta at the <b>base of the ovary</b> with a <b>single ovule</b>: <span class="eg">sunflower, marigold</span>.</li></ul>`,
+<li>Arrangement of <b>ovules within the ovary</b>.</li>
+<li><b>Marginal</b><ul><li>ridge along <b>ventral suture</b></li><li>ovules in <b>two rows</b></li><li><span class="eg">pea</span></li></ul></li>
+<li><b>Axile</b><ul><li>placenta <b>axial</b></li><li>ovary <b>multilocular</b></li><li><span class="eg">china rose, tomato, lemon</span></li></ul></li>
+<li><b>Parietal</b><ul><li>ovules on <b>inner wall</b></li><li>one-chambered ovary → two-chambered by a <b>false septum</b></li><li><span class="eg">mustard, Argemone</span></li></ul></li>
+<li><b>Free central</b><ul><li>ovules on a <b>central axis</b></li><li><b>no septa</b></li><li><span class="eg">Dianthus, Primrose</span></li></ul></li>
+<li><b>Basal</b><ul><li>placenta at ovary <b>base</b></li><li><b>single ovule</b></li><li><span class="eg">sunflower, marigold</span></li></ul></li></ul>`,
 terms:[['Stamen','Male reproductive organ – filament + anther'],['Pollen-sacs','Two chambers in each anther lobe'],['Staminode','Sterile stamen'],['Epipetalous','Stamens attached to petals (brinjal)'],['Epiphyllous','Stamens attached to perianth (lily)'],['Monoadelphous','Stamens in one bundle (china rose)'],['Diadelphous','Two bundles (pea)'],['Polyadelphous','More than two bundles (citrus)'],['Carpel','Stigma + style + ovary'],['Apocarpous','Carpels free (lotus, rose)'],['Syncarpous','Carpels fused (mustard, tomato)'],['Placentation','Arrangement of ovules within ovary']],qk:'stamen|staminode|delphous|epipetalous|placentation|apocarp|syncarp|carpel'});
 
 n5('c5-fruit',{notes:`
 <h4><span class="num">5.6</span>The fruit</h4><ul>
 <li>A <b>characteristic feature</b> of flowering plants.</li>
-<li>It is a <b>mature or ripened ovary</b>, developed after fertilisation.</li>
-<li>Fruit formed <b>without fertilisation</b> of the ovary = <span class="term">parthenocarpic fruit</span>.</li>
-<li>Generally the fruit consists of a wall or <span class="term">pericarp</span> and <b>seeds</b>. The pericarp may be <b>dry or fleshy</b>.</li>
-<li>When pericarp is <b>thick and fleshy</b>, it is differentiated into the outer <b>epicarp</b>, the middle <b>mesocarp</b> and the inner <b>endocarp</b>.</li></ul>
+<li>Fruit = <b>mature, ripened ovary</b> after fertilisation.</li>
+<li>Formed <b>without fertilisation</b> → <span class="term">parthenocarpic fruit</span>.</li>
+<li>Fruit = wall (<span class="term">pericarp</span>) + <b>seeds</b>.</li>
+<li>Pericarp: <b>dry</b> or <b>fleshy</b>.</li>
+<li>Thick, fleshy pericarp has three layers:<ul>
+ <li><b>epicarp</b> – outer</li><li><b>mesocarp</b> – middle</li><li><b>endocarp</b> – inner</li></ul></li></ul>
 <h4>Drupe (Fig. 5.13)</h4><ul>
-<li>In <span class="eg">mango and coconut</span> the fruit is a <span class="term">drupe</span>.</li>
-<li>Drupes develop from <b>monocarpellary superior ovaries</b> and are <b>one-seeded</b>.</li>
-<li><b>Mango</b>: outer <b>thin epicarp</b>, middle <b>fleshy edible mesocarp</b>, inner <b>stony hard endocarp</b>.</li>
-<li><b>Coconut</b> (also a drupe): the <b>mesocarp is fibrous</b>.</li></ul>`,
+<li><span class="eg">Mango</span> and <span class="eg">coconut</span> are <span class="term">drupes</span>.</li>
+<li>Develop from <b>monocarpellary superior</b> ovaries.</li>
+<li><b>One-seeded</b>.</li>
+<li>Mango:<ul>
+ <li>epicarp – <b>thin</b></li>
+ <li>mesocarp – <b>fleshy, edible</b></li>
+ <li>endocarp – <b>stony, hard</b></li></ul></li>
+<li>Coconut: mesocarp is <b>fibrous</b>.</li></ul>`,
 terms:[['Fruit','Mature or ripened ovary after fertilisation'],['Parthenocarpic fruit','Fruit formed without fertilisation'],['Pericarp','Fruit wall – epicarp, mesocarp, endocarp'],['Drupe','One-seeded fruit from monocarpellary superior ovary (mango, coconut)'],['Mesocarp','Fleshy & edible in mango; fibrous in coconut'],['Endocarp','Stony hard inner layer in mango']],qk:'fruit|mesocarp|parthenocarp|coconut|mango|drupe'});
 
 n5('c5-seed',{notes:`
 <h4><span class="num">5.7</span>The seed</h4><ul>
-<li>The <b>ovules after fertilisation develop into seeds</b>.</li>
-<li>A seed = <b>seed coat</b> + <b>embryo</b>. The embryo has a <b>radicle</b>, an <b>embryonal axis</b> and <b>one</b> (<span class="eg">wheat, maize</span>) or <b>two cotyledons</b> (<span class="eg">gram, pea</span>).</li></ul>
-<h4><span class="num">5.7.1</span>Structure of a dicotyledonous seed (Fig. 5.14)</h4><ul>
-<li>Outermost covering = <span class="term">seed coat</span>, with two layers: outer <b>testa</b> and inner <b>tegmen</b>.</li>
-<li><span class="term">Hilum</span> – a <b>scar</b> on the seed coat through which the developing seed was attached to the fruit.</li>
-<li><span class="term">Micropyle</span> – a small <b>pore above the hilum</b>.</li>
-<li>Within the seed coat is the <b>embryo</b> – an <b>embryonal axis</b> and <b>two cotyledons</b>. Cotyledons are often <b>fleshy and full of reserve food</b>.</li>
-<li>At the two ends of the embryonal axis are the <b>radicle</b> and the <b>plumule</b>.</li>
-<li><b>Endospermic</b> seeds – endosperm (formed by <b>double fertilisation</b>) is a food-storing tissue: <span class="eg">castor</span>.</li>
-<li><b>Non-endospermous</b> – endosperm not present in mature seeds: <span class="eg">bean, gram, pea</span>.</li></ul>
-<h4><span class="num">5.7.2</span>Structure of a monocotyledonous seed (Fig. 5.15)</h4><ul>
-<li>Generally <b>endospermic</b>; some, as in <span class="eg">orchids</span>, are non-endospermic.</li>
-<li>In cereals such as <span class="eg">maize</span>, the seed coat is <b>membranous</b> and generally <b>fused with the fruit wall</b>.</li>
-<li>The <b>endosperm is bulky</b> and <b>stores food</b>.</li>
-<li>The outer covering of endosperm separates the embryo by a <b>proteinous layer</b> – the <span class="term">aleurone layer</span>.</li>
-<li>The <b>embryo is small</b>, situated in a <b>groove at one end</b> of the endosperm.</li>
-<li>It has <b>one large, shield-shaped cotyledon</b> – the <span class="term">scutellum</span> – and a short axis with a <b>plumule and a radicle</b>.</li>
-<li>Plumule and radicle are enclosed in sheaths: <span class="term">coleoptile</span> (around plumule) and <span class="term">coleorhiza</span> (around radicle).</li></ul>`,
+<li><b>Ovules</b> develop into seeds after fertilisation.</li>
+<li>Seed = <b>seed coat + embryo</b>.</li>
+<li>Embryo has:<ul>
+ <li>a <b>radicle</b></li><li>an <b>embryonal axis</b></li>
+ <li><b>one</b> cotyledon (<span class="eg">wheat, maize</span>) or</li>
+ <li><b>two</b> cotyledons (<span class="eg">gram, pea</span>)</li></ul></li></ul>
+<h4><span class="num">5.7.1</span>Dicotyledonous seed (Fig. 5.14)</h4><ul>
+<li><span class="term">Seed coat</span> – outermost, two layers:<ul><li><b>testa</b> – outer</li><li><b>tegmen</b> – inner</li></ul></li>
+<li><span class="term">Hilum</span> – <b>scar</b> where seed was attached to fruit.</li>
+<li><span class="term">Micropyle</span> – small <b>pore above the hilum</b>.</li>
+<li>Embryo = <b>embryonal axis + two cotyledons</b>.</li>
+<li>Cotyledons often <b>fleshy</b>, full of <b>reserve food</b>.</li>
+<li>Ends of embryonal axis:<ul><li><b>radicle</b></li><li><b>plumule</b></li></ul></li>
+<li><b>Endospermic</b> seeds:<ul><li>endosperm stores food</li><li>formed by <b>double fertilisation</b></li><li><span class="eg">castor</span></li></ul></li>
+<li><b>Non-endospermous</b>:<ul><li>no endosperm in mature seed</li><li><span class="eg">bean, gram, pea</span></li></ul></li></ul>
+<h4><span class="num">5.7.2</span>Monocotyledonous seed (Fig. 5.15)</h4><ul>
+<li>Generally <b>endospermic</b>.</li>
+<li>Some are non-endospermic – <span class="eg">orchids</span>.</li>
+<li>Cereals like <span class="eg">maize</span>:<ul>
+ <li>seed coat <b>membranous</b></li>
+ <li>generally <b>fused with fruit wall</b></li></ul></li>
+<li>Endosperm is <b>bulky</b>, <b>stores food</b>.</li>
+<li><span class="term">Aleurone layer</span>:<ul>
+ <li>outer covering of endosperm</li>
+ <li><b>proteinous</b></li>
+ <li>separates the embryo</li></ul></li>
+<li>Embryo is <b>small</b>, in a <b>groove at one end</b> of endosperm.</li>
+<li>One large, shield-shaped cotyledon = <span class="term">scutellum</span>.</li>
+<li>Short axis with <b>plumule</b> and <b>radicle</b>.</li>
+<li>Sheaths:<ul>
+ <li><span class="term">coleoptile</span> – around plumule</li>
+ <li><span class="term">coleorhiza</span> – around radicle</li></ul></li></ul>`,
 terms:[['Testa','Outer layer of seed coat'],['Tegmen','Inner layer of seed coat'],['Hilum','Scar where seed was attached to fruit'],['Micropyle','Small pore above the hilum'],['Endospermic seed','Stores food in endosperm (castor, maize)'],['Non-endospermous','No endosperm in mature seed (bean, gram, pea)'],['Aleurone layer','Proteinous layer around endosperm'],['Scutellum','Shield-shaped single cotyledon of maize'],['Coleoptile','Sheath around plumule'],['Coleorhiza','Sheath around radicle']],qk:'seed|hilum|aleurone|scutellum|coleo|endosperm'});
 
 n5('c5-semi',{notes:`
-<h4><span class="num">5.8</span>Semi-technical description of a typical flowering plant</h4><ul>
-<li>Various morphological features are used to describe a flowering plant. The description must be <b>brief</b>, in <b>simple and scientific language</b> and in a <b>proper sequence</b>.</li>
-<li>Sequence: <b>habit → vegetative characters</b> (roots, stem, leaves) <b>→ floral characters</b> (inflorescence and flower parts) → <b>floral diagram</b> and <b>floral formula</b>.</li></ul>
+<h4><span class="num">5.8</span>Semi-technical description</h4><ul>
+<li>Morphological features are used to describe a flowering plant.</li>
+<li>Description must be:<ul>
+ <li><b>brief</b></li><li>in <b>simple, scientific language</b></li><li>in a <b>proper sequence</b></li></ul></li>
+<li>Sequence:<ul>
+ <li><b>habit</b></li>
+ <li><b>vegetative</b> – roots, stem, leaves</li>
+ <li><b>floral</b> – inflorescence, flower parts</li>
+ <li><b>floral diagram</b> and <b>floral formula</b></li></ul></li></ul>
 <h4>Floral formula symbols</h4><ul>
-<li><b>Br</b> – bracteate · <b>K</b> – calyx · <b>C</b> – corolla · <b>P</b> – perianth · <b>A</b> – androecium · <b>G</b> – gynoecium.</li>
-<li><b><span class="ulfix">G</span></b> – superior ovary · <b><span style="text-decoration:overline">G</span></b> – inferior ovary.</li>
-<li><b>♂</b> male · <b>♀</b> female · <b>⚥</b> bisexual · <b>⊕</b> actinomorphic · <b>%</b> zygomorphic.</li>
-<li><b>Fusion</b> – the figure is enclosed within <b>brackets</b>. <b>Adhesion</b> – a <b>line drawn above</b> the symbols of the floral parts.</li></ul>
+<li><b>Br</b> bracteate · <b>K</b> calyx · <b>C</b> corolla</li>
+<li><b>P</b> perianth · <b>A</b> androecium · <b>G</b> gynoecium</li>
+<li><b><span class="ulfix">G</span></b> superior ovary · <b><span style="text-decoration:overline">G</span></b> inferior ovary</li>
+<li><b>♂</b> male · <b>♀</b> female · <b>⚥</b> bisexual</li>
+<li><b>⊕</b> actinomorphic · <b>%</b> zygomorphic</li>
+<li><b>Fusion</b> → figure inside <b>brackets</b></li>
+<li><b>Adhesion</b> → <b>line drawn above</b> the symbols</li></ul>
 <h4>Floral diagram (Fig. 5.16)</h4><ul>
-<li>Gives information about the <b>number of parts</b> of a flower, their <b>arrangement</b> and their <b>relation</b> with one another.</li>
-<li>The position of the <b>mother axis</b> is shown by a <b>dot on the top</b> of the floral diagram.</li>
-<li>Calyx, corolla, androecium and gynoecium are drawn in <b>successive whorls</b> – calyx outermost, gynoecium in the centre.</li>
-<li>The floral formula also shows <b>cohesion and adhesion</b> within parts of whorls and between whorls.</li>
-<li>Fig. 5.16 represents the <span class="eg">mustard plant (family Brassicaceae)</span>.</li></ul>`,
+<li>Shows the parts’:<ul><li><b>number</b></li><li><b>arrangement</b></li><li><b>relation</b> to one another</li></ul></li>
+<li><b>Mother axis</b> → a <b>dot on top</b>.</li>
+<li>Whorls drawn successively:<ul><li><b>calyx</b> outermost</li><li><b>gynoecium</b> in the centre</li></ul></li>
+<li>Floral formula also shows <b>cohesion</b> and <b>adhesion</b>.</li>
+<li>Fig. 5.16 = <span class="eg">mustard (Brassicaceae)</span>.</li></ul>`,
 terms:[['Floral formula','Symbolic summary of a flower'],['Floral diagram','Shows number, arrangement and relation of floral parts'],['Mother axis','Shown by a dot on top of floral diagram'],['Fusion','Shown by brackets ( )'],['Adhesion','Shown by a line above symbols'],['⊕','Actinomorphic'],['%','Zygomorphic'],['G underlined','Superior ovary']],qk:'floral formula|fusion'});
 
 n5('c5-sol',{notes:`
 <h4><span class="num">5.9</span>Solanaceae (Fig. 5.17)</h4><ul>
-<li>A large family, commonly called the <b>‘potato family’</b>. Widely distributed in <b>tropics, subtropics and even temperate zones</b>.</li>
-<li>Illustrated by <span class="eg">Solanum nigrum (makoi)</span>: flowering twig, flower, L.S. of flower, stamens, carpel and floral diagram.</li></ul>
+<li>Large family – the <b>‘potato family’</b>.</li>
+<li>Found in <b>tropics, subtropics</b>, even <b>temperate</b> zones.</li>
+<li>Illustrated by <span class="eg">Solanum nigrum (makoi)</span>:<ul>
+ <li>flowering twig · flower · L.S. of flower</li>
+ <li>stamens · carpel · floral diagram</li></ul></li></ul>
 <h4>Vegetative characters</h4><ul>
-<li>Plants mostly <b>herbs, shrubs</b> and rarely small trees.</li>
-<li><b>Stem</b>: herbaceous, rarely woody, aerial; erect, cylindrical, branched, solid or hollow, hairy or glabrous; <b>underground stem in potato</b> (<i>Solanum tuberosum</i>).</li>
-<li><b>Leaves</b>: alternate, simple, rarely pinnately compound, <b>exstipulate</b>; venation <b>reticulate</b>.</li></ul>
+<li><b>Habit</b>: mostly herbs, shrubs; rarely small trees</li>
+<li><b>Stem</b>:<ul>
+ <li>herbaceous, rarely woody; aerial</li>
+ <li>erect, cylindrical, branched</li>
+ <li>solid or hollow; hairy or glabrous</li>
+ <li><b>underground stem in potato</b> (<i>Solanum tuberosum</i>)</li></ul></li>
+<li><b>Leaves</b>:<ul>
+ <li>alternate, simple</li>
+ <li>rarely pinnately compound</li>
+ <li><b>exstipulate</b></li>
+ <li>venation <b>reticulate</b></li></ul></li></ul>
 <h4>Floral characters</h4><ul>
-<li><b>Inflorescence</b>: solitary, axillary or cymose as in <i>Solanum</i>.</li>
-<li><b>Flower</b>: bisexual, actinomorphic.</li>
-<li><b>Calyx</b>: sepals five, united, <b>persistent</b>, valvate aestivation.</li>
-<li><b>Corolla</b>: petals five, united; valvate aestivation.</li>
-<li><b>Androecium</b>: stamens five, <b>epipetalous</b>.</li>
-<li><b>Gynoecium</b>: <b>bicarpellary</b>, obliquely placed, <b>syncarpous</b>; ovary <b>superior, bilocular</b>, placenta swollen with many ovules, <b>axile</b>.</li>
-<li><b>Fruits</b>: berry or capsule. <b>Seeds</b>: many, endospermous.</li>
-<li><b>Floral formula</b>: ⊕ ⚥ K<sub>(5)</sub> C<sub>(5)</sub> A<sub>5</sub> <span class="ulfix">G</span><sub>(2)</sub> – with a line joining C and A (epipetalous).</li></ul>
+<li><b>Inflorescence</b>: solitary, axillary, or cymose (<i>Solanum</i>)</li>
+<li><b>Flower</b>: bisexual, actinomorphic</li>
+<li><b>Calyx</b>:<ul><li>five sepals, united</li><li><b>persistent</b></li><li>valvate</li></ul></li>
+<li><b>Corolla</b>: five petals, united; valvate</li>
+<li><b>Androecium</b>: five stamens, <b>epipetalous</b></li>
+<li><b>Gynoecium</b>:<ul>
+ <li><b>bicarpellary</b>, obliquely placed</li>
+ <li><b>syncarpous</b></li>
+ <li>ovary <b>superior, bilocular</b></li>
+ <li>swollen placenta, many ovules, <b>axile</b></li></ul></li>
+<li><b>Fruits</b>: berry or capsule</li>
+<li><b>Seeds</b>: many, endospermous</li>
+<li><b>Floral formula</b>: ⊕ ⚥ K<sub>(5)</sub> C<sub>(5)</sub> A<sub>5</sub> <span class="ulfix">G</span><sub>(2)</sub><ul><li>line joins C and A (epipetalous)</li></ul></li></ul>
 <h4>Economic importance</h4><ul>
-<li>Food – <span class="eg">tomato, brinjal, potato</span>; spice – <span class="eg">chilli</span>; medicine – <span class="eg">belladonna, ashwagandha</span>; fumigatory – <span class="eg">tobacco</span>; ornamentals – <span class="eg">petunia</span>.</li></ul>`,
+<li>Food – <span class="eg">tomato, brinjal, potato</span></li>
+<li>Spice – <span class="eg">chilli</span></li>
+<li>Medicine – <span class="eg">belladonna, ashwagandha</span></li>
+<li>Fumigatory – <span class="eg">tobacco</span></li>
+<li>Ornamental – <span class="eg">petunia</span></li></ul>`,
 terms:[['Potato family','Solanaceae'],['Exstipulate','Leaves without stipules'],['Persistent calyx','Calyx remains attached (Solanaceae)'],['Bicarpellary','Gynoecium of two carpels'],['Bilocular','Ovary with two chambers'],['Berry / capsule','Fruits of Solanaceae']],qk:'solanaceae|potato|ashwagandha|belladonna'});
 
 n5('c5-summary',{notes:`
-<ul><li>Flowering plants show enormous variation in <b>shape, size, structure, mode of nutrition, life span, habit and habitat</b>; they have well-developed <b>root and shoot systems</b>.</li>
-<li>Root system is either <b>tap root or fibrous</b>. Generally dicots have tap roots, monocots fibrous roots. Roots in some plants get modified for <b>storage of food, mechanical support and respiration</b>.</li>
-<li>The shoot system is differentiated into <b>stem, leaves, flowers and fruits</b>. Nodes and internodes, multicellular hair and positively phototropic nature differentiate stems from roots.</li>
-<li>Leaf is a lateral outgrowth of the stem developed <b>exogenously at the node</b>; green for photosynthesis. Leaves vary in shape, size, margin, apex and extent of incision of the lamina.</li>
-<li>The flower is a <b>modified shoot</b> meant for sexual reproduction, arranged in different inflorescences. Flowers vary in structure, symmetry, position of ovary, arrangement of petals, sepals, ovules etc.</li>
-<li>After fertilisation, <b>ovary → fruit</b> and <b>ovules → seeds</b>. Seeds may be monocotyledonous or dicotyledonous; they vary in shape, size and period of viability.</li>
-<li>Floral characteristics form the <b>basis of classification and identification</b>, illustrated by semi-technical descriptions of families. Floral features are summarised as <b>floral diagrams and floral formulae</b>.</li></ul>`,qk:'.'});
+<ul>
+<li>Flowering plants vary hugely in:<ul>
+ <li>shape · size · structure</li><li>mode of nutrition · life span</li><li>habit · habitat</li></ul></li>
+<li>They have well-developed <b>root</b> and <b>shoot</b> systems.</li>
+<li>Root system: <b>tap root</b> or <b>fibrous</b>.<ul><li>generally dicots → tap; monocots → fibrous</li></ul></li>
+<li>Some roots are modified for:<ul><li>food <b>storage</b> · mechanical <b>support</b> · <b>respiration</b></li></ul></li>
+<li>Shoot system → <b>stem, leaves, flowers, fruits</b>.</li>
+<li>Stem vs root:<ul><li>nodes and internodes</li><li>multicellular hair</li><li>positively phototropic</li></ul></li>
+<li>Leaf:<ul>
+ <li>lateral outgrowth of stem</li>
+ <li>develops <b>exogenously at the node</b></li>
+ <li>green → photosynthesis</li>
+ <li>varies in shape, size, margin, apex, incision</li></ul></li>
+<li>Flower:<ul>
+ <li>a <b>modified shoot</b> for sexual reproduction</li>
+ <li>arranged in different <b>inflorescences</b></li>
+ <li>varies in structure, symmetry, ovary position</li>
+ <li>and in arrangement of petals, sepals, ovules</li></ul></li>
+<li>After fertilisation: <b>ovary → fruit</b>, <b>ovules → seeds</b>.</li>
+<li>Seeds: monocot or dicot; vary in shape, size, <b>viability</b> period.</li>
+<li>Floral characters = <b>basis of classification and identification</b>.</li>
+<li>Shown through semi-technical descriptions of families.</li>
+<li>Summarised as <b>floral diagrams</b> and <b>floral formulae</b>.</li></ul>`,qk:'.'});
 
 /* ===== Detailed NCERT notes – Chapter 6 ===== */
 const n6=n5;
 n6('c6-tissue',{notes:`
 <h4>Introduction</h4><ul>
-<li>Study of the <b>internal structure</b> of plants is called <span class="term">anatomy</span>.</li>
-<li>Plants have <b>cells</b> as the basic unit; cells are organised into <b>tissues</b>, and tissues into <b>organs</b>.</li>
-<li>Different organs show differences in internal structure. Within angiosperms, <b>monocots and dicots</b> are anatomically different. Internal structures also show <b>adaptations to diverse environments</b>.</li></ul>
+<li><span class="term">Anatomy</span> = study of the <b>internal structure</b> of plants.</li>
+<li>Levels of organisation:<ul><li><b>cells</b> → <b>tissues</b> → <b>organs</b></li></ul></li>
+<li>Different organs differ in internal structure.</li>
+<li><b>Monocots</b> and <b>dicots</b> are anatomically different.</li>
+<li>Internal structures show <b>adaptations</b> to diverse environments.</li></ul>
 <h4><span class="num">6.1</span>The tissue system</h4><ul>
-<li>Tissues vary depending on their <b>location</b> in the plant body; their structure and function depend on location too.</li>
-<li>On the basis of <b>structure and location</b>, there are <b>three tissue systems</b>:</li>
-<li>1️⃣ <span class="term">Epidermal tissue system</span> 2️⃣ <span class="term">Ground or fundamental tissue system</span> 3️⃣ <span class="term">Vascular or conducting tissue system</span>.</li></ul>
-<div class="note">📌 Summary: plant tissues are broadly <b>meristematic</b> (apical, lateral, intercalary) and <b>permanent</b> (simple, complex). Main functions: assimilation and storage of food, transport of water, minerals and photosynthates, and mechanical support.</div>`,
+<li>Tissues vary with their <b>location</b> in the plant.</li>
+<li>Structure and function also depend on location.</li>
+<li>Three tissue systems (by structure and location):<ul>
+ <li><span class="term">Epidermal</span> tissue system</li>
+ <li><span class="term">Ground</span> (fundamental) tissue system</li>
+ <li><span class="term">Vascular</span> (conducting) tissue system</li></ul></li></ul>
+<div class="note">📌 Tissues: <b>meristematic</b> (apical, lateral, intercalary) and <b>permanent</b> (simple, complex). Functions: food assimilation and storage; transport of water, minerals and photosynthates; mechanical support.</div>`,
 terms:[['Anatomy','Study of internal structure of plants'],['Tissue system','Group of tissues by structure & location'],['Epidermal system','Outermost covering of plant body'],['Ground system','All tissues except epidermis & vascular bundles'],['Vascular system','Xylem and phloem – conducting tissues']],qk:'tissue system'});
 n6('c6-epi',{notes:`
 <h4><span class="num">6.1.1</span>Epidermal tissue system</h4><ul>
-<li>Forms the <b>outer-most covering</b> of the whole plant body; comprises <b>epidermal cells, stomata</b> and <b>epidermal appendages</b> – the trichomes and hairs.</li>
-<li><span class="term">Epidermis</span> – the outermost layer of the primary plant body. Made of <b>elongated, compactly arranged cells</b> forming a <b>continuous layer</b>; usually <b>single-layered</b>.</li>
-<li>Epidermal cells are <b>parenchymatous</b>, with a small amount of cytoplasm lining the cell wall and a <b>large vacuole</b>.</li>
-<li>The outside of the epidermis is often covered with a <b>waxy thick layer</b> – the <span class="term">cuticle</span> – which <b>prevents loss of water</b>. <b>Cuticle is absent in roots.</b></li></ul>
+<li><b>Outer-most covering</b> of the whole plant body.</li>
+<li>Made of:<ul><li><b>epidermal cells</b></li><li><b>stomata</b></li><li><b>epidermal appendages</b> – trichomes and hairs</li></ul></li>
+<li><span class="term">Epidermis</span>:<ul>
+ <li>outermost layer of the primary plant body</li>
+ <li><b>elongated, compactly arranged</b> cells</li>
+ <li>a <b>continuous</b> layer</li>
+ <li>usually <b>single-layered</b></li></ul></li>
+<li>Epidermal cells:<ul>
+ <li><b>parenchymatous</b></li>
+ <li>little cytoplasm lining the wall</li>
+ <li>a <b>large vacuole</b></li></ul></li>
+<li><span class="term">Cuticle</span>:<ul>
+ <li><b>waxy, thick</b> layer outside the epidermis</li>
+ <li><b>prevents water loss</b></li>
+ <li><b>absent in roots</b></li></ul></li></ul>
 <h4>Stomata (Fig. 6.1)</h4><ul>
-<li>Structures present in the <b>epidermis of leaves</b>; they <b>regulate transpiration and gaseous exchange</b>.</li>
-<li>Each stoma has two <b>bean-shaped</b> <span class="term">guard cells</span> enclosing the <b>stomatal pore</b>. In <b>grasses</b> the guard cells are <b>dumb-bell shaped</b>.</li>
-<li><b>Outer walls</b> of guard cells (away from the pore) are <b>thin</b>; <b>inner walls</b> (towards the pore) are <b>highly thickened</b>.</li>
-<li>Guard cells possess <b>chloroplasts</b> and regulate opening and closing of stomata.</li>
-<li>A few epidermal cells near the guard cells become specialised in shape and size – <span class="term">subsidiary cells</span>.</li>
-<li>Stomatal aperture + guard cells + surrounding subsidiary cells = <span class="term">stomatal apparatus</span>.</li></ul>
+<li>Present in the <b>epidermis of leaves</b>.</li>
+<li>Regulate <b>transpiration</b> and <b>gaseous exchange</b>.</li>
+<li>Two <span class="term">guard cells</span> enclose the <b>stomatal pore</b>:<ul>
+ <li><b>bean-shaped</b> usually</li>
+ <li><b>dumb-bell shaped</b> in grasses</li></ul></li>
+<li>Guard cell walls:<ul>
+ <li><b>outer</b> (away from pore) – <b>thin</b></li>
+ <li><b>inner</b> (towards pore) – <b>highly thickened</b></li></ul></li>
+<li>Guard cells have <b>chloroplasts</b>.</li>
+<li>They regulate <b>opening and closing</b> of stomata.</li>
+<li><span class="term">Subsidiary cells</span> – nearby epidermal cells, specialised in shape and size.</li>
+<li><span class="term">Stomatal apparatus</span> =<ul><li>stomatal aperture + guard cells + subsidiary cells</li></ul></li></ul>
 <h4>Epidermal appendages</h4><ul>
-<li><span class="term">Root hairs</span> – <b>unicellular</b> elongations of epidermal cells; help absorb water and minerals from the soil.</li>
-<li>On the stem, epidermal hairs are called <span class="term">trichomes</span>. In the shoot system they are usually <b>multicellular</b>; may be <b>branched or unbranched, soft or stiff</b>, and even <b>secretory</b>.</li>
-<li>Trichomes help in <b>preventing water loss due to transpiration</b>.</li></ul>`,
+<li><span class="term">Root hairs</span>:<ul>
+ <li><b>unicellular</b> elongations of epidermal cells</li>
+ <li>absorb water and minerals</li></ul></li>
+<li><span class="term">Trichomes</span> – epidermal hairs on the stem:<ul>
+ <li>usually <b>multicellular</b> in the shoot</li>
+ <li>branched or unbranched</li>
+ <li>soft or stiff</li>
+ <li>may be <b>secretory</b></li>
+ <li>help <b>prevent water loss</b> by transpiration</li></ul></li></ul>`,
 terms:[['Cuticle','Waxy layer preventing water loss; absent in roots'],['Guard cells','Bean-shaped (dumb-bell in grasses) cells around the pore'],['Subsidiary cells','Specialised epidermal cells near guard cells'],['Stomatal apparatus','Aperture + guard cells + subsidiary cells'],['Root hairs','Unicellular epidermal elongations'],['Trichomes','Epidermal hairs on stem, usually multicellular']],qk:'cuticle|guard|stoma|trichome|root hair'});
 n6('c6-ground',{notes:`
 <h4><span class="num">6.1.2</span>The ground tissue system</h4><ul>
-<li><b>All tissues except epidermis and vascular bundles</b> constitute the ground tissue.</li>
-<li>It consists of <b>simple tissues</b> such as <b>parenchyma, collenchyma and sclerenchyma</b>.</li>
-<li><b>Parenchymatous cells</b> are usually present in the <b>cortex, pericycle, pith and medullary rays</b> in primary stems and roots.</li>
-<li>In <b>leaves</b>, the ground tissue consists of <b>thin-walled, chloroplast-containing</b> cells and is called <span class="term">mesophyll</span>.</li></ul>
-<div class="note">📌 Summary: the ground tissue system forms the <b>main bulk</b> of the plant and is divided into three zones – <b>cortex, pericycle and pith</b>.</div>`,
+<li>= <b>all tissues except</b> epidermis and vascular bundles.</li>
+<li>Made of <b>simple tissues</b>:<ul><li><b>parenchyma · collenchyma · sclerenchyma</b></li></ul></li>
+<li>Parenchyma in primary stems and roots is found in:<ul>
+ <li><b>cortex · pericycle</b></li><li><b>pith · medullary rays</b></li></ul></li>
+<li>In <b>leaves</b>, ground tissue = <span class="term">mesophyll</span>:<ul>
+ <li>thin-walled cells</li><li>contain <b>chloroplasts</b></li></ul></li></ul>
+<div class="note">📌 Ground tissue = <b>main bulk</b> of the plant, in three zones: <b>cortex, pericycle, pith</b>.</div>`,
 terms:[['Ground tissue','All except epidermis & vascular bundles'],['Simple tissues','Parenchyma, collenchyma, sclerenchyma'],['Mesophyll','Ground tissue of leaf with chloroplasts'],['Medullary rays','Parenchyma between vascular bundles']],qk:'ground tissue|mesophyll|medullary'});
 n6('c6-vasc',{notes:`
 <h4><span class="num">6.1.3</span>The vascular tissue system (Fig. 6.2)</h4><ul>
-<li>Consists of <b>complex tissues</b> – the <b>phloem</b> and the <b>xylem</b>. Together they constitute <span class="term">vascular bundles</span>.</li>
-<li>In <b>dicot stems</b>, <b>cambium</b> is present between phloem and xylem. Such bundles can form <b>secondary xylem and phloem</b> and are called <span class="term">open</span>.</li>
-<li>In <b>monocots</b>, vascular bundles have <b>no cambium</b>; they do not form secondary tissues and are called <span class="term">closed</span>.</li>
-<li><span class="term">Radial</span> – xylem and phloem arranged in an <b>alternate manner along different radii</b>, as in <b>roots</b>.</li>
-<li><span class="term">Conjoint</span> – xylem and phloem <b>jointly situated along the same radius</b>; common in <b>stems and leaves</b>.</li>
-<li>Conjoint bundles usually have the <b>phloem located only on the outer side of xylem</b>.</li></ul>
-<div class="note">📌 Summary: on the basis of <b>presence of cambium</b> and <b>location of xylem and phloem</b>, vascular bundles are of different types. They translocate water, minerals and food.</div>`,
+<li>Made of <b>complex tissues</b> – <b>phloem</b> and <b>xylem</b>.</li>
+<li>Together they form <span class="term">vascular bundles</span>.</li>
+<li><span class="term">Open</span> bundles – <b>dicot stems</b>:<ul>
+ <li><b>cambium</b> between phloem and xylem</li>
+ <li>can form <b>secondary</b> xylem and phloem</li></ul></li>
+<li><span class="term">Closed</span> bundles – <b>monocots</b>:<ul>
+ <li><b>no cambium</b></li><li>no secondary tissues</li></ul></li>
+<li><span class="term">Radial</span>:<ul>
+ <li>xylem and phloem <b>alternate</b> on different radii</li>
+ <li>found in <b>roots</b></li></ul></li>
+<li><span class="term">Conjoint</span>:<ul>
+ <li>xylem and phloem on the <b>same radius</b></li>
+ <li>common in <b>stems and leaves</b></li>
+ <li>phloem usually only on the <b>outer side</b> of xylem</li></ul></li></ul>
+<div class="note">📌 Bundle types depend on <b>cambium</b> and <b>position of xylem and phloem</b>. They carry water, minerals and food.</div>`,
 terms:[['Vascular bundle','Xylem + phloem together'],['Open bundle','Has cambium – forms secondary tissues'],['Closed bundle','No cambium (monocots)'],['Radial','Xylem & phloem on alternate radii (roots)'],['Conjoint','Xylem & phloem on same radius (stems, leaves)'],['Endarch','Protoxylem towards the centre (dicot stem)']],qk:'open|closed|radial|conjoint|cambium'});
 n6('c6-droot',{notes:`
-<h4><span class="num">6.2</span>Anatomy of dicot and monocot plants</h4><p>For a better understanding of tissue organisation of roots, stems and leaves, it is convenient to study <b>transverse sections of the mature zones</b> of these organs.</p>
-<h4><span class="num">6.2.1</span>Dicotyledonous root – T.S. of sunflower root (Fig. 6.3a)</h4><ul>
-<li><span class="term">Epiblema</span> – the outermost layer. Many of its cells protrude as <b>unicellular root hairs</b>.</li>
-<li><span class="term">Cortex</span> – several layers of <b>thin-walled parenchyma</b> cells with <b>intercellular spaces</b>.</li>
-<li><span class="term">Endodermis</span> – innermost layer of the cortex; a <b>single layer of barrel-shaped cells</b> without intercellular spaces. Tangential and radial walls have a deposition of <b>water-impermeable, waxy suberin</b> as <span class="term">Casparian strips</span>.</li>
-<li><span class="term">Pericycle</span> – next to endodermis, a few layers of <b>thick-walled parenchymatous</b> cells. <b>Initiation of lateral roots and vascular cambium</b> (during secondary growth) takes place here.</li>
-<li><span class="term">Pith</span> – <b>small or inconspicuous</b>.</li>
-<li><span class="term">Conjunctive tissue</span> – parenchymatous cells lying between the xylem and the phloem.</li>
-<li>Usually <b>two to four xylem and phloem patches</b>. Later, a <b>cambium ring</b> develops between the xylem and phloem.</li>
-<li>All tissues on the inner side of the endodermis – <b>pericycle, vascular bundles and pith</b> – constitute the <span class="term">stele</span>.</li></ul>`,
+<h4><span class="num">6.2</span>Anatomy of dicot and monocot plants</h4><ul><li>We study <b>transverse sections</b> of the <b>mature zones</b> of roots, stems and leaves.</li></ul>
+<h4><span class="num">6.2.1</span>Dicot root – T.S. sunflower root (Fig. 6.3a)</h4><ul>
+<li><span class="term">Epiblema</span><ul><li>outermost layer</li><li>many cells form <b>unicellular root hairs</b></li></ul></li>
+<li><span class="term">Cortex</span><ul><li>several layers of <b>thin-walled parenchyma</b></li><li>with <b>intercellular spaces</b></li></ul></li>
+<li><span class="term">Endodermis</span><ul>
+ <li>innermost layer of cortex</li>
+ <li>single layer of <b>barrel-shaped</b> cells</li>
+ <li><b>no</b> intercellular spaces</li>
+ <li>tangential and radial walls have <b>suberin</b> (waxy, water-impermeable)</li>
+ <li>these deposits = <span class="term">Casparian strips</span></li></ul></li>
+<li><span class="term">Pericycle</span><ul>
+ <li>a few layers of <b>thick-walled parenchyma</b> next to endodermis</li>
+ <li>origin of <b>lateral roots</b></li>
+ <li>origin of <b>vascular cambium</b> during secondary growth</li></ul></li>
+<li><span class="term">Pith</span> – <b>small or inconspicuous</b></li>
+<li><span class="term">Conjunctive tissue</span> – parenchyma between xylem and phloem</li>
+<li><b>Two to four</b> xylem and phloem patches.</li>
+<li>Later a <b>cambium ring</b> forms between them.</li>
+<li><span class="term">Stele</span> = everything inside the endodermis:<ul><li>pericycle · vascular bundles · pith</li></ul></li></ul>`,
 terms:[['Epiblema','Outermost layer of root bearing root hairs'],['Endodermis','Barrel-shaped cells, no intercellular spaces'],['Casparian strips','Suberin on tangential & radial walls of endodermis'],['Pericycle','Origin of lateral roots and vascular cambium'],['Conjunctive tissue','Parenchyma between xylem and phloem'],['Stele','Pericycle + vascular bundles + pith']],qk:'epiblema|casparian|pericycle|conjunctive|stele|two to four|dicot root'});
 n6('c6-mroot',{notes:`
-<h4><span class="num">6.2.2</span>Monocotyledonous root (Fig. 6.3b)</h4><ul>
-<li>Similar to the dicot root in many respects: it has <b>epidermis, cortex, endodermis, pericycle, vascular bundles and pith</b>.</li>
-<li>Compared to the dicot root (fewer xylem bundles), there are usually <b>more than six (polyarch)</b> xylem bundles.</li>
-<li><b>Pith is large and well developed</b>.</li>
-<li>Monocot roots <b>do not undergo any secondary growth</b>.</li></ul>`,
+<h4><span class="num">6.2.2</span>Monocot root (Fig. 6.3b)</h4><ul>
+<li>Similar parts to the dicot root:<ul>
+ <li>epidermis · cortex · endodermis</li>
+ <li>pericycle · vascular bundles · pith</li></ul></li>
+<li>Differences:<ul>
+ <li>usually <b>more than six</b> xylem bundles – <b>polyarch</b></li>
+ <li>(dicot root has fewer)</li>
+ <li><b>pith large</b>, well developed</li>
+ <li><b>no secondary growth</b></li></ul></li></ul>`,
 terms:[['Polyarch','More than six xylem bundles (monocot root)'],['Large pith','Feature of monocot root'],['No secondary growth','Monocot roots']],qk:'polyarch|monocot root|pith|secondary growth'});
 n6('c6-dstem',{notes:`
-<h4><span class="num">6.2.3</span>Dicotyledonous stem – T.S. of young stem (Fig. 6.4a)</h4><ul>
-<li><span class="term">Epidermis</span> – outermost protective layer; covered with a thin <b>cuticle</b>; may bear <b>trichomes</b> and a few <b>stomata</b>.</li>
-<li><span class="term">Cortex</span> – cells in multiple layers between epidermis and pericycle; three sub-zones:</li>
-<li style="list-style:circle;margin-left:18px"><b>Hypodermis</b> – a few layers of <b>collenchymatous</b> cells just below the epidermis; give <b>mechanical strength</b> to the young stem.</li>
-<li style="list-style:circle;margin-left:18px"><b>Cortical layers</b> – rounded <b>thin-walled parenchymatous</b> cells with conspicuous intercellular spaces.</li>
-<li style="list-style:circle;margin-left:18px"><b>Endodermis</b> – innermost layer; cells <b>rich in starch grains</b> → called the <span class="term">starch sheath</span>.</li>
-<li><span class="term">Pericycle</span> – inner side of the endodermis, above the phloem, as <b>semi-lunar patches of sclerenchyma</b>.</li>
-<li><span class="term">Medullary rays</span> – a few layers of <b>radially placed parenchymatous</b> cells between the vascular bundles.</li>
-<li>A large number of <span class="term">vascular bundles</span> arranged in a <b>ring</b> – the ‘ring’ arrangement is characteristic of the dicot stem. Each bundle is <b>conjoint, open, with endarch protoxylem</b>.</li>
-<li><span class="term">Pith</span> – a large number of rounded parenchymatous cells with large intercellular spaces in the <b>central portion</b>.</li></ul>`,
+<h4><span class="num">6.2.3</span>Dicot stem – T.S. young stem (Fig. 6.4a)</h4><ul>
+<li><span class="term">Epidermis</span><ul>
+ <li>outermost protective layer</li>
+ <li>thin <b>cuticle</b></li>
+ <li>may have <b>trichomes</b> and a few <b>stomata</b></li></ul></li>
+<li><span class="term">Cortex</span> – between epidermis and pericycle; three sub-zones:<ul>
+ <li><b>Hypodermis</b> – a few layers of <b>collenchyma</b> below epidermis; gives <b>mechanical strength</b></li>
+ <li><b>Cortical layers</b> – rounded, <b>thin-walled parenchyma</b>; clear intercellular spaces</li>
+ <li><b>Endodermis</b> – innermost; cells <b>rich in starch</b> → <span class="term">starch sheath</span></li></ul></li>
+<li><span class="term">Pericycle</span><ul>
+ <li>inside the endodermis, above the phloem</li>
+ <li><b>semi-lunar patches of sclerenchyma</b></li></ul></li>
+<li><span class="term">Medullary rays</span><ul>
+ <li>radially placed <b>parenchyma</b></li>
+ <li>between the vascular bundles</li></ul></li>
+<li><span class="term">Vascular bundles</span><ul>
+ <li>many, arranged in a <b>ring</b></li>
+ <li>ring = characteristic of dicot stem</li>
+ <li><b>conjoint, open</b></li>
+ <li><b>endarch</b> protoxylem</li></ul></li>
+<li><span class="term">Pith</span><ul>
+ <li>central portion</li>
+ <li>rounded parenchyma, <b>large intercellular spaces</b></li></ul></li></ul>`,
 terms:[['Hypodermis (dicot)','Collenchyma – mechanical strength'],['Starch sheath','Endodermis of stem rich in starch'],['Semi-lunar patches','Sclerenchymatous pericycle above phloem'],['Ring arrangement','Vascular bundles in a ring – dicot stem'],['Endarch','Protoxylem towards the pith']],qk:'dicot stem|starch|semi-lunar|collenchyma|medullary|ring'});
 n6('c6-mstem',{notes:`
-<h4><span class="num">6.2.4</span>Monocotyledonous stem (Fig. 6.4b)</h4><ul>
-<li>Has a <b>sclerenchymatous hypodermis</b>.</li>
-<li>A <b>large number of scattered vascular bundles</b>, each surrounded by a <b>sclerenchymatous bundle sheath</b>.</li>
-<li>A large, conspicuous <b>parenchymatous ground tissue</b>.</li>
-<li>Vascular bundles are <b>conjoint and closed</b>.</li>
-<li><b>Peripheral</b> vascular bundles are generally <b>smaller</b> than the centrally located ones.</li>
-<li><b>Phloem parenchyma is absent</b>, and <b>water-containing cavities</b> are present within the vascular bundles.</li></ul>`,
+<h4><span class="num">6.2.4</span>Monocot stem (Fig. 6.4b)</h4><ul>
+<li><b>Sclerenchymatous hypodermis</b>.</li>
+<li>Many <b>scattered</b> vascular bundles.</li>
+<li>Each bundle has a <b>sclerenchymatous bundle sheath</b>.</li>
+<li>Large, conspicuous <b>parenchymatous ground tissue</b>.</li>
+<li>Bundles are <b>conjoint and closed</b>.</li>
+<li><b>Peripheral</b> bundles are <b>smaller</b> than central ones.</li>
+<li><b>No phloem parenchyma</b>.</li>
+<li><b>Water-containing cavities</b> inside the bundles.</li></ul>`,
 terms:[['Hypodermis (monocot)','Sclerenchymatous'],['Scattered bundles','Feature of monocot stem'],['Bundle sheath','Sclerenchymatous layer around each bundle'],['Water-containing cavity','Present in monocot stem bundles'],['Phloem parenchyma','Absent in monocot stem']],qk:'monocot stem|scattered|phloem parenchyma|peripheral'});
 n6('c6-dleaf',{notes:`
-<h4><span class="num">6.2.5</span>Dorsiventral (dicotyledonous) leaf (Fig. 6.5a)</h4><ul>
-<li>A vertical section through the lamina shows three main parts: <b>epidermis, mesophyll and vascular system</b>.</li>
-<li><b>Epidermis</b> covers both the upper surface (<span class="term">adaxial epidermis</span>) and lower surface (<span class="term">abaxial epidermis</span>), with a <b>conspicuous cuticle</b>.</li>
-<li>The <b>abaxial epidermis generally bears more stomata</b> than the adaxial; the latter may even <b>lack stomata</b>.</li>
-<li><span class="term">Mesophyll</span> – tissue between upper and lower epidermis; possesses <b>chloroplasts</b> and carries out <b>photosynthesis</b>; made of parenchyma. Two types of cells:</li>
-<li style="list-style:circle;margin-left:18px"><b>Palisade parenchyma</b> – adaxially placed, <b>elongated cells arranged vertically and parallel</b> to each other.</li>
-<li style="list-style:circle;margin-left:18px"><b>Spongy parenchyma</b> – <b>oval or round, loosely arranged</b> cells below the palisade, extending to the lower epidermis, with <b>numerous large spaces and air cavities</b>.</li>
-<li><b>Vascular system</b> – vascular bundles seen in the <b>veins and the midrib</b>. Size of bundles depends on the size of the veins; veins vary in thickness in the <b>reticulate venation</b> of dicot leaves.</li>
-<li>Vascular bundles are surrounded by a layer of <b>thick-walled bundle sheath cells</b>.</li></ul>`,
+<h4><span class="num">6.2.5</span>Dorsiventral (dicot) leaf (Fig. 6.5a)</h4><ul>
+<li>Vertical section shows three parts:<ul><li><b>epidermis · mesophyll · vascular system</b></li></ul></li>
+<li><b>Epidermis</b> on both surfaces:<ul>
+ <li>upper = <span class="term">adaxial epidermis</span></li>
+ <li>lower = <span class="term">abaxial epidermis</span></li>
+ <li>conspicuous <b>cuticle</b></li></ul></li>
+<li>Stomata:<ul>
+ <li><b>more</b> on the <b>abaxial</b> (lower) side</li>
+ <li>adaxial side may have <b>none</b></li></ul></li>
+<li><span class="term">Mesophyll</span>:<ul>
+ <li>between upper and lower epidermis</li>
+ <li>parenchyma with <b>chloroplasts</b></li>
+ <li>does <b>photosynthesis</b></li></ul></li>
+<li><b>Palisade parenchyma</b><ul>
+ <li>on the <b>adaxial</b> side</li>
+ <li><b>elongated</b> cells, <b>vertical and parallel</b></li></ul></li>
+<li><b>Spongy parenchyma</b><ul>
+ <li>below palisade, to lower epidermis</li>
+ <li><b>oval or round</b>, <b>loosely</b> arranged</li>
+ <li>many <b>large spaces and air cavities</b></li></ul></li>
+<li><b>Vascular system</b>:<ul>
+ <li>bundles in the <b>veins and midrib</b></li>
+ <li>bundle size depends on vein size</li>
+ <li>veins vary in thickness – <b>reticulate</b> venation</li>
+ <li>surrounded by thick-walled <b>bundle sheath</b> cells</li></ul></li></ul>`,
 terms:[['Adaxial','Upper surface of leaf'],['Abaxial','Lower surface – more stomata'],['Palisade','Vertical elongated parallel cells (adaxial)'],['Spongy','Loose round cells with air cavities'],['Bundle sheath','Thick-walled cells around leaf bundles']],qk:'dorsiventral|palisade|spongy|abaxial|adaxial'});
 n6('c6-mleaf',{notes:`
-<h4><span class="num">6.2.6</span>Isobilateral (monocotyledonous) leaf (Fig. 6.5b)</h4><ul>
-<li>Similar to the dorsiventral leaf in many ways, with these characteristic differences:</li>
-<li><b>Stomata are present on both surfaces</b> of the epidermis.</li>
-<li>The <b>mesophyll is not differentiated</b> into palisade and spongy parenchyma.</li>
-<li>In <b>grasses</b>, certain <b>adaxial epidermal cells along the veins</b> modify into <b>large, empty, colourless</b> cells – <span class="term">bulliform cells</span>.</li>
-<li>When bulliform cells have <b>absorbed water and are turgid</b>, the leaf surface is <b>exposed</b>. When they are <b>flaccid due to water stress</b>, the leaves <b>curl inwards</b> to minimise water loss.</li>
-<li>The <b>parallel venation</b> of monocot leaves is reflected in the <b>near similar sizes of vascular bundles</b> (except in main veins).</li></ul>`,
+<h4><span class="num">6.2.6</span>Isobilateral (monocot) leaf (Fig. 6.5b)</h4><ul>
+<li>Similar to the dorsiventral leaf, but:</li>
+<li><b>Stomata on both surfaces</b>.</li>
+<li>Mesophyll <b>not differentiated</b> into palisade and spongy.</li>
+<li><span class="term">Bulliform cells</span> – in <b>grasses</b>:<ul>
+ <li>some <b>adaxial</b> epidermal cells along the veins</li>
+ <li><b>large, empty, colourless</b></li></ul></li>
+<li>How they work:<ul>
+ <li><b>turgid</b> (water absorbed) → leaf surface <b>exposed</b></li>
+ <li><b>flaccid</b> (water stress) → leaf <b>curls inwards</b></li>
+ <li>curling <b>minimises water loss</b></li></ul></li>
+<li><b>Parallel venation</b> → bundles of <b>near-similar size</b><ul><li>except in the main veins</li></ul></li></ul>`,
 terms:[['Isobilateral','Monocot leaf – stomata on both surfaces'],['Bulliform cells','Large empty colourless adaxial cells (grasses)'],['Turgid bulliform','Leaf surface exposed'],['Flaccid bulliform','Leaf curls inwards – less water loss']],qk:'isobilateral|bulliform|similar sizes'});
 n6('c6-viewer',{notes:`<p>Use this viewer to revise all six sections in one place. Tap <b>🚶 Walk outside → in</b> to step through every layer in order with Focus Mode, then switch <b>Labels off</b> and test yourself.</p>`,qk:'dicot|monocot'});
-n6('c6-compare',{notes:`<ul><li><b>Monocots and dicots show marked variation</b> in internal structure. They differ in <b>type, number and location of vascular bundles</b>.</li><li><b>Secondary growth</b> occurs in most dicotyledonous roots and stems.</li></ul>`,qk:'monocot|dicot'});
+n6('c6-compare',{notes:`<ul>
+<li><b>Monocots and dicots</b> show marked variation in internal structure.</li>
+<li>They differ in vascular bundles’:<ul><li><b>type · number · location</b></li></ul></li>
+<li><b>Secondary growth</b> occurs in most dicot roots and stems.</li></ul>`,qk:'monocot|dicot'});
 n6('c6-summary',{notes:`<ul>
-<li>Anatomically, a plant is made of different kinds of tissues: <b>meristematic</b> (apical, lateral, intercalary) and <b>permanent</b> (simple and complex).</li>
-<li>Functions of tissues: <b>assimilation of food and its storage</b>, <b>transportation of water, minerals and photosynthates</b>, and <b>mechanical support</b>.</li>
-<li>Three tissue systems: <b>epidermal, ground and vascular</b>. Epidermal = epidermal cells, stomata and appendages. Ground = main bulk – <b>cortex, pericycle and pith</b>. Vascular = <b>xylem and phloem</b>.</li>
-<li>Based on presence of cambium and location of xylem and phloem, vascular bundles are of different types; they conduct water, minerals and food.</li>
-<li>Monocots and dicots differ in <b>type, number and location of vascular bundles</b>. Secondary growth occurs in most dicot roots and stems.</li></ul>`,qk:'.'});
+<li>A plant is made of different <b>tissues</b>:<ul>
+ <li><b>meristematic</b> – apical, lateral, intercalary</li>
+ <li><b>permanent</b> – simple, complex</li></ul></li>
+<li>Functions of tissues:<ul>
+ <li>food <b>assimilation</b> and <b>storage</b></li>
+ <li><b>transport</b> of water, minerals, photosynthates</li>
+ <li><b>mechanical support</b></li></ul></li>
+<li>Three tissue systems:<ul>
+ <li><b>Epidermal</b> – epidermal cells, stomata, appendages</li>
+ <li><b>Ground</b> – main bulk: cortex, pericycle, pith</li>
+ <li><b>Vascular</b> – xylem and phloem</li></ul></li>
+<li>Vascular bundle types depend on:<ul><li>presence of <b>cambium</b></li><li>location of <b>xylem and phloem</b></li></ul></li>
+<li>Bundles conduct <b>water, minerals, food</b>.</li>
+<li>Monocots vs dicots: bundle <b>type, number, location</b>.</li>
+<li><b>Secondary growth</b> in most dicot roots and stems.</li></ul>`,qk:'.'});
 LESSONS[6].push({id:'c6-summary',n:13,ch:6,em:'🗺️',title:'Chapter 6 summary & concept map',sub:'Everything on one page',render(el){
   const map=[['🧱 Tissue systems',[['Overview','c6-tissue',['Epidermal','Ground','Vascular']],['Epidermal','c6-epi',['Epidermis','Cuticle','Stomata','Trichomes, root hairs']],['Ground','c6-ground',['Cortex','Pericycle','Pith','Medullary rays','Mesophyll']],['Vascular','c6-vasc',['Radial','Conjoint closed','Conjoint open']]]],
    ['🌱 Roots',[['Dicot root','c6-droot',['2–4 xylem','Small pith','Casparian strips']],['Monocot root','c6-mroot',['Polyarch','Large pith']]]],
@@ -2972,99 +3294,227 @@ function gSpeed(scr){
 /* ---------- notes ---------- */
 n5('c1-intro',{notes:`
 <h4>Unit 1 · Diversity in the living world</h4><ul>
-<li><b>Biology</b> is the science of <b>life forms and living processes</b>. The living world has an amazing <b>diversity</b> of living organisms.</li>
-<li>Early man could easily tell <b>inanimate matter</b> from <b>living organisms</b>; he <b>deified</b> some inanimate matter (wind, sea, fire) and some animals and plants – all of which evoked <b>awe or fear</b>.</li>
-<li>Description of living organisms, including human beings, began much later. Societies with an <b>anthropocentric view</b> of biology made limited progress.</li>
-<li>Systematic description of life forms brought, out of necessity, detailed systems of <b>identification, nomenclature and classification</b>.</li>
-<li>The biggest spin-off: recognising that living organisms <b>share similarities</b> both horizontally and vertically – all present-day organisms are <b>related</b> to each other and to all organisms that ever lived. This humbled man and led to movements for <b>conservation of biodiversity</b>.</li></ul>
+<li><b>Biology</b> = science of <b>life forms</b> and <b>living processes</b>.</li>
+<li>The living world shows amazing <b>diversity</b>.</li>
+<li>Early man:<ul>
+ <li>could easily tell <b>inanimate matter</b> from <b>living organisms</b></li>
+ <li><b>deified</b> some inanimate matter – wind, sea, fire</li>
+ <li>also deified some animals and plants</li>
+ <li>common feeling behind all of these: <b>awe or fear</b></li></ul></li>
+<li>Describing living organisms (incl. humans) <b>began much later</b>.</li>
+<li>An <b>anthropocentric</b> (human-centred) view → <b>limited progress</b>.</li>
+<li>Systematic description of life forms brought, out of necessity:<ul>
+ <li><b>identification</b></li><li><b>nomenclature</b></li><li><b>classification</b></li></ul></li>
+<li>Biggest spin-off: organisms <b>share similarities</b><ul>
+ <li><b>horizontally</b> – among present-day organisms</li>
+ <li><b>vertically</b> – with all organisms that ever lived</li>
+ <li>so all living organisms are <b>related</b></li></ul></li>
+<li>This was <b>humbling</b> for man.</li>
+<li>It led to movements for <b>conservation of biodiversity</b>.</li></ul>
 <h4>Chapter 1 · What is life?</h4><ul>
-<li>Living organisms are found in extraordinary <b>habitats</b> – cold mountains, deciduous forests, oceans, fresh water lakes, deserts, hot springs.</li>
-<li>The question <b>“what indeed is life?”</b> has two parts: a <b>technical</b> one – what living is, as opposed to non-living – and a <b>philosophical</b> one – what the purpose of life is.</li>
-<li>As scientists, we <b>do not attempt the second</b> question; we reflect on <b>what is living</b>.</li></ul>
+<li>Organisms live in extraordinary <b>habitats</b>:<ul>
+ <li>cold mountains · deciduous forests</li>
+ <li>oceans · fresh water lakes</li>
+ <li>deserts · hot springs</li></ul></li>
+<li>“<b>What indeed is life?</b>” has two parts:<ul>
+ <li><b>Technical</b> – what is living vs non-living?</li>
+ <li><b>Philosophical</b> – what is the purpose of life?</li></ul></li>
+<li>Scientists <b>do not attempt</b> the philosophical one.</li>
+<li>We reflect only on <b>what is living</b>.</li></ul>
 <h4>Meet Ernst Mayr (1904 – 2004)</h4><ul>
-<li>Born 5 July 1904 in Kempten, Germany; Harvard evolutionary biologist called <b>‘The Darwin of the 20th century’</b>.</li>
-<li>Research spanned ornithology, taxonomy, zoogeography, evolution, systematics and the history and philosophy of biology.</li>
-<li>Made the <b>origin of species diversity</b> the central question of evolutionary biology; pioneered the currently accepted definition of a <b>biological species</b>.</li>
-<li>Won the ‘triple crown’ of biology: <b>Balzan Prize (1983)</b>, <b>International Prize for Biology (1994)</b>, <b>Crafoord Prize (1999)</b>.</li></ul>`,
+<li>Born <b>5 July 1904</b>, Kempten, Germany.</li>
+<li>Harvard evolutionary biologist.</li>
+<li>Called <b>‘The Darwin of the 20th century’</b>.</li>
+<li>Worked on:<ul>
+ <li>ornithology · taxonomy · zoogeography</li>
+ <li>evolution · systematics</li>
+ <li>history and philosophy of biology</li></ul></li>
+<li>Made <b>origin of species diversity</b> the central question of evolutionary biology.</li>
+<li>Pioneered today’s definition of a <b>biological species</b>.</li>
+<li>‘Triple crown’ of biology:<ul>
+ <li><b>Balzan Prize</b> – 1983</li>
+ <li><b>International Prize for Biology</b> – 1994</li>
+ <li><b>Crafoord Prize</b> – 1999</li></ul></li></ul>`,
 terms:[['Biology','Science of life forms and living processes'],['Anthropocentric view','Human-centred view of biology – limited progress'],['Technical question','What is living, as opposed to non-living?'],['Philosophical question','What is the purpose of life? (not attempted by scientists)'],['Ernst Mayr','‘Darwin of the 20th century’; defined biological species']],qk:'living|Mayr|habitat'});
 n5('c1-div',{notes:`
 <h4><span class="num">1.1</span>Diversity in the living world</h4><ul>
-<li>Look around – potted plants, insects, birds, pets… plus many organisms <b>too small to see</b> with the naked eye.</li>
-<li>If you <b>increase the area</b> of observation, the <b>range and variety</b> of organisms increases; a dense forest has a much greater number and kinds of organisms.</li>
-<li>Each different kind of plant, animal or organism represents a <span class="term">species</span>.</li>
-<li>The number of species known and described is <b>1.7 – 1.8 million</b>. This refers to <span class="term">biodiversity</span> – the number and types of organisms present on earth.</li>
-<li>As we explore new areas, and even old ones, <b>new organisms are continuously being identified</b>.</li></ul>
+<li>Around us: potted plants, insects, birds, pets…</li>
+<li>Many organisms are <b>too small to see</b> with the naked eye.</li>
+<li><b>Bigger area</b> observed → greater <b>range and variety</b>.<ul>
+ <li>a dense forest has many more numbers and kinds</li></ul></li>
+<li>Each different kind of organism = a <span class="term">species</span>.</li>
+<li>Species known and described: <b>1.7 – 1.8 million</b>.</li>
+<li>This is <span class="term">biodiversity</span>:<ul>
+ <li>the number and types of organisms on earth</li></ul></li>
+<li><b>New organisms</b> are continuously being identified –<ul>
+ <li>in new areas</li><li>and even in old ones</li></ul></li></ul>
 <h4>Why we need standard names</h4><ul>
-<li>We know organisms in our own area by their <b>local names</b>, which vary from place to place, even within a country – this would create <b>confusion</b>.</li>
-<li>So naming is <b>standardised</b> so that a particular organism is known by the <b>same name all over the world</b> – this process is <span class="term">nomenclature</span>.</li>
-<li>Naming is possible only when the organism is <b>described correctly</b> and we know which organism the name is attached to – this is <span class="term">identification</span>.</li></ul>`,
+<li>We know local organisms by <b>local names</b>.</li>
+<li>Local names <b>vary</b> from place to place, even within a country.<ul>
+ <li>→ this would create <b>confusion</b></li></ul></li>
+<li>So naming is <b>standardised</b>:<ul>
+ <li>one organism, <b>same name all over the world</b></li>
+ <li>this process = <span class="term">nomenclature</span></li></ul></li>
+<li>Naming needs the organism to be <b>described correctly</b>.<ul>
+ <li>we must know which organism the name is attached to</li>
+ <li>this = <span class="term">identification</span></li></ul></li></ul>`,
 terms:[['Species','Each different kind of plant, animal or organism'],['Biodiversity','Number and types of organisms present on earth'],['1.7–1.8 million','Number of species known and described'],['Nomenclature','Standardised naming – same name all over the world'],['Identification','Describing an organism correctly so the name can be attached']],qk:'biodiversity|million|nomenclature|identification|local'});
 n5('c1-nom',{notes:`
 <h4><span class="num">1.1</span>Scientific names</h4><ul>
-<li>Scientists have set procedures to give a <b>scientific name</b> to each known organism, accepted by biologists all over the world.</li>
-<li><b>Plants</b>: names follow the <span class="term">International Code for Botanical Nomenclature (ICBN)</span>.</li>
-<li><b>Animals</b>: the <span class="term">International Code of Zoological Nomenclature (ICZN)</span>.</li>
-<li>Scientific names ensure each organism has <b>only one name</b>, that people anywhere arrive at the <b>same name</b> from its description, and that the name has <b>not been used for any other</b> known organism.</li></ul>
+<li>Set procedures give each known organism a <b>scientific name</b>.</li>
+<li>Accepted by biologists <b>all over the world</b>.</li>
+<li><b>Plants</b> → <span class="term">ICBN</span><ul><li>International Code for Botanical Nomenclature</li></ul></li>
+<li><b>Animals</b> → <span class="term">ICZN</span><ul><li>International Code of Zoological Nomenclature</li></ul></li>
+<li>Scientific names ensure:<ul>
+ <li>each organism has <b>only one name</b></li>
+ <li>anyone, anywhere reaches the <b>same name</b> from its description</li>
+ <li>the name is <b>not used</b> for any other known organism</li></ul></li></ul>
 <h4>Binomial nomenclature</h4><ul>
-<li>Each name has two components – the <b>generic name</b> and the <b>specific epithet</b>. This two-part system is <span class="term">binomial nomenclature</span>, given by <b>Carolus Linnaeus</b>.</li>
-<li>Example: mango is <i>Mangifera indica</i> – <i>Mangifera</i> is the <b>genus</b>, <i>indica</i> is the <b>specific epithet</b>.</li></ul>
+<li>Each name has <b>two</b> components:<ul>
+ <li><b>generic name</b> (genus)</li><li><b>specific epithet</b></li></ul></li>
+<li>This two-part system = <span class="term">binomial nomenclature</span>.</li>
+<li>Given by <b>Carolus Linnaeus</b>.</li>
+<li>Example – mango: <i>Mangifera indica</i><ul>
+ <li><i>Mangifera</i> → <b>genus</b></li>
+ <li><i>indica</i> → <b>specific epithet</b></li></ul></li></ul>
 <h4>Universal rules of nomenclature</h4><ul>
-<li><b>1.</b> Biological names are generally in <b>Latin</b> and written in <b>italics</b>; they are Latinised or derived from Latin irrespective of their origin.</li>
-<li><b>2.</b> The <b>first word</b> represents the <b>genus</b>; the <b>second</b> denotes the <b>specific epithet</b>.</li>
-<li><b>3.</b> When <b>handwritten</b>, both words are <b>separately underlined</b>; when printed, they are in <b>italics</b> – to show their Latin origin.</li>
-<li><b>4.</b> The genus starts with a <b>capital letter</b>; the specific epithet with a <b>small letter</b> – <i>Mangifera indica</i>.</li>
-<li>The <b>author’s name</b> appears after the specific epithet, in an <b>abbreviated</b> form – <i>Mangifera indica</i> <b>Linn.</b> – meaning the species was first described by <b>Linnaeus</b>.</li></ul>`,
+<li><b>Rule 1</b> – names are generally in <b>Latin</b>, written in <b>italics</b>.<ul>
+ <li>Latinised or derived from Latin, whatever their origin</li></ul></li>
+<li><b>Rule 2</b> – <b>first word</b> = genus; <b>second word</b> = specific epithet.</li>
+<li><b>Rule 3</b> – showing Latin origin:<ul>
+ <li><b>handwritten</b> → each word <b>underlined separately</b></li>
+ <li><b>printed</b> → <b>italics</b></li></ul></li>
+<li><b>Rule 4</b> – capitals:<ul>
+ <li>genus starts with a <b>capital</b> letter</li>
+ <li>specific epithet starts with a <b>small</b> letter</li>
+ <li>e.g. <i>Mangifera indica</i></li></ul></li>
+<li><b>Author’s name</b> comes after the specific epithet:<ul>
+ <li>written in <b>abbreviated</b> form</li>
+ <li>e.g. <i>Mangifera indica</i> <b>Linn.</b></li>
+ <li>= first described by <b>Linnaeus</b></li></ul></li></ul>`,
 terms:[['ICBN','International Code for Botanical Nomenclature – plants'],['ICZN','International Code of Zoological Nomenclature – animals'],['Binomial nomenclature','Two-part name: generic name + specific epithet'],['Carolus Linnaeus','Gave the binomial naming system'],['Generic name','First word – genus, capital letter'],['Specific epithet','Second word – small letter'],['Linn.','Author abbreviation – first described by Linnaeus']],qk:'ICBN|ICZN|binomial|Linnaeus|italic|epithet|Mangifera|capital|underline|Latin'});
 n5('c1-tax',{notes:`
 <h4><span class="num">1.1</span>Classification and taxa</h4><ul>
-<li>It is nearly impossible to study all organisms, so we need <span class="term">classification</span> – grouping anything into <b>convenient categories</b> based on <b>easily observable characters</b>.</li>
-<li>Examples of such groups: plants, animals, dogs, cats, insects, mammals (animals with external ears and body hair), wheat, rice. Saying ‘dog’ brings dogs to mind, not cats; ‘Alsatians’ is more specific still.</li>
-<li>The scientific term for these categories is <span class="term">taxa</span>. Taxa can be at <b>very different levels</b>: ‘plants’ and ‘wheat’ are both taxa; ‘animals’, ‘mammals’ and ‘dogs’ are taxa at different levels – a dog is a mammal and mammals are animals.</li></ul>
+<li>Studying every organism is nearly <b>impossible</b>.</li>
+<li>So we need <span class="term">classification</span>:<ul>
+ <li>grouping into <b>convenient categories</b></li>
+ <li>based on <b>easily observable characters</b></li></ul></li>
+<li>Examples of such groups:<ul>
+ <li>plants · animals · dogs · cats · insects</li>
+ <li>mammals – animals with <b>external ears</b> and <b>body hair</b></li>
+ <li>wheat · rice</li></ul></li>
+<li>Say ‘dog’ → we think of dogs, not cats.</li>
+<li>‘Alsatians’ is <b>more specific</b> still.</li>
+<li>Scientific term for these categories: <span class="term">taxa</span>.</li>
+<li>Taxa can be at <b>very different levels</b>:<ul>
+ <li>‘plants’ and ‘wheat’ – both taxa</li>
+ <li>‘animals’, ‘mammals’, ‘dogs’ – taxa at different levels</li>
+ <li>a dog is a mammal; mammals are animals</li></ul></li></ul>
 <h4>Taxonomy</h4><ul>
-<li>Classifying all living organisms into different taxa based on characteristics is <span class="term">taxonomy</span>.</li>
-<li>Basis of modern taxonomic studies: <b>external and internal structure</b>, <b>structure of the cell</b>, <b>development process</b> and <b>ecological information</b>.</li>
-<li><b>Characterisation, identification, classification and nomenclature</b> are the processes basic to taxonomy.</li>
-<li>Taxonomy is not new: the <b>earliest classifications were based on the ‘uses’</b> of organisms – for food, clothing and shelter.</li></ul>
+<li><span class="term">Taxonomy</span> = classifying organisms into taxa by characteristics.</li>
+<li>Basis of modern taxonomic studies:<ul>
+ <li><b>external</b> and <b>internal structure</b></li>
+ <li><b>structure of the cell</b></li>
+ <li><b>development process</b></li>
+ <li><b>ecological information</b></li></ul></li>
+<li>Processes basic to taxonomy:<ul>
+ <li>characterisation · identification</li>
+ <li>classification · nomenclature</li></ul></li>
+<li>Taxonomy is <b>not new</b>.</li>
+<li>Earliest classifications were based on <b>‘uses’</b>:<ul>
+ <li>food · clothing · shelter</li></ul></li></ul>
 <h4>Systematics</h4><ul>
-<li>Study of the different kinds of organisms, their diversities <b>and the relationships among them</b> = <span class="term">systematics</span>.</li>
-<li>From the Latin <b>‘systema’</b> – systematic arrangement of organisms. Linnaeus titled his publication <b><i>Systema Naturae</i></b>.</li>
-<li>Its scope was later enlarged to include <b>identification, nomenclature and classification</b>. Systematics takes into account <b>evolutionary relationships</b> between organisms.</li></ul>`,
+<li><span class="term">Systematics</span> studies:<ul>
+ <li>different kinds of organisms</li>
+ <li>their diversities</li>
+ <li><b>relationships among them</b></li></ul></li>
+<li>From Latin <b>‘systema’</b> – systematic arrangement.</li>
+<li>Linnaeus’ publication: <b><i>Systema Naturae</i></b>.</li>
+<li>Scope later enlarged to include:<ul>
+ <li>identification · nomenclature · classification</li></ul></li>
+<li>Takes into account <b>evolutionary relationships</b>.</li></ul>`,
 terms:[['Classification','Grouping into convenient categories by easily observable characters'],['Taxa','Scientific term for categories (singular: taxon)'],['Taxonomy','Classifying organisms into taxa based on characteristics'],['Basic taxonomic processes','Characterisation, identification, classification, nomenclature'],['Earliest classification','Based on uses of organisms'],['Systematics','Kinds of organisms, diversity and relationships'],['Systema Naturae','Linnaeus’ publication; ‘systema’ = systematic arrangement']],qk:'taxa|taxonomy|systematics|classification|Systema|uses'});
 n5('c1-hier',{notes:`
 <h4><span class="num">1.2</span>Taxonomic categories</h4><ul>
-<li>Classification is <b>not a single step</b>; it involves a <b>hierarchy of steps</b>, each step a <b>rank or category</b>.</li>
-<li>Each is called a <span class="term">taxonomic category</span>; all categories together form the <span class="term">taxonomic hierarchy</span>.</li>
-<li>Each category is a <b>unit of classification</b>, represents a <b>rank</b> and is commonly termed a <span class="term">taxon</span> (pl. <b>taxa</b>).</li>
-<li>Example: <b>insects</b> share three pairs of jointed legs – a recognisable concrete group, so they were given a rank. Groups represent category; category denotes rank.</li>
-<li>Taxonomic groups are <b>distinct biological entities</b>, not merely morphological aggregates.</li>
-<li>Common categories: <b>kingdom, phylum or division (for plants), class, order, family, genus, species</b>. <b>Species</b> is the <b>lowest</b> category for all organisms.</li>
-<li>To place an organism in categories you need <b>knowledge of its characters</b> – to find similarities and dissimilarities.</li></ul>
+<li>Classification is <b>not a single step</b>.</li>
+<li>It is a <b>hierarchy of steps</b>; each step = a <b>rank or category</b>.</li>
+<li>Each one = a <span class="term">taxonomic category</span>.</li>
+<li>All categories together = the <span class="term">taxonomic hierarchy</span>.</li>
+<li>Each category:<ul>
+ <li>is a <b>unit of classification</b></li>
+ <li>represents a <b>rank</b></li>
+ <li>is called a <span class="term">taxon</span> (plural <b>taxa</b>)</li></ul></li>
+<li>Example – <b>insects</b>:<ul>
+ <li>share <b>three pairs of jointed legs</b></li>
+ <li>a recognisable, concrete group → given a rank</li></ul></li>
+<li>Groups represent <b>category</b>; category denotes <b>rank</b>.</li>
+<li>Taxonomic groups are <b>distinct biological entities</b>,<ul>
+ <li>not merely morphological aggregates</li></ul></li>
+<li>Common categories:<ul>
+ <li>kingdom · phylum (<b>division</b> for plants)</li>
+ <li>class · order · family</li>
+ <li>genus · species</li></ul></li>
+<li><b>Species</b> = the <b>lowest</b> category for all organisms.</li>
+<li>Placing an organism needs <b>knowledge of its characters</b>:<ul>
+ <li>to find similarities and dissimilarities</li></ul></li></ul>
 <h4>The hierarchy (Fig. 1.1)</h4><ul>
-<li>Categories from species to kingdom are shown in <b>ascending order</b> starting with species. Taxonomists have also developed <b>sub-categories</b>.</li>
-<li>Going <b>higher</b> from species to kingdom, the <b>number of common characteristics decreases</b>.</li>
-<li><b>Lower</b> the taxa, <b>more</b> characteristics the members share. <b>Higher</b> the category, <b>greater the difficulty</b> of determining the relationship to other taxa at the same level – classification becomes more complex.</li></ul>`,
+<li>Shown in <b>ascending order</b> – species → kingdom.</li>
+<li>Taxonomists also developed <b>sub-categories</b>.</li>
+<li>Going <b>up</b> the hierarchy:<ul>
+ <li>common characteristics <b>decrease</b></li>
+ <li>relationship to other taxa at the same level gets <b>harder</b> to find</li>
+ <li>classification becomes <b>more complex</b></li></ul></li>
+<li><b>Lower</b> the taxon → <b>more</b> characters shared by members.</li></ul>`,
 terms:[['Taxonomic category','A rank / step in classification'],['Taxonomic hierarchy','All categories together'],['Taxon','Unit of classification representing a rank (pl. taxa)'],['Lowest category','Species'],['Division','Used for plants in place of phylum'],['Higher category','Fewer common characters, harder to relate']],qk:'hierarch|taxon|lowest|ascending|category|common characteristics'});
 n5('c1-ranks',{notes:`
 <h4><span class="num">1.2.1</span>Species</h4><ul>
-<li>A group of individual organisms with <b>fundamental similarities</b>; distinguishable from closely related species by <b>distinct morphological differences</b>.</li>
-<li>In <i>Mangifera indica</i>, <i>Solanum tuberosum</i> (potato) and <i>Panthera leo</i> (lion): <i>indica, tuberosum, leo</i> are <b>specific epithets</b>; <i>Mangifera, Solanum, Panthera</i> are <b>genera</b>.</li>
-<li>A genus may have more than one specific epithet: <i>Panthera tigris</i>; <i>Solanum nigrum</i> and <i>S. melongena</i>. Human beings: species <i>sapiens</i>, genus <i>Homo</i> – <b><i>Homo sapiens</i></b>.</li></ul>
+<li>Individuals with <b>fundamental similarities</b>.</li>
+<li>Told apart from close relatives by <b>distinct morphological differences</b>.</li>
+<li>Examples:<ul>
+ <li><i>Mangifera indica</i> – mango</li>
+ <li><i>Solanum tuberosum</i> – potato</li>
+ <li><i>Panthera leo</i> – lion</li></ul></li>
+<li><i>indica, tuberosum, leo</i> → <b>specific epithets</b></li>
+<li><i>Mangifera, Solanum, Panthera</i> → <b>genera</b></li>
+<li>One genus can have several specific epithets:<ul>
+ <li><i>Panthera tigris</i></li>
+ <li><i>Solanum nigrum</i>, <i>S. melongena</i></li></ul></li>
+<li>Humans: genus <i>Homo</i>, species <i>sapiens</i> → <b><i>Homo sapiens</i></b>.</li></ul>
 <h4><span class="num">1.2.2</span>Genus</h4><ul>
-<li>A group of <b>related species</b> with more characters in common than species of other genera – <b>aggregates of closely related species</b>.</li>
-<li>Potato and brinjal: different species, same genus <i>Solanum</i>. Lion (<i>P. leo</i>), leopard (<i>P. pardus</i>), tiger (<i>P. tigris</i>): genus <i>Panthera</i>, which differs from genus <i>Felis</i> (cats).</li></ul>
+<li>A group of <b>related species</b>.</li>
+<li>More characters in common than with species of other genera.</li>
+<li>= <b>aggregates of closely related species</b>.</li>
+<li>Potato and brinjal → different species, same genus <i>Solanum</i>.</li>
+<li>Genus <i>Panthera</i>:<ul>
+ <li>lion – <i>P. leo</i></li><li>leopard – <i>P. pardus</i></li><li>tiger – <i>P. tigris</i></li></ul></li>
+<li><i>Panthera</i> differs from genus <i>Felis</i> (cats).</li></ul>
 <h4><span class="num">1.2.3</span>Family</h4><ul>
-<li>A group of <b>related genera</b> with still fewer similarities than genus and species. Plant families are characterised on both <b>vegetative and reproductive</b> features.</li>
-<li><i>Solanum, Petunia, Datura</i> → family <b>Solanaceae</b>. <i>Panthera</i> + <i>Felis</i> → family <b>Felidae</b>. Cat and dog → <b>Felidae</b> and <b>Canidae</b>.</li></ul>
+<li>A group of <b>related genera</b>.</li>
+<li>Still <b>fewer similarities</b> than genus and species.</li>
+<li>Plant families use <b>vegetative</b> and <b>reproductive</b> features.</li>
+<li><i>Solanum, Petunia, Datura</i> → <b>Solanaceae</b></li>
+<li><i>Panthera</i> + <i>Felis</i> → <b>Felidae</b></li>
+<li>Cat → <b>Felidae</b>; dog → <b>Canidae</b></li></ul>
 <h4><span class="num">1.2.4</span>Order</h4><ul>
-<li>Higher categories are identified on <b>aggregates of characters</b>. Order is an <b>assemblage of families</b> with a few similar characters.</li>
-<li><b>Convolvulaceae, Solanaceae</b> → order <b>Polymoniales</b> (mainly floral characters). <b>Felidae, Canidae</b> → order <b>Carnivora</b>.</li></ul>
+<li>Higher categories use <b>aggregates of characters</b>.</li>
+<li>Order = <b>assemblage of families</b> with a few similar characters.</li>
+<li><b>Convolvulaceae</b> + <b>Solanaceae</b> → <b>Polymoniales</b><ul>
+ <li>based mainly on <b>floral</b> characters</li></ul></li>
+<li><b>Felidae</b> + <b>Canidae</b> → <b>Carnivora</b></li></ul>
 <h4><span class="num">1.2.5</span>Class</h4><ul>
-<li>Includes <b>related orders</b>: order <b>Primata</b> (monkey, gorilla, gibbon) and order <b>Carnivora</b> (tiger, cat, dog) → class <b>Mammalia</b>, which has other orders too.</li></ul>
+<li>Includes <b>related orders</b>.</li>
+<li>Order <b>Primata</b> – monkey, gorilla, gibbon.</li>
+<li>Order <b>Carnivora</b> – tiger, cat, dog.</li>
+<li>Both → class <b>Mammalia</b> (which has other orders too).</li></ul>
 <h4><span class="num">1.2.6</span>Phylum</h4><ul>
-<li>Classes of fishes, amphibians, reptiles, birds and mammals → phylum <b>Chordata</b>, based on the <b>notochord</b> and <b>dorsal hollow neural system</b>.</li>
-<li>In <b>plants</b>, classes with a few similar characters form a higher category called <b>Division</b>.</li></ul>
+<li>Classes of fishes, amphibians, reptiles, birds, mammals → phylum <b>Chordata</b>.</li>
+<li>Common features:<ul>
+ <li><b>notochord</b></li><li><b>dorsal hollow neural system</b></li></ul></li>
+<li>In <b>plants</b>: classes with a few similar characters → <b>Division</b>.</li></ul>
 <h4><span class="num">1.2.7</span>Kingdom</h4><ul>
-<li>All animals of various phyla → the highest category, <b>Kingdom Animalia</b>. <b>Kingdom Plantae</b> comprises all plants from various divisions.</li></ul>`,
+<li>Highest category.</li>
+<li>All animals of various phyla → <b>Kingdom Animalia</b>.</li>
+<li>All plants of various divisions → <b>Kingdom Plantae</b>.</li></ul>`,
 terms:[['Genus','Aggregate of closely related species'],['Family','Group of related genera'],['Order','Assemblage of families'],['Class','Group of related orders'],['Phylum','Group of classes (animals)'],['Kingdom','Highest category – Animalia, Plantae'],['Chordata','Notochord + dorsal hollow neural system'],['Polymoniales','Order with Convolvulaceae, Solanaceae'],['Carnivora','Order with Felidae, Canidae'],['Felidae / Canidae','Cats (with Panthera) / dogs']],qk:'genus|family|order|class|phylum|kingdom|Panthera|Solanum|Felidae|Carnivora|Chordata|Polymoniales|Primata|Homo'});
 n5('c1-table',{notes:`
 <h4>Table 1.1 – Organisms with their taxonomic categories</h4>
@@ -3075,13 +3525,24 @@ n5('c1-table',{notes:`
 <tr><td>Wheat</td><td><i>Triticum aestivum</i></td><td>Poaceae</td><td>Poales</td><td>Monocotyledonae</td><td>Angiospermae</td></tr></table>
 <p class="small muted">The genus is the first word of each biological name: <i>Homo, Musca, Mangifera, Triticum</i>.</p>`,
 terms:[['Homo sapiens','Man – Hominidae, Primata, Mammalia, Chordata'],['Musca domestica','Housefly – Muscidae, Diptera, Insecta, Arthropoda'],['Mangifera indica','Mango – Anacardiaceae, Sapindales, Dicotyledonae, Angiospermae'],['Triticum aestivum','Wheat – Poaceae, Poales, Monocotyledonae, Angiospermae']],qk:'Homo|Musca|Triticum|Poaceae|Diptera|Anacardiaceae|Sapindales|Muscidae|Hominidae|Arthropoda|Insecta'});
-n5('c1-summary',{notes:`<ul>
-<li>The living world is rich in variety. Millions of plants and animals have been identified and described, but a <b>large number still remains unknown</b>.</li>
-<li>The range of organisms in size, colour, habitat, physiological and morphological features makes us seek the defining characteristics of living organisms.</li>
-<li>To study the kinds and diversity of organisms, biologists evolved rules and principles for <b>identification, nomenclature and classification</b> – the branch dealing with these is <b>taxonomy</b>.</li>
-<li>Taxonomic studies are useful in <b>agriculture, forestry, industry</b> and for knowing our <b>bio-resources</b> and their diversity.</li>
-<li>Identification, naming and classification are universally evolved under <b>international codes</b>. Each organism gets a correct scientific/biological name of <b>two words</b> – the <b>binomial system</b>.</li>
-<li>Each organism occupies a place in the system of classification. The categories/ranks are <b>taxonomic categories or taxa</b>; together they form the <b>taxonomic hierarchy</b>.</li></ul>`,qk:'.'});
+n5('c1-summary',{notes:`
+<ul>
+<li>The living world is <b>rich in variety</b>.</li>
+<li>Millions of plants and animals have been identified and described.<ul>
+ <li>a <b>large number still remains unknown</b></li></ul></li>
+<li>Organisms vary in size, colour, habitat, physiology and morphology.<ul>
+ <li>so we seek the <b>defining characteristics</b> of living organisms</li></ul></li>
+<li>Biologists evolved rules for:<ul>
+ <li>identification · nomenclature · classification</li></ul></li>
+<li>The branch dealing with these = <b>taxonomy</b>.</li>
+<li>Taxonomy is useful in:<ul>
+ <li><b>agriculture</b> · <b>forestry</b> · <b>industry</b></li>
+ <li>knowing our <b>bio-resources</b> and their diversity</li></ul></li>
+<li>Naming and classifying follow <b>international codes</b>.</li>
+<li>Each organism gets a scientific name of <b>two words</b> – the <b>binomial system</b>.</li>
+<li>Each organism has a <b>place</b> in the classification system.</li>
+<li>Categories / ranks = <b>taxonomic categories</b> or <b>taxa</b>.</li>
+<li>Together they form the <b>taxonomic hierarchy</b>.</li></ul>`,qk:'.'});
 
 /* ---------- widgets ---------- */
 function twoQuestions(){
@@ -3246,8 +3707,64 @@ function tableWidget(){
 }
 
 /* ---------- lessons ---------- */
+
+/* ---- Introduction diagrams (drawn for this site; examples are for illustration) ---- */
+const HAB_PARTS=[
+ {id:'mtn',name:'Cold mountains',desc:'High, snowy places where it stays very cold for much of the year.',fn:'Even here we find living organisms – NCERT lists cold mountains as one of the extraordinary habitats of life.',eg:'For example, mosses, lichens and yaks live in cold mountains.'},
+ {id:'for',name:'Deciduous forests',desc:'Forests whose trees shed their leaves in one season of the year.',fn:'A dense forest has a much greater number and variety of organisms than a small area.',eg:'Trees, climbers, insects, birds and mammals share one forest.'},
+ {id:'lak',name:'Fresh water lakes',desc:'Inland water bodies with fresh (not salty) water.',fn:'Home to plants and animals adapted to living in or near fresh water.',eg:'Lotus, fish, frogs and many microscopic organisms.'},
+ {id:'des',name:'Deserts',desc:'Very dry places with little rain and large changes in temperature.',fn:'Organisms here survive with very little water.',eg:'Cacti, camels and lizards.'},
+ {id:'hot',name:'Hot springs',desc:'Places where water comes out of the ground hot.',fn:'Shows that life exists even at high temperatures.',eg:'Some bacteria live in hot springs.'},
+ {id:'oce',name:'Oceans',desc:'The huge salty water bodies covering most of the earth.',fn:'Hold a very large variety of organisms, many too small to see.',eg:'Fish, whales, seaweeds and plankton.'}];
+const D_HAB=reg({id:'hab',title:'Where living organisms are found',vb:'0 0 900 470',fs:21,parts:HAB_PARTS,svg:()=>`<rect width="900" height="470" class="fw"/>
+ <g data-part="mtn"><rect x="0" y="120" width="165" height="300" fill="#dfe8f2"/><polygon points="-10,420 70,170 150,420" fill="#8fa3b8"/><polygon points="60,420 120,230 190,420" fill="#7a8fa6"/><polygon points="70,170 52,226 66,218 80,232 92,210" fill="#fff"/><polygon points="120,230 106,270 120,262 132,276 140,262" fill="#fff"/>
+  <g fill="#2f6b4a"><polygon points="24,420 36,380 48,420"/><polygon points="40,420 52,372 64,420"/></g><circle cx="20" cy="150" r="3" fill="#fff"/><circle cx="140" cy="140" r="3" fill="#fff"/><circle cx="96" cy="128" r="2.5" fill="#fff"/></g>
+ <g data-part="for"><rect x="165" y="120" width="150" height="300" fill="#eaf3e3"/>
+  <rect x="190" y="320" width="9" height="100" fill="#7a5233"/><circle cx="195" cy="300" r="36" fill="#d98a2b"/><circle cx="180" cy="285" r="20" fill="#e6a640"/>
+  <rect x="250" y="300" width="10" height="120" fill="#7a5233"/><circle cx="255" cy="270" r="44" fill="#4f9a5a"/><circle cx="240" cy="258" r="22" fill="#69b26f"/>
+  <rect x="292" y="340" width="7" height="80" fill="#7a5233"/><circle cx="296" cy="324" r="24" fill="#c0612a"/>
+  <path d="M220 360 q6 8 0 14 q-8 -6 0 -14z" fill="#d98a2b"/><path d="M276 380 q6 8 0 14 q-8 -6 0 -14z" fill="#c0612a"/></g>
+ <g data-part="lak"><rect x="315" y="120" width="150" height="300" fill="#e6f1f4"/><path d="M315 420 V350 Q390 318 465 350 V420Z" fill="#7cc1d9"/><path d="M330 372 q20-6 40 0 M392 392 q20-6 40 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  <ellipse cx="350" cy="352" rx="16" ry="5" fill="#3f8f4f"/><path d="M344 350 q6-16 12 0z" fill="#f08fb0"/><path d="M420 400 q12-8 24 0 q-12 8 -24 0z M444 400 l8 -6 v12z" fill="#e3833f"/>
+  <path d="M452 350 V300 M458 352 V312 M446 352 V318" stroke="#5c8f3e" stroke-width="3"/></g>
+ <g data-part="des"><rect x="465" y="120" width="150" height="300" fill="#fbefd6"/><circle cx="580" cy="160" r="22" fill="#f6b73c"/><path d="M465 420 V360 Q510 330 555 360 Q590 340 615 352 V420Z" fill="#e9c27a"/><path d="M465 420 V392 Q540 372 615 396 V420Z" fill="#dcae5e"/>
+  <g fill="#4f8f4a"><rect x="508" y="300" width="14" height="70" rx="7"/><rect x="494" y="318" width="10" height="26" rx="5"/><rect x="494" y="336" width="20" height="8" rx="4"/><rect x="526" y="308" width="10" height="24" rx="5"/><rect x="518" y="326" width="18" height="8" rx="4"/></g></g>
+ <g data-part="hot"><rect x="615" y="120" width="140" height="300" fill="#eef0ee"/><path d="M615 420 V372 Q640 350 660 368 Q690 340 720 366 Q740 352 755 362 V420Z" fill="#9aa39a"/><ellipse cx="686" cy="390" rx="52" ry="16" fill="#5ed1c4"/><ellipse cx="686" cy="392" rx="30" ry="8" fill="#9fe7de"/>
+  <path d="M664 368 q-10 -20 0 -40 q10 -20 0 -40 M690 364 q-10 -22 0 -44 q10 -22 0 -44 M714 370 q-10 -18 0 -36 q10 -18 0 -36" stroke="#b8c2c8" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <g fill="#e07b3a"><circle cx="676" cy="392" r="2.2"/><circle cx="694" cy="388" r="2.2"/><circle cx="702" cy="394" r="2.2"/></g></g>
+ <g data-part="oce"><rect x="755" y="120" width="145" height="300" fill="#e3eef8"/><path d="M755 420 V300 q18 -12 36 0 t36 0 t36 0 t37 0 V420Z" fill="#2f6db5"/><path d="M755 420 V340 q18 -10 36 0 t36 0 t36 0 t37 0 V420Z" fill="#245a98"/>
+  <path d="M790 366 q16-10 32 0 q-16 10 -32 0z M822 366 l10 -7 v14z" fill="#f2c94c"/><path d="M850 330 q10 -24 26 -18 q-8 6 -10 14 q12 -6 22 0 q-16 2 -24 12z" fill="#16365f"/>
+  <path d="M770 420 q-6 -20 4 -36 q-8 -10 0 -24 M884 420 q6 -18 -4 -34" stroke="#3aa86b" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+ <rect x="0" y="420" width="900" height="50" fill="#d9cdb8"/>`,labels:[['mtn',70,176,8,92,'start','Cold mountains'],['for',255,240,240,62,'middle','Deciduous forest'],['lak',390,350,390,92,'middle','Fresh water lake'],['des',540,350,540,62,'middle','Desert'],['hot',686,300,686,92,'middle','Hot spring'],['oce',828,300,828,62,'middle','Ocean']]});
+
+const REL_PARTS=[
+ {id:'now',name:'Present-day organisms',desc:'All the organisms living today – bacteria, plants, insects, birds, human beings.',fn:'Comparing them shows they share similarities with each other.',eg:'Bacteria, ferns, trees, insects, birds and humans in this tree.'},
+ {id:'past',name:'Organisms that ever lived',desc:'The organisms that lived earlier, from which present-day organisms descended.',fn:'Present-day organisms share similarities with these too.'},
+ {id:'hor',name:'Horizontal similarity',desc:'Similarities among organisms living at the same time – across the present day.',fn:'One of the two ways living organisms are seen to share similarities.'},
+ {id:'ver',name:'Vertical similarity',desc:'Similarities between present-day organisms and those that lived before them.',fn:'Shows that all present-day organisms are related to all organisms that ever lived.'},
+ {id:'hum',name:'Human beings',desc:'Just one branch among many on the tree of life.',fn:'Realising we are related to all other organisms was humbling – and moved away from an anthropocentric view.'},
+ {id:'con',name:'Conservation of biodiversity',desc:'Protecting the variety of living organisms on earth.',fn:'The realisation that all organisms are related led to cultural movements for conservation of biodiversity.'}];
+const D_REL=reg({id:'rel',title:'All living organisms are related',vb:'0 0 780 500',fs:20,parts:REL_PARTS,svg:()=>{
+  const tips=[[150,'bac'],[262,'fern'],[374,'tree'],[486,'ins'],[598,'bird'],[700,'hum']];
+  const ic={bac:'<rect x="-20" y="-9" width="40" height="18" rx="9" fill="#8bc4a0" stroke="#2f7a52" stroke-width="2"/><path d="M20 0 q8 -6 14 0" stroke="#2f7a52" stroke-width="2" fill="none"/>',
+   fern:'<path d="M0 20 V-20" stroke="#2f7a52" stroke-width="3"/>'+[ -14,-6,2,10].map(y=>`<path d="M0 ${y} q-14 -4 -18 4 M0 ${y} q14 -4 18 4" stroke="#3f9a5c" stroke-width="3" fill="none"/>`).join(''),
+   tree:'<rect x="-4" y="2" width="8" height="18" fill="#7a5233"/><circle cy="-8" r="16" fill="#4f9a5a"/>',
+   ins:'<ellipse rx="8" ry="14" fill="#5a4a7a"/><circle cy="-16" r="6" fill="#5a4a7a"/><path d="M-8 -4 l-12 -6 M-8 4 l-12 2 M-8 10 l-10 8 M8 -4 l12 -6 M8 4 l12 2 M8 10 l10 8" stroke="#5a4a7a" stroke-width="2.4"/>',
+   bird:'<path d="M-20 4 q14 -22 30 -6 q8 -8 14 -2 l-8 4 q-4 16 -22 14 q-10 0 -14 -10z" fill="#3a78c2"/><circle cx="18" cy="-8" r="2" fill="#fff"/>',
+   hum:'<circle cy="-14" r="7" fill="#c46a3a"/><path d="M0 -6 V10 M-10 0 H10 M0 10 l-8 12 M0 10 l8 12" stroke="#c46a3a" stroke-width="4" stroke-linecap="round"/>'};
+  const br=tips.map(([x])=>`<path d="M420 420 C420 330 ${x} 300 ${x} 150" stroke="#9b7a55" stroke-width="6" fill="none" stroke-linecap="round"/>`).join('');
+  return `<rect width="780" height="500" class="fw"/>
+  <g data-part="past"><rect x="100" y="330" width="660" height="150" rx="18" fill="#efe4d2"/><path d="M420 480 V420" stroke="#9b7a55" stroke-width="12" stroke-linecap="round"/>${[[240,440],[330,400],[520,410],[620,450]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9" fill="#c9b08c"/>`).join('')}<path d="M330 400 L420 420 M520 410 L420 420 M240 440 L330 400 M620 450 L520 410" stroke="#c9b08c" stroke-width="3"/></g>
+  <g data-part="now"><rect x="100" y="104" width="660" height="92" rx="18" fill="#e3efe6"/></g>
+  ${br}
+  ${tips.map(([x,k])=>`<g ${k==='hum'?'data-part="hum"':''}><circle cx="${x}" cy="150" r="32" fill="#fff" stroke="#9b7a55" stroke-width="3"/><g transform="translate(${x} 150)">${ic[k]}</g></g>`).join('')}
+  <g data-part="hor"><path d="M150 72 H700" stroke="#2156c4" stroke-width="4"/><path d="M150 72 l14 -9 v18z M700 72 l-14 -9 v18z" fill="#2156c4"/></g>
+  <g data-part="ver"><path d="M50 460 V120" stroke="#c0392b" stroke-width="4"/><path d="M50 120 l-9 14 h18z M50 460 l-9 -14 h18z" fill="#c0392b"/></g>
+  <g data-part="con"><path d="M740 250 l26 10 v20 q0 22 -26 34 q-26 -12 -26 -34 v-20z" fill="#1e7b4f"/><path d="M728 282 l9 9 l17 -19" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/></g>`;},
+  labels:[['now',430,104,430,44,'middle','Present day'],['hor',300,72,300,96,'middle','Horizontal similarity'],['ver',50,290,62,300,'start','Vertical similarity'],['past',600,470,600,494,'middle','Organisms that ever lived'],['hum',700,182,700,224,'middle','Humans'],['con',740,316,772,342,'end','Conservation']]});
+
 LESSONS[1].push(
- {id:'c1-intro',n:1,ch:1,title:'Introduction: what is living?',sub:'Diversity of life; two questions; Ernst Mayr',render(el){el.appendChild(twoQuestions());el.appendChild(mayrCard());}},
+ {id:'c1-intro',n:1,ch:1,title:'Introduction: what is living?',sub:'Diversity of life; two questions; Ernst Mayr',render(el){el.appendChild(Diagram.create(D_HAB).wrap);el.appendChild(Diagram.create(D_REL).wrap);el.appendChild(twoQuestions());el.appendChild(mayrCard());}},
  {id:'c1-div',n:2,ch:1,title:'1.1 Diversity in the living world',sub:'Species, biodiversity, local names, identification',render(el){el.appendChild(areaWidget());el.appendChild(speciesCounter());el.appendChild(localNames());}},
  {id:'c1-nom',n:3,ch:1,title:'1.1 Binomial nomenclature',sub:'ICBN, ICZN, rules for writing scientific names',render(el){el.appendChild(codesCard());el.appendChild(Diagram.create(D_BIN).wrap);el.appendChild(writeItRight());}},
  {id:'c1-tax',n:4,ch:1,title:'1.1 Classification, taxonomy and systematics',sub:'Taxa, processes of taxonomy, systematics',render(el){el.appendChild(Diagram.create(D_TAXA).wrap);el.appendChild(taxoProcess());el.appendChild(taxVsSys());}},
@@ -3478,6 +3995,11 @@ const BgFx={
 /* ===== About page + version history + update check ===== */
 /* Newest first. Version rule: 1.<chapters>.<changes since the last chapter was added>. */
 const CHANGELOG=[
+ {v:'1.3.21',items:['Automatic updates: when a new version is out, the site updates itself (never in the middle of a quiz or game).','After an update, a “What’s new” screen shows the features of the new version.']},
+ {v:'1.3.20',items:['Version history on the About page is grouped by main version (1.0, 1.1, 1.3…). Tap a version to open its list of updates.']},
+ {v:'1.3.19',items:['The “About this site” link now shows only on the main screen. Inside a subject the footer shows just the version and copyright.']},
+ {v:'1.3.18',items:['Two new detailed diagrams in “Introduction: what is living?” – where living organisms are found, and how all organisms are related (horizontal and vertical similarities). Tap any part for Focus Mode.']},
+ {v:'1.3.17',items:['Notes are easier to read on phones: all chapters (1, 5 and 6) rewritten as short pointers with sub-points – same content, less reading per line – and tighter spacing on small screens.']},
  {v:'1.3.16',items:['New About page with the purpose of the site, what it offers and this full version history.']},
  {v:'1.3.15',items:['The site now checks for a newer version whenever it opens or you come back to it, and shows an “Update” bar – no need to clear the browser cache.']},
  {v:'1.3.14',items:['Quiz timer: a clock runs on every question (thinking time only).','Time report after each quiz – total time, time per question, slowest question, and a comparison with the NEET average (1 minute a question) and the subject target pace.']},
@@ -3498,6 +4020,14 @@ const CHANGELOG=[
  {v:'1.1',items:['Chapter 1 – The Living World added: 8 lessons, diagrams, 35 MCQs, exam questions and 2 new games (Rank Ladder, Name It Right).','Progress tab: subjects open as dropdowns showing their chapters.','Version number and copyright added to the footer.']},
  {v:'1.0',items:['First release: Chapter 5 (Morphology of Flowering Plants) and Chapter 6 (Anatomy of Flowering Plants).','Lessons by NCERT section with detailed notes, labelled diagrams with Focus Mode, Labels on/off and Quiz me.','MCQ quiz, Wrong Tab, exam-style questions, flashcards, 6 games and progress saving.','Later 1.0 updates: light/dark switch, diagrams fit the screen, © Mrudul watermark, new design with Physics / Chemistry / Biology sections, 3D depth on diagrams and a 3D layers view, and speed fixes.']}];
 
+function clGroups(){
+  const key=v=>v.split('.').slice(0,2).join('.');const num=v=>v.split('.').map(Number);
+  const cmp=(x,y)=>{const a=num(x),b=num(y);for(let i=0;i<3;i++){const d=(a[i]||0)-(b[i]||0);if(d)return d;}return 0;};
+  const groups={};CHANGELOG.forEach(c=>(groups[key(c.v)]=groups[key(c.v)]||[]).push(c));
+  return Object.keys(groups).sort(cmp).map(g=>{const list=groups[g].sort((x,y)=>cmp(x.v,y.v));const cur=list.some(c=>c.v===APP_VERSION);
+    return `<details class="clgr${cur?' cur':''}"><summary><b>Version ${g}</b><span class="small muted">${list.length} update${list.length>1?'s':''}</span>${cur?'<em>current</em>':''}<i class="chev">${icon('next')}</i></summary>
+    <div class="cl">${list.map(c=>`<div class="clv${c.v===APP_VERSION?' now':''}"><div class="cln">${c.v}${c.v===APP_VERSION?'<span>current</span>':''}</div><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul></div>`).join('')}</div></details>`;}).join('');
+}
 function renderAbout(scr){
   scr.innerHTML=`<div class="ph"><h1>About</h1><p>Class 11 revision, made by Mrudul.</p></div>
   <div class="card"><h2>Why this site exists</h2><p>NCERT is the base of the Class 11 syllabus and of NEET. This site turns each NCERT chapter into short lessons you can explore, practise and revise – on a phone or iPad – so learning the textbook is active instead of just reading it. Everything comes from the NCERT chapters themselves.</p></div>
@@ -3510,23 +4040,37 @@ function renderAbout(scr){
     <li><b>Progress</b> – chapter by chapter, saved on your device.</li>
     <li><b>Subjects</b> – Biology now; Chemistry and Physics are coming, each with its own look.</li></ul></div>
   <div class="card"><h2>Version history</h2><p class="small muted">Version numbers work like this: <b>1.3</b> means 3 chapters. The last number counts fixes and new features since the last chapter was added. A new chapter moves it to 1.4.</p>
-    <div class="cl">${CHANGELOG.map((c,i)=>`<div class="clv${i===0?' now':''}"><div class="cln">${c.v}${i===0?'<span>current</span>':''}</div><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul></div>`).join('')}</div></div>
+    <div class="clg">${clGroups()}</div></div></div>
   <p class="foot">© ${new Date().getFullYear()} Mrudul. All rights reserved.</p>`;
 }
 function openAbout(){App.push(renderAbout,'About');}
 
-/* ---------- update check: compares this page's version with the live one ---------- */
-const Updater={last:0,shown:false,
+/* ---------- automatic update ----------
+   Checks the live page for a newer APP_VERSION. If found, updates straight away when you are on a
+   main screen; if you are inside a lesson, quiz or game it waits until you leave it. */
+const Updater={last:0,pending:null,
   cmp(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d;}return 0;},
-  async check(){if(this.shown||!/^https?:/.test(location.protocol))return;const now=Date.now();if(now-this.last<60000)return;this.last=now;
+  async check(){if(this.pending||!/^https?:/.test(location.protocol))return;const now=Date.now();if(now-this.last<60000)return;this.last=now;
     try{const r=await fetch(location.pathname+'?check='+now,{cache:'no-store'});if(!r.ok)return;const t=await r.text();
-      const m=t.match(/const APP_VERSION='([\d.]+)'/);if(m&&this.cmp(m[1],APP_VERSION)>0)this.show(m[1]);}catch(e){}},
-  show(v){this.shown=true;const b=document.createElement('div');b.id='updbar';
-    b.innerHTML=`<span>New version <b>${v}</b> is available</span><button class="btn sm" id="updGo">Update</button><button class="iconbtn" id="updX" aria-label="Later">✕</button>`;
-    document.body.appendChild(b);b.animate([{transform:'translateY(30px)',opacity:0},{transform:'none',opacity:1}],{duration:450,easing:'cubic-bezier(.3,1.4,.5,1)'});
-    $('#updGo',b).onclick=()=>{location.replace(location.pathname+'?v='+v+location.hash);};
-    $('#updX',b).onclick=()=>b.remove();},
+      const m=t.match(/const APP_VERSION='([\d.]+)'/);if(m&&this.cmp(m[1],APP_VERSION)>0){this.pending=m[1];this.tryApply();}}catch(e){}},
+  busy(){return App.stack.length>0||!!document.querySelector('#focus.on,#x3d.on,.gi');},
+  tryApply(){if(!this.pending||this.busy())return;const v=this.pending;
+    const o=document.createElement('div');o.id='updating';o.innerHTML=`<div class="up-in"><div class="up-spin"></div><b>Updating to version ${v}</b><span>Getting the latest copy…</span></div>`;document.body.appendChild(o);
+    o.animate([{opacity:0},{opacity:1}],{duration:250,fill:'forwards'});
+    setTimeout(()=>location.replace(location.pathname+'?v='+v+location.hash),700);},
   init(){setTimeout(()=>this.check(),2500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')this.check();});window.addEventListener('pageshow',e=>{if(e.persisted)this.check();});}};
+
+/* ---------- "What's new" after an update ---------- */
+const WhatsNew={
+  justUpdated(){return S.seenVer&&S.seenVer!==APP_VERSION;},
+  maybe(){const show=this.justUpdated();const from=S.seenVer;S.seenVer=APP_VERSION;save();if(!show)return;
+    const c=CHANGELOG.find(x=>x.v===APP_VERSION);if(!c)return;
+    const d=document.createElement('div');d.id='whatsnew';
+    d.innerHTML=`<div class="wn-card"><div class="wn-badge">${icon('check')}</div><div class="small muted">Updated from ${from}</div><h2>You’re on version ${APP_VERSION}</h2><h3>What’s new</h3><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul><button class="btn w100" id="wnOk">Got it</button><button class="ablink" id="wnAll">See all versions</button></div>`;
+    document.body.appendChild(d);$('.wn-card',d).animate([{transform:'translateY(40px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:520,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+    setTimeout(()=>confetti(40),250);
+    const close=()=>d.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).onfinish=()=>d.remove();
+    $('#wnOk',d).onclick=close;$('#wnAll',d).onclick=()=>{close();App.subj=null;App.go('home');openAbout();};}};
 
 Object.keys(LESSONS).forEach(c=>LESSONS[c].sort((a,b)=>a.n-b.n));buildFlash();Store.loadLocal();App.init();Store.initRemote();
 </script>
