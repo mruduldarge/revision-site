@@ -489,19 +489,10 @@ body.s-bio .btn{border-radius:999px}
 
 /* motifs */
 .mo{width:100%;height:100%;overflow:visible}
-.mo.live .leaf{transform-origin:0 50px;animation:sway 3.2s ease-in-out infinite}
-.mo.live .cellA{animation:bob 2.6s ease-in-out infinite}
-.mo.live .cellB{animation:bob 2.2s .6s ease-in-out infinite}
 @keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.mo.live .orb{animation:spin 2.4s linear infinite}
-.mo.live .orb.o1{animation-duration:3.1s;animation-direction:reverse}
-.mo.live .orb.o2{animation-duration:2.7s}
-.mo.live .nuc{animation:pulse 2s ease-in-out infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.mo.live .bx{animation:bx 1.8s linear infinite}
-.mo.live .by{animation:by 1.8s infinite}
 @keyframes bx{0%{transform:translateX(0)}100%{transform:translateX(96px)}}
 @keyframes by{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.6,.4,1)}50%{transform:translateY(-61px);animation-timing-function:cubic-bezier(.6,0,.8,.4)}100%{transform:translateY(0)}}
 
@@ -514,8 +505,8 @@ body.splashing{overflow:hidden}
 @keyframes floatUp{from{transform:translateY(0) rotate(0) scale(var(--s))}to{transform:translateY(-115vh) rotate(300deg) scale(var(--s))}}
 .sp-orbit{position:relative;width:min(50vw,220px);aspect-ratio:1;margin:calc(min(50vw,220px)*.12) 0 calc(min(50vw,220px)*.2)}
 .sp-o{position:absolute;left:50%;top:50%;width:34%;aspect-ratio:1;margin:-17% 0 0 -17%;
-  animation:spIn .8s calc(var(--i)*.14s) cubic-bezier(.2,.9,.3,1.25) backwards,spRing 7s linear infinite}
-.sp-o > .mo{transform:rotate(calc(var(--i)*-120deg));animation:spCounter 7s linear infinite}
+  animation:spIn .8s calc(var(--i)*.14s) cubic-bezier(.2,.9,.3,1.25) backwards,spRing 18s linear infinite}
+.sp-o > .mo{transform:rotate(calc(var(--i)*-120deg));animation:spCounter 18s linear infinite}
 @keyframes spRing{from{transform:rotate(calc(var(--i)*120deg)) translateY(-118%)}to{transform:rotate(calc(var(--i)*120deg + 360deg)) translateY(-118%)}}
 @keyframes spCounter{from{transform:rotate(calc(var(--i)*-120deg))}to{transform:rotate(calc(var(--i)*-120deg - 360deg))}}
 @keyframes spIn{from{opacity:0;scale:.2}}
@@ -701,9 +692,20 @@ html.lite #bgfx{display:none}
 .wn-card h3{text-align:left;margin:0 0 4px;color:var(--acc)}
 .wn-card ul{text-align:left;margin:0 0 16px;padding-left:1.15em}.wn-card li{margin:6px 0}
 .wn-card .ablink{margin-top:6px}
+.cln small{font-family:var(--font);font-weight:700;font-size:.72rem;color:var(--ink3)}
+.clgr summary b{white-space:nowrap}.clgr summary .small{min-width:0}
+
+#nameask{position:fixed;inset:0;z-index:360;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.45)}
+.na-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px 20px 12px;text-align:center;box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+.na-wave{font-size:2.4rem;display:inline-block;transform-origin:70% 80%;animation:wave2 1.6s ease-in-out 2}
+@keyframes wave2{0%,100%{transform:rotate(0)}20%{transform:rotate(18deg)}40%{transform:rotate(-10deg)}60%{transform:rotate(14deg)}80%{transform:rotate(-4deg)}}
+.na-card h2{margin:6px 0 4px}
+.na-card input{width:100%;margin:14px 0 12px;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--card2);color:var(--ink);font:inherit;font-size:1.05rem;outline:none}
+.na-card input:focus{border-color:var(--acc)}
+.foot .latest{color:var(--ok);font-weight:700}
 </style></head>
 <body>
-<header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">MD</span><span class="t" id="ttl">Class 11 Revision</span></div><button class="subjbtn hidden" id="subjBtn" aria-label="Switch subject"></button><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
+<header id="top"><button id="backBtn" aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="logo"><span class="mk" id="mk">SE</span><span class="t" id="ttl">Class 11 Revision</span></div><button class="subjbtn hidden" id="subjBtn" aria-label="Switch subject"></button><span id="syncDot" class="hidden small muted" title="Synced">Synced</span><button class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button></header>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <filter id="dz" x="-8%" y="-8%" width="120%" height="126%" color-interpolation-filters="sRGB">
 <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="b"/>
@@ -743,7 +745,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 /* Version rule (set by Mrudul): 1.0 = first release (Ch 5, 6). Each new chapter adds 1 to the middle number
    and resets the bug-fix count; each bug fix adds 1 to the last number. e.g. 1.1 → 1.1.1 … 1.1.5 → (new chapter) 1.2
    History: 1.0 – Ch 5 & 6 · 1.1 – Ch 1 The Living World */
-const APP_VERSION='1.3.21'; /* rule: 1.<chapters>.<changes since last chapter>. Full history lives in CHANGELOG (about.js) – add a line there with every version bump. New chapter -> 1.4 (last number resets). */
+const APP_VERSION='3.18'; /* Chapter.Feature.Fix – see rule and history in CHANGELOG (about.js). One user message = one step. */
 const LESSONS={1:[],5:[],6:[]};
 const allLessons=()=>Object.values(LESSONS).flat();
 const DIAGRAMS={};
@@ -884,11 +886,11 @@ const App={tab:'home',stack:[],subj:null,learnCh:5,
     let subj=this.subj;if(top&&top.opts.ch){const s=subjOf(top.opts.ch);if(s)subj=s.id;}
     document.body.className='s-'+(subj||'none');$('#subjBtn').classList.toggle('hidden',!subj||!!top);{if(!top&&typeof Updater!=='undefined')setTimeout(()=>Updater.tryApply(),400);const pt=$('#tabs [data-tab=progress]');if(pt)pt.classList.toggle('hidden',!!this.subj);}updateBadge();if(subj)$('#subjBtn').innerHTML=`<b>${SUBJECTS.find(s=>s.id===subj).sym}</b>${icon('swap')}`;
     $('#backBtn').classList.toggle('show',!!top);
-    const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'MD';
+    const S0=SUBJECTS.find(s=>s.id===subj);$('#mk').textContent=(top&&top.opts.ch)?S0.sym:'SE';
     if(top){$('#ttl').textContent=top.title;top.fn(scr);animateScreen(scr);}
     else{$('#ttl').textContent={home:'Class 11 Revision',learn:'Learn',practice:'Practice',games:'Games',wrong:'Wrong Tab',progress:'Progress'}[this.tab];
       ({home:renderHome,learn:renderLearn,practice:renderPractice,games:renderGames,wrong:renderWrong,progress:renderProgress})[this.tab](scr);
-      animateScreen(scr);scr.insertAdjacentHTML('beforeend',`<footer class="foot">${App.subj?'':'<button class="ablink">About this site</button><br>'}Version ${APP_VERSION}<br>© ${new Date().getFullYear()} Mrudul. All rights reserved.</footer>`);$('.ablink',scr)&&($('.ablink',scr).onclick=openAbout);}
+      animateScreen(scr);scr.insertAdjacentHTML('beforeend',`<footer class="foot">${App.subj?'':'<button class="ablink">About this site</button><br>'}Version ${APP_VERSION} <span class="latest">(latest version)</span><br>© ${new Date().getFullYear()} Mrudul. All rights reserved.</footer>`);$('.ablink',scr)&&($('.ablink',scr).onclick=openAbout);}
     if(!quiet)window.scrollTo({top:0,behavior:'instant'});
   }
 };
@@ -1394,9 +1396,11 @@ function renderProgress(el){
   ${SUBJECTS.map(s=>`<div class="card psub s-${s.id} ${App.progOpen&&App.progOpen[s.id]?'open':''}" data-s="${s.id}"><button class="hd" aria-expanded="${!!(App.progOpen&&App.progOpen[s.id])}"><div class="ct" style="font-size:${s.sym.length>3?'.85rem':'1rem'}">${s.sym}</div><div style="flex:1;min-width:0"><h3>${s.name}</h3><div class="small muted">${s.chapters.length?s.chapters.length+' chapter'+(s.chapters.length>1?'s':''):'Coming soon'}</div></div><span class="pc">${s.chapters.length?pct(subjProgress(s)):''}</span><span class="chev muted">${icon('next')}</span></button>
     <div class="pbody"><div>${s.chapters.length?s.chapters.map(c=>{const {done,total}=chLessons(c.key);return `<button class="pch" data-k="${c.key}"><div class="r1"><b>Chapter ${c.num}: ${c.title}</b><span>${pct(chProgress(c.key))}</span></div><div class="bar"><i style="width:${chProgress(c.key)*100}%"></i></div><div class="small muted" style="margin-top:6px">${done} of ${total} lessons · quiz best ${S.quizBest['c'+c.key]||0}%</div></button>`;}).join(''):`<p class="muted" style="margin:12px 0 0">No chapters yet. ${s.next} is coming next.</p>`}</div></div></div>`).join('')}
   <div class="card"><h3>Best scores</h3><div class="kv"><b>All-chapters quiz</b><span>${S.quizBest.mix||0}%</span><b>Exam answers known</b><span>${exK} of ${ex}</span>${Object.entries(GAME_NAMES).map(([k,n])=>`<b>${n}</b><span>${S.games[k]||0}</span>`).join('')}</div></div>
+  <div class="card"><h3>Your name</h3><p class="small muted">${S.name?`Greetings say “${greeting()}”.`:'Add your name to see it in greetings.'}</p><button class="btn ghost sm" id="nameBtn">${S.name?'Change name':'Add name'}</button></div>
   <div class="card"><h3>Visual effects</h3><p class="small muted">Full adds the moving background and 3D lighting. Lite turns those off so older or slower devices stay smooth. Auto checks how fast this device is and picks for you${FX.lite?' – this device is using Lite':''}.</p><div class="fxseg"></div></div>
   <div class="card"><h3>Reset</h3><p class="small muted">Clears lessons, scores, flashcards and the Wrong Tab on this device.</p><button class="btn bad" id="reset">Reset all progress</button></div>`;
   $$('.pch',el).forEach(b=>b.onclick=()=>openChapter(+b.dataset.k));
+  $('#nameBtn',el).onclick=()=>NameAsk.open(false);
   $('.fxseg',el).appendChild(seg([['auto','Auto'],['full','Full'],['lite','Lite']],S.fx||'auto',v=>{S.fx=v;save();FX.init();toast(v==='auto'?(FX.lite?'Auto: using Lite':'Auto: using Full'):v==='lite'?'Lite effects on':'Full effects on');}));
   $$('.psub .hd',el).forEach(b=>b.onclick=()=>{const c=b.closest('.psub');const o=!c.classList.contains('open');c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);App.progOpen=App.progOpen||{};App.progOpen[c.dataset.s]=o;});
   $('#reset',el).onclick=async()=>{if(await confirmBox('Reset all progress?','Lessons, scores, flashcards and the Wrong Tab will all be cleared.','Reset')){const th=S.theme;S=DEFAULT_STATE();S.theme=th;S.ts=Date.now();Store.saveLocal();Store.push();updateBadge();App.render(false,true);toast('Progress reset');}};
@@ -3867,20 +3871,24 @@ const SUBJ_LOOK={
 
 /* small animated pictures for each subject – transform/opacity only */
 function motif(id,cls=''){
+  /* animated with SVG's own animation (SMIL): it has fixed rotation centres, so it plays the same on iPhone Safari and Chrome */
+  const live=/live/.test(cls);
+  const A=s=>live?s:'';
+  const sway=(a,cx,cy,d)=>A(`<animateTransform attributeName="transform" type="rotate" values="${-a} ${cx} ${cy};${a} ${cx} ${cy};${-a} ${cx} ${cy}" dur="${d}s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".45 0 .55 1;.45 0 .55 1"/>`);
+  const bob=(dy,d,del=0)=>A(`<animateTransform attributeName="transform" type="translate" values="0 0;0 ${-dy};0 0" dur="${d}s" begin="${del}s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".45 0 .55 1;.45 0 .55 1"/>`);
   if(id==='bio')return `<svg class="mo mo-bio ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
-    <g class="cellA"><circle r="13" cx="-34" cy="-30" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="4.5" cx="-34" cy="-30" fill="var(--bio)"/></g>
-    <g class="cellB"><circle r="9" cx="36" cy="-36" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="3.2" cx="36" cy="-36" fill="var(--bio)"/></g>
-    <g class="leaf"><path d="M0 50 C-36 30 -34 -18 0 -40 C34 -18 36 30 0 50Z" fill="var(--bio)"/><path d="M0 50 V-30 M0 -8 L-15 -20 M0 8 L15 -6 M0 24 L-15 12" stroke="var(--bio-soft)" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`;
+    <g><circle r="13" cx="-34" cy="-30" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="4.5" cx="-34" cy="-30" fill="var(--bio)"/>${bob(5,3.6)}</g>
+    <g><circle r="9" cx="36" cy="-36" fill="var(--bio-soft)" stroke="var(--bio)" stroke-width="2.5"/><circle r="3.2" cx="36" cy="-36" fill="var(--bio)"/>${bob(5,3.2,.8)}</g>
+    <g><path d="M0 50 C-36 30 -34 -18 0 -40 C34 -18 36 30 0 50Z" fill="var(--bio)"/><path d="M0 50 V-30 M0 -8 L-15 -20 M0 8 L15 -6 M0 24 L-15 12" stroke="var(--bio-soft)" stroke-width="3" fill="none" stroke-linecap="round"/>${sway(4,0,50,5)}</g></svg>`;
   if(id==='chem')return `<svg class="mo mo-chem ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
-    ${[0,60,120].map((r,i)=>`<g transform="rotate(${r})"><ellipse rx="50" ry="17" fill="none" stroke="var(--chem)" stroke-width="2.2" opacity=".55"/><g transform="scale(1 .34)"><g class="orb o${i}"><circle cx="50" r="7" fill="var(--chem)"/></g></g></g>`).join('')}
-    <g class="nuc"><circle r="13" fill="var(--chem)"/><circle r="5" cx="-4" cy="-4" fill="var(--chem-soft)" opacity=".7"/></g></svg>`;
+    ${[[0,7,1],[60,9,-1],[120,8,1]].map(([r,d,dir],i)=>`<g transform="rotate(${r})"><ellipse rx="50" ry="17" fill="none" stroke="var(--chem)" stroke-width="2.2" opacity=".55"/>${live?`<circle r="6.5" fill="var(--chem)"><animateMotion dur="${d}s" begin="${-i*d/3}s" repeatCount="indefinite" path="${dir>0?'M50 0 A50 17 0 1 1 -50 0 A50 17 0 1 1 50 0':'M50 0 A50 17 0 1 0 -50 0 A50 17 0 1 0 50 0'}"/></circle>`:`<circle cx="${i===1?-50:50}" r="6.5" fill="var(--chem)"/>`}</g>`).join('')}
+    <g><circle r="13" fill="var(--chem)"/><circle r="5" cx="-4" cy="-4" fill="var(--chem-soft)" opacity=".7"/>${A(`<animateTransform attributeName="transform" type="scale" values="1;1.08;1" dur="3.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".45 0 .55 1;.45 0 .55 1"/>`)}</g></svg>`;
   return `<svg class="mo mo-phy ${cls}" viewBox="-60 -60 120 120" aria-hidden="true">
     <path d="M-50 40 H54" stroke="var(--phy)" stroke-width="3" stroke-linecap="round"/>
     <path d="M-46 36 Q4 -86 50 36" fill="none" stroke="var(--phy)" stroke-width="2.2" stroke-dasharray="4 6" opacity=".5"/>
     <path d="M-46 36 L-30 6" stroke="var(--phy)" stroke-width="3" stroke-linecap="round"/><path d="M-30 6 l-1 9 m1 -9 l-8 4" stroke="var(--phy)" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <g class="bx"><g class="by"><circle cx="-46" cy="36" r="8" fill="var(--phy)"/></g></g></svg>`;
+    ${live?`<circle r="8" fill="var(--phy)" opacity="0"><animateMotion dur="4s" repeatCount="indefinite" path="M-46 36 Q4 -86 50 36" keyPoints="0;0;1;1" keyTimes="0;.15;.75;1" calcMode="spline" keySplines="0 0 1 1;.35 .1 .65 .9;0 0 1 1"/><animate attributeName="opacity" values="0;1;1;1;0;0" keyTimes="0;.08;.15;.75;.85;1" dur="4s" repeatCount="indefinite"/></circle>`:`<circle cx="-46" cy="36" r="8" fill="var(--phy)"/>`}</svg>`;
 }
-
 /* ---------- splash: waits for "Let's get started" ---------- */
 function mascot(id){/* little characters with faces */
   const eyes=(x,y,c='#fff')=>`<g class="eyes"><ellipse cx="${x-6}" cy="${y}" rx="3.2" ry="4" fill="${c}"/><ellipse cx="${x+6}" cy="${y}" rx="3.2" ry="4" fill="${c}"/><circle cx="${x-5}" cy="${y+1}" r="1.7" fill="#142027"/><circle cx="${x+7}" cy="${y+1}" r="1.7" fill="#142027"/></g>`;
@@ -3895,14 +3903,14 @@ const Splash={
       return `<i class="bk s-${k}" style="left:${(r(1)*100).toFixed(1)}%;--h1:var(--acc);--sz:${(5+r(2)*10).toFixed(1)}px;--t:${(9+r(3)*9).toFixed(1)}s;--dl:${(-r(4)*16).toFixed(1)}s;--sw:${(r(5)*60-30).toFixed(0)}px"></i>`;}).join('');
     d.innerHTML=`<div class="sp-pts" aria-hidden="true">${parts}</div>
       <div class="sp-in">
-      <div class="sp-orbit">${['bio','chem','phy'].map((s,i)=>`<div class="sp-o s-${s}" style="--i:${i}">${motif(s,'live')}</div>`).join('')}<div class="sp-core">MD</div></div>
+      <div class="sp-orbit">${['bio','chem','phy'].map((s,i)=>`<div class="sp-o s-${s}" style="--i:${i}">${motif(s,'live')}</div>`).join('')}<div class="sp-core">SE</div></div>
       <h1 class="sp-h">${'Welcome'.split('').map((c,i)=>`<span style="--k:${i}">${c}</span>`).join('')}</h1>
-      <p class="sp-p">Let’s revise.</p>
+      <p class="sp-p">${S.name?`Let’s revise, ${esc(S.name)}.`:'Let’s revise.'}</p>
       <div class="sp-chips">${SUBJECTS.map((s,i)=>`<span class="s-${s.id}" style="--k:${i}">${s.name}</span>`).join('')}</div>
       <button class="sp-go" id="spGo"><span>Let’s get started</span>${icon('next')}</button></div>
       <div class="sp-lane" aria-hidden="true">${['bio','chem','phy'].map((s,i)=>`<div class="mc s-${s}" style="--i:${i}"><div class="mc-b">${mascot(s)}</div><i class="mc-sh"></i></div>`).join('')}</div>`;
     document.body.appendChild(d);document.body.classList.add('splashing');
-    let gone=false;const end=()=>{if(gone)return;gone=true;document.removeEventListener('keydown',key);document.body.classList.remove('splashing');
+    let gone=false;const end=()=>{if(gone)return;gone=true;setTimeout(()=>NameAsk.maybe(),700);document.removeEventListener('keydown',key);document.body.classList.remove('splashing');
       const btn=$('#spGo',d);btn.animate([{transform:'scale(1)'},{transform:'scale(.92)'},{transform:'scale(1.08)'}],{duration:260,easing:'ease-out'});
       d.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(1.08)'}],{duration:480,delay:150,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).onfinish=()=>d.remove();
       const m=$('#main');m&&m.animate([{opacity:0,transform:'translateY(24px) scale(.97)'},{opacity:1,transform:'none'}],{duration:560,delay:250,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});};
@@ -3933,10 +3941,25 @@ function subjChooser(){/* big neutral cards */
 }
 function needSubject(el,title,sub){el.innerHTML=`<div class="ph"><h1>${title}</h1><p>${sub}</p></div><h2 class="sech">Choose a subject</h2>`;el.appendChild(subjChooser());}
 
+/* ---------- greeting by device clock + name ---------- */
+function greeting(){const hr=new Date().getHours();const g=hr>=4&&hr<12?'Good morning':hr>=12&&hr<17?'Good afternoon':hr>=17&&hr<22?'Good evening':'Good night';return S.name?`${g}, ${esc(S.name)}`:g;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const NameAsk={
+  maybe(){if(S.name||S.nameAsked)return;this.open(true);},
+  open(first){const d=document.createElement('div');d.id='nameask';
+    d.innerHTML=`<form class="na-card"><div class="na-wave">👋</div><h2>${first?'What should we call you?':'Your name'}</h2><p class="muted small">Used for greetings and other purposes. Saved on this device.</p>
+      <input id="naIn" maxlength="20" autocomplete="given-name" placeholder="Your first name" value="${esc(S.name||'')}"><button class="btn w100" type="submit">${first?'Continue':'Save'}</button><button class="ablink" type="button" id="naSkip">${first?'Skip':'Cancel'}</button></form>`;
+    document.body.appendChild(d);const f=$('form',d),inp=$('#naIn',d);
+    f.animate([{transform:'translateY(30px) scale(.95)',opacity:0},{transform:'none',opacity:1}],{duration:450,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+    setTimeout(()=>inp.focus(),300);
+    const close=()=>d.animate([{opacity:1},{opacity:0}],{duration:220,fill:'forwards'}).onfinish=()=>d.remove();
+    f.onsubmit=e=>{e.preventDefault();const v=inp.value.trim().replace(/\s+/g,' ').slice(0,20);S.nameAsked=true;if(v){S.name=v;toast(`Hi ${v}!`);}save();close();App.render(false,true);};
+    $('#naSkip',d).onclick=()=>{if(first){S.nameAsked=true;save();}close();};}};
+
 /* ---------- home ---------- */
 function renderHome(el){
   const n=wrongCount();const hr=new Date().getHours();
-  const greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  const greet=greeting();
   const s=SUBJECTS.find(x=>x.id===App.subj);
   if(!s){
     el.innerHTML=`<div class="ph"><h1>${greet}</h1><p>What are we revising today?</p></div>`;
@@ -3994,38 +4017,53 @@ const BgFx={
 
 /* ===== About page + version history + update check ===== */
 /* Newest first. Version rule: 1.<chapters>.<changes since the last chapter was added>. */
+/* Version rule – Chapter.Feature.Fix
+   First number  = total chapters on the site (all subjects). New chapter -> +1, others reset (4.0).
+   Middle number = feature / improvement batches since the last chapter. Fix number resets.
+   Last number   = bug-fix batches since the last feature.
+   ONE MESSAGE FROM MRUDUL = ONE STEP: several features in one message -> one bump with several points;
+   several fixes in one message -> one fix bump. If a message mixes features and fixes -> one feature bump listing both.
+   Keep `was` (old number) for history. Newest first. */
 const CHANGELOG=[
- {v:'1.3.21',items:['Automatic updates: when a new version is out, the site updates itself (never in the middle of a quiz or game).','After an update, a “What’s new” screen shows the features of the new version.']},
- {v:'1.3.20',items:['Version history on the About page is grouped by main version (1.0, 1.1, 1.3…). Tap a version to open its list of updates.']},
- {v:'1.3.19',items:['The “About this site” link now shows only on the main screen. Inside a subject the footer shows just the version and copyright.']},
- {v:'1.3.18',items:['Two new detailed diagrams in “Introduction: what is living?” – where living organisms are found, and how all organisms are related (horizontal and vertical similarities). Tap any part for Focus Mode.']},
- {v:'1.3.17',items:['Notes are easier to read on phones: all chapters (1, 5 and 6) rewritten as short pointers with sub-points – same content, less reading per line – and tighter spacing on small screens.']},
- {v:'1.3.16',items:['New About page with the purpose of the site, what it offers and this full version history.']},
- {v:'1.3.15',items:['The site now checks for a newer version whenever it opens or you come back to it, and shows an “Update” bar – no need to clear the browser cache.']},
- {v:'1.3.14',items:['Quiz timer: a clock runs on every question (thinking time only).','Time report after each quiz – total time, time per question, slowest question, and a comparison with the NEET average (1 minute a question) and the subject target pace.']},
- {v:'1.3.13',items:['The Progress tab now shows only on the main screen, not inside a subject.']},
- {v:'1.3.12',items:['Wrong Tab follows the subject you are in: only Biology inside Biology, all subjects on the main screen. Clear and Retry work per subject too.']},
- {v:'1.3.11',items:['Dark mode is now the default.']},
- {v:'1.3.10',items:['New background: soft drifting colour light, a large slowly turning line drawing for each subject, and glowing particles. The start screen uses the same style.']},
- {v:'1.3.9',items:['New MD logo mark in the top bar and on the start screen.']},
- {v:'1.3.8',items:['Moving background behind the site (Full effects only). Auto checks how fast the device is and picks Full or Lite.']},
- {v:'1.3.7',items:['Start screen waits for the “Let’s get started” button.','Game-style start screen: walking characters, floating particles, waving title.']},
- {v:'1.3.6',items:['Get-ready intro before every game with a 3 · 2 · 1 · Go! countdown.']},
- {v:'1.3.5',items:['Subject themes: nothing is selected at the start. Choosing Biology, Chemistry or Physics changes the whole look – colours, shapes and background pattern.']},
- {v:'1.3.4',items:['Welcome screen when the site opens.']},
- {v:'1.3.3',items:['Fixed: text in “Taxa at different levels” was invisible in dark mode.']},
- {v:'1.3.2',items:['Fixed: the “Look at a bigger area” slider showed a blank picture on iPad.']},
- {v:'1.3.1',items:['Flashcards rebuilt: swipe right for Got it, swipe left for Again, smoother flip, cards fly off and the next one flips in. Buttons do the same.','Lots of new smooth animations across the site, plus Visual effects setting (Auto / Full / Lite) for slower devices.']},
- {v:'1.3',items:['Version renumbered to match the rule: 3 chapters → 1.3.']},
- {v:'1.1',items:['Chapter 1 – The Living World added: 8 lessons, diagrams, 35 MCQs, exam questions and 2 new games (Rank Ladder, Name It Right).','Progress tab: subjects open as dropdowns showing their chapters.','Version number and copyright added to the footer.']},
- {v:'1.0',items:['First release: Chapter 5 (Morphology of Flowering Plants) and Chapter 6 (Anatomy of Flowering Plants).','Lessons by NCERT section with detailed notes, labelled diagrams with Focus Mode, Labels on/off and Quiz me.','MCQ quiz, Wrong Tab, exam-style questions, flashcards, 6 games and progress saving.','Later 1.0 updates: light/dark switch, diagrams fit the screen, © Mrudul watermark, new design with Physics / Chemistry / Biology sections, 3D depth on diagrams and a 3D layers view, and speed fixes.']}];
+ {v:'3.18',items:['New SE logo in the top bar and on the start screen.']},
+ {v:'3.17',items:['Updates now happen quietly in the background – no pop-up screens.','The footer shows your version with “(latest version)” beside it.']},
+ {v:'3.16',items:['Your name in greetings: the site asks once (you can skip), then says “Good evening, Mrudul” on the home screen and “Let’s revise, Mrudul.” on the start screen.','Change your name any time in Progress → Your name.','New “Good night” greeting for late-night revision (10 pm – 4 am). Greetings follow your device’s clock.']},
+ {v:'3.15',items:['Version history renumbered: Chapter 5 = 1.0, Chapter 6 = 2.0, Chapter 1 = 3.0, with every earlier update in its place.','Old version numbers removed from the history.','Fixed: on iPhone the start-screen pictures spun too fast and the physics ball jumped back and forth. All subject pictures now move smoothly and more slowly; the ball flies along its path, lands, fades and relaunches.']},
+ {v:'3.14',items:['New version numbers, like real apps: Chapter.Feature.Fix. First number = total chapters, middle = new features, last = bug fixes.','One request = one version step, even if it has several changes – they are listed together.']},
+ {v:'3.13',items:['Automatic updates: when a new version is out, the site updates itself (never in the middle of a lesson, quiz or game).','After an update, a “What’s new” screen shows that version’s features.']},
+ {v:'3.12',items:['Version history on the About page grouped into dropdowns. Tap a version to see its updates.']},
+ {v:'3.11',items:['“About this site” link shows only on the main screen. Inside a subject, just the version and copyright.']},
+ {v:'3.10',items:['Notes in all chapters (1, 5, 6) rewritten as short pointers with sub-points – same content, easier on phones.','Tighter note spacing on small screens.','Two new detailed diagrams in “Introduction: what is living?” – where living organisms are found, and how all organisms are related.']},
+ {v:'3.9',items:['New About page: purpose of the site, what it offers and the full version history.','The site checks for a newer version and offers an Update button.']},
+ {v:'3.8',items:['Quiz timer: a clock runs on every question (thinking time only).','Time report after each quiz compared with the NEET average (1 minute a question) and the subject target pace.']},
+ {v:'3.7',items:['Dark mode is now the default.','Fixed: Wrong Tab now follows the subject you are in; all subjects on the main screen.','Progress tab shows only on the main screen.']},
+ {v:'3.6',items:['New background: soft drifting colour light, a large turning line drawing per subject and glowing particles – also on the start screen.']},
+ {v:'3.5',items:['New MD logo in the top bar and on the start screen.']},
+ {v:'3.4',items:['Moving background (Full effects only); Auto checks the device speed and picks Full or Lite.']},
+ {v:'3.3',items:['Start screen waits for the “Let’s get started” button.','Game-style start screen: walking characters, floating particles, waving title.']},
+ {v:'3.2',items:['Welcome screen when the site opens.','Subject themes: nothing selected at the start; choosing Biology, Chemistry or Physics changes the whole look.','Get-ready intro before every game with a 3 · 2 · 1 · Go! countdown.']},
+ {v:'3.1.2',items:['Fixed: text in “Taxa at different levels” was invisible in dark mode.']},
+ {v:'3.1.1',items:['Fixed: the “Look at a bigger area” slider showed a blank picture on iPad.']},
+ {v:'3.1',items:['Flashcards rebuilt: swipe right for Got it, left for Again, smoother flip, cards fly off and the next flips in. Buttons do the same.','Lots of smooth animations across the site.','Visual effects setting (Auto / Full / Lite) for slower devices.']},
+ {v:'3.0',items:['Chapter 1 – The Living World added: 8 lessons, diagrams, 35 MCQs, exam questions and 2 new games.','Progress tab: subjects open as dropdowns showing their chapters.','Version number and copyright in the footer.']},
+ {v:'2.5.1',items:['Fixed: the site lagged – smoother scrolling and diagrams, lighter effects.']},
+ {v:'2.5',items:['Depth and 3D effects on diagrams, plus a “3D layers” view.','More animations.']},
+ {v:'2.4.2',items:['Fixed: the home card still showed the wrong lesson after a reset; version label added to check which copy is live.']},
+ {v:'2.4.1',items:['Fixed: “Continue where you left off” card showed the wrong lesson.']},
+ {v:'2.4',items:['New design with Physics, Chemistry and Biology sections.','Progress tab shows only chapter names under each subject.']},
+ {v:'2.3',items:['Small © Mrudul watermark in the corner.']},
+ {v:'2.2.1',items:['Fixed: diagrams needed scrolling – they now fit on the screen.']},
+ {v:'2.2',items:['Lessons split by NCERT section, with very detailed notes.']},
+ {v:'2.1',items:['Light / dark mode switch.']},
+ {v:'2.0',items:['Chapter 6 – Anatomy of Flowering Plants: lessons, labelled tissue and T.S. diagrams, MCQs and exam questions.']},
+ {v:'1.0',items:['First release with Chapter 5 – Morphology of Flowering Plants.','Lessons, labelled diagrams with Focus Mode, Labels on/off and Quiz me.','MCQ quiz, Wrong Tab, exam-style questions, flashcards, games and progress saving.']}];
 
 function clGroups(){
-  const key=v=>v.split('.').slice(0,2).join('.');const num=v=>v.split('.').map(Number);
+  const key=v=>v.split('.')[0];const num=v=>v.split('.').map(Number);
   const cmp=(x,y)=>{const a=num(x),b=num(y);for(let i=0;i<3;i++){const d=(a[i]||0)-(b[i]||0);if(d)return d;}return 0;};
   const groups={};CHANGELOG.forEach(c=>(groups[key(c.v)]=groups[key(c.v)]||[]).push(c));
   return Object.keys(groups).sort(cmp).map(g=>{const list=groups[g].sort((x,y)=>cmp(x.v,y.v));const cur=list.some(c=>c.v===APP_VERSION);
-    return `<details class="clgr${cur?' cur':''}"><summary><b>Version ${g}</b><span class="small muted">${list.length} update${list.length>1?'s':''}</span>${cur?'<em>current</em>':''}<i class="chev">${icon('next')}</i></summary>
+    return `<details class="clgr${cur?' cur':''}"><summary><b>Version ${g}</b><span class="small muted">${g} chapter${g>1?'s':''} · ${list.length} update${list.length>1?'s':''}</span>${cur?'<em>current</em>':''}<i class="chev">${icon('next')}</i></summary>
     <div class="cl">${list.map(c=>`<div class="clv${c.v===APP_VERSION?' now':''}"><div class="cln">${c.v}${c.v===APP_VERSION?'<span>current</span>':''}</div><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul></div>`).join('')}</div></details>`;}).join('');
 }
 function renderAbout(scr){
@@ -4039,7 +4077,7 @@ function renderAbout(scr){
     <li><b>Wrong Tab</b> – every question you miss waits there until you get it right.</li>
     <li><b>Progress</b> – chapter by chapter, saved on your device.</li>
     <li><b>Subjects</b> – Biology now; Chemistry and Physics are coming, each with its own look.</li></ul></div>
-  <div class="card"><h2>Version history</h2><p class="small muted">Version numbers work like this: <b>1.3</b> means 3 chapters. The last number counts fixes and new features since the last chapter was added. A new chapter moves it to 1.4.</p>
+  <div class="card"><h2>Version history</h2><p class="small muted">Versions work like real apps: <b>Chapter.Feature.Fix</b>. In <b>3.8.1</b>, <b>3</b> = chapters on the site (all subjects), <b>8</b> = new-feature updates since the last chapter, <b>1</b> = bug-fix updates since the last feature. A new chapter makes it 4.0.</p>
     <div class="clg">${clGroups()}</div></div></div>
   <p class="foot">© ${new Date().getFullYear()} Mrudul. All rights reserved.</p>`;
 }
@@ -4055,22 +4093,13 @@ const Updater={last:0,pending:null,
       const m=t.match(/const APP_VERSION='([\d.]+)'/);if(m&&this.cmp(m[1],APP_VERSION)>0){this.pending=m[1];this.tryApply();}}catch(e){}},
   busy(){return App.stack.length>0||!!document.querySelector('#focus.on,#x3d.on,.gi');},
   tryApply(){if(!this.pending||this.busy())return;const v=this.pending;
-    const o=document.createElement('div');o.id='updating';o.innerHTML=`<div class="up-in"><div class="up-spin"></div><b>Updating to version ${v}</b><span>Getting the latest copy…</span></div>`;document.body.appendChild(o);
-    o.animate([{opacity:0},{opacity:1}],{duration:250,fill:'forwards'});
-    setTimeout(()=>location.replace(location.pathname+'?v='+v+location.hash),700);},
+    location.replace(location.pathname+'?v='+v+location.hash);},
   init(){setTimeout(()=>this.check(),2500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')this.check();});window.addEventListener('pageshow',e=>{if(e.persisted)this.check();});}};
 
 /* ---------- "What's new" after an update ---------- */
 const WhatsNew={
   justUpdated(){return S.seenVer&&S.seenVer!==APP_VERSION;},
-  maybe(){const show=this.justUpdated();const from=S.seenVer;S.seenVer=APP_VERSION;save();if(!show)return;
-    const c=CHANGELOG.find(x=>x.v===APP_VERSION);if(!c)return;
-    const d=document.createElement('div');d.id='whatsnew';
-    d.innerHTML=`<div class="wn-card"><div class="wn-badge">${icon('check')}</div><div class="small muted">Updated from ${from}</div><h2>You’re on version ${APP_VERSION}</h2><h3>What’s new</h3><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul><button class="btn w100" id="wnOk">Got it</button><button class="ablink" id="wnAll">See all versions</button></div>`;
-    document.body.appendChild(d);$('.wn-card',d).animate([{transform:'translateY(40px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:520,easing:'cubic-bezier(.2,.9,.3,1.2)'});
-    setTimeout(()=>confetti(40),250);
-    const close=()=>d.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).onfinish=()=>d.remove();
-    $('#wnOk',d).onclick=close;$('#wnAll',d).onclick=()=>{close();App.subj=null;App.go('home');openAbout();};}};
+  maybe(){if(S.seenVer!==APP_VERSION){S.seenVer=APP_VERSION;save();}}};
 
 Object.keys(LESSONS).forEach(c=>LESSONS[c].sort((a,b)=>a.n-b.n));buildFlash();Store.loadLocal();App.init();Store.initRemote();
 </script>
